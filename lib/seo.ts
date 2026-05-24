@@ -72,6 +72,22 @@ export function generateCanonicalUrl(path: string = ""): string {
 }
 
 /**
+ * Resolve a site path or absolute URL to a full https://www.bokkiecleaning.co.za URL.
+ */
+export function toAbsoluteUrl(pathOrUrl: string): string {
+  const trimmed = pathOrUrl.trim();
+  if (!trimmed) {
+    return `${siteConfig.url}${siteConfig.ogImage}`;
+  }
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    return trimmed;
+  }
+
+  return `${siteConfig.url}${trimmed.startsWith("/") ? trimmed : `/${trimmed}`}`;
+}
+
+/**
  * Generate image alt text with keywords
  */
 export function generateImageAlt(imageType: string, location?: string): string {

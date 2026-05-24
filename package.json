@@ -9,11 +9,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generate:og": "node scripts/generate-og-image.js"
+    "generate:og": "node scripts/generate-og-image.js",
+    "test:blog-sanitize": "npx tsx --test lib/utils/sanitize-blog-html.test.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.87.1",
+    "isomorphic-dompurify": "^3.14.0",
     "lucide-react": "^0.561.0",
     "next": "^16.0.10",
     "react": "^19.2.3",

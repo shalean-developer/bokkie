@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 import { getBlogPosts } from "@/app/actions/blog";
 import { capeTownAreas, getLocationSlug } from "@/lib/constants/areas";
+import { siteConfig } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = "https://bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
 
   // Helper function to safely construct URLs
   const makeUrl = (path: string): string => {
@@ -38,6 +39,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     {
       url: makeUrl("/guides"),
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.8,
+    },
+    {
+      url: makeUrl("/blog"),
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
       priority: 0.8,

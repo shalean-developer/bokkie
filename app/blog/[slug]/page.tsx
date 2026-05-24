@@ -10,10 +10,12 @@ import TableOfContents from "@/components/blog/TableOfContents";
 import Footer from "@/components/Footer";
 import { generateBlogSEOMetadata } from "@/lib/seo/blog-seo";
 import { generateBlogPostSchema, generateBreadcrumbSchema } from "@/lib/seo/schema-generator";
+import { siteConfig, toAbsoluteUrl } from "@/lib/seo";
 import { formatReadingTime } from "@/lib/utils/reading-time";
+import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
 import { Calendar, Clock, ArrowLeft, Tag } from "lucide-react";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -34,12 +36,16 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
     post.seo_title ?? undefined,
     post.seo_description ?? undefined,
     post.seo_keywords || [],
-    (post.og_image_url || post.featured_image_url) ?? undefined,
     post.published_at ?? undefined,
     post.updated_at,
     post.author_name,
     post.category ?? undefined,
-    post.tags || []
+    post.tags || [],
+    {
+      canonicalUrl: post.canonical_url,
+      ogImageUrl: post.og_image_url,
+      featuredImageUrl: post.featured_image_url,
+    }
   );
 }
 
@@ -50,6 +56,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   if (!post) {
     notFound();
   }
+
+  const sanitizedContent = sanitizeBlogHtml(post.content);
+  const postUrl = `${siteConfig.url}/blog/${post.slug}`;
 
   // Increment views (fire and forget)
   incrementBlogViews(slug).catch(() => {});
@@ -62,25 +71,30 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     3
   );
 
+  const schemaImage =
+    post.og_image_url || post.featured_image_url
+      ? toAbsoluteUrl(post.og_image_url || post.featured_image_url || "")
+      : undefined;
+
   // Generate structured data
   const blogSchema = generateBlogPostSchema(
     post.title,
     post.excerpt || post.seo_description || "",
-    `https://bokkiecleaning.co.za/blog/${post.slug}`,
-    post.featured_image_url || undefined,
+    postUrl,
+    schemaImage,
     post.author_name,
     post.published_at || post.created_at,
     post.updated_at,
     post.seo_keywords || [],
     post.category || undefined,
-    post.content,
+    sanitizedContent,
     post.reading_time
   );
 
   const breadcrumbSchema = generateBreadcrumbSchema([
-    { name: "Home", url: "https://bokkiecleaning.co.za" },
-    { name: "Blog", url: "https://bokkiecleaning.co.za/blog" },
-    { name: post.title, url: `https://bokkiecleaning.co.za/blog/${post.slug}` },
+    { name: "Home", url: siteConfig.url },
+    { name: "Blog", url: `${siteConfig.url}/blog` },
+    { name: post.title, url: postUrl },
   ]);
 
   return (
@@ -159,7 +173,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
             <div className="flex flex-col lg:flex-row gap-8">
               {/* Table of Contents Sidebar - Left on desktop */}
               <aside className="lg:w-64 flex-shrink-0 order-2 lg:order-1">
-                <TableOfContents content={post.content} />
+                <TableOfContents content={sanitizedContent} />
               </aside>
 
               {/* Main Content */}
@@ -174,7 +188,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 </div>
 
                 {/* Blog Content */}
-                <BlogPostContent content={post.content} />
+                <BlogPostContent content={sanitizedContent} />
 
                 {/* Tags */}
                 {post.tags && post.tags.length > 0 && (

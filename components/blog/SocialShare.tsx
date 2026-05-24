@@ -2,6 +2,7 @@
 
 import { Facebook, Twitter, Linkedin, Link2, Copy, Check } from "lucide-react";
 import { useState } from "react";
+import { siteConfig } from "@/lib/seo";
 
 interface SocialShareProps {
   url: string;
@@ -11,7 +12,7 @@ interface SocialShareProps {
 
 export default function SocialShare({ url, title, description }: SocialShareProps) {
   const [copied, setCopied] = useState(false);
-  const fullUrl = url.startsWith("http") ? url : `https://bokkiecleaning.co.za${url}`;
+  const fullUrl = url.startsWith("http") ? url : `${siteConfig.url}${url.startsWith("/") ? url : `/${url}`}`;
   const encodedUrl = encodeURIComponent(fullUrl);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description || "");

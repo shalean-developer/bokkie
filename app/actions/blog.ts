@@ -1,8 +1,18 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calculateReadingTime } from "@/lib/utils/reading-time";
-import { generateSlug, generateUniqueSlug } from "@/lib/utils/slug-generator";
+import { generateUniqueSlug } from "@/lib/utils/slug-generator";
+import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
+
+function revalidateBlogCache(slug?: string): void {
+  revalidatePath("/blog");
+  revalidatePath("/sitemap.xml");
+  if (slug) {
+    revalidatePath(`/blog/${slug}`);
+  }
+}
 
 export interface BlogPost {
   id: string;
@@ -177,7 +187,8 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ success: b
   const slug = generateUniqueSlug(input.title, existingSlugs);
 
   // Calculate reading time
-  const readingTime = calculateReadingTime(input.content);
+  const sanitizedContent = sanitizeBlogHtml(input.content);
+  const readingTime = calculateReadingTime(sanitizedContent);
 
   // Set published_at if status is published
   const publishedAt = input.status === 'published' ? new Date().toISOString() : null;
@@ -188,7 +199,7 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ success: b
       slug,
       title: input.title,
       excerpt: input.excerpt || null,
-      content: input.content,
+      content: sanitizedContent,
       featured_image_url: input.featured_image_url || null,
       author_id: user.id,
       author_name: user.user_metadata?.name || 'Bokkie Cleaning Services',
@@ -206,13 +217,15 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ success: b
       internal_links: input.internal_links || [],
       related_post_ids: input.related_post_ids || [],
     })
-    .select('id')
+    .select('id, slug')
     .single();
 
   if (error) {
     console.error('Error creating blog post:', error);
     return { success: false, error: error.message };
   }
+
+  revalidateBlogCache(data.slug);
 
   return { success: true, id: data.id };
 }
@@ -238,20 +251,11 @@ export async function updateBlogPost(
     return { success: false, error: 'Post not found' };
   }
 
-  // Update slug if title changed
-  let slug = existingPost.slug;
-  if (input.title !== existingPost.title) {
-    const { data: existingPosts } = await supabase
-      .from('blog_posts')
-      .select('slug')
-      .neq('id', id);
-    
-    const existingSlugs = existingPosts?.map(p => p.slug) || [];
-    slug = generateUniqueSlug(input.title, existingSlugs);
-  }
+  // Preserve slug after creation so title edits do not break public URLs
+  const slug = existingPost.slug;
 
-  // Calculate reading time
-  const readingTime = calculateReadingTime(input.content);
+  const sanitizedContent = sanitizeBlogHtml(input.content);
+  const readingTime = calculateReadingTime(sanitizedContent);
 
   // Set published_at if status changed to published
   let publishedAt = existingPost.published_at;
@@ -265,7 +269,7 @@ export async function updateBlogPost(
       slug,
       title: input.title,
       excerpt: input.excerpt !== undefined ? input.excerpt : existingPost.excerpt,
-      content: input.content,
+      content: sanitizedContent,
       featured_image_url: input.featured_image_url !== undefined ? input.featured_image_url : existingPost.featured_image_url,
       status: input.status !== undefined ? input.status : existingPost.status,
       published_at: publishedAt,
@@ -288,6 +292,8 @@ export async function updateBlogPost(
     return { success: false, error: error.message };
   }
 
+  revalidateBlogCache(slug);
+
   return { success: true };
 }
 
@@ -303,6 +309,11 @@ export async function deleteBlogPost(id: string): Promise<{ success: boolean; er
     return { success: false, error: 'Unauthorized' };
   }
 
+  const existingPost = await getBlogPostById(id);
+  if (!existingPost) {
+    return { success: false, error: 'Post not found' };
+  }
+
   const { error } = await supabase
     .from('blog_posts')
     .delete()
@@ -312,6 +323,8 @@ export async function deleteBlogPost(id: string): Promise<{ success: boolean; er
     console.error('Error deleting blog post:', error);
     return { success: false, error: error.message };
   }
+
+  revalidateBlogCache(existingPost.slug);
 
   return { success: true };
 }
@@ -328,6 +341,11 @@ export async function publishBlogPost(id: string): Promise<{ success: boolean; e
     return { success: false, error: 'Unauthorized' };
   }
 
+  const existingPost = await getBlogPostById(id);
+  if (!existingPost) {
+    return { success: false, error: 'Post not found' };
+  }
+
   const publishedAt = new Date().toISOString();
 
   const { error } = await supabase
@@ -342,6 +360,8 @@ export async function publishBlogPost(id: string): Promise<{ success: boolean; e
     console.error('Error publishing blog post:', error);
     return { success: false, error: error.message };
   }
+
+  revalidateBlogCache(existingPost.slug);
 
   return { success: true };
 }

@@ -1,5 +1,8 @@
 "use client";
 
+import { siteConfig } from "@/lib/seo";
+import { resolveBlogOgImageUrl } from "@/lib/seo/blog-seo";
+
 interface SEOPreviewProps {
   title: string;
   description: string;
@@ -13,13 +16,8 @@ export default function SEOPreview({
   url,
   imageUrl,
 }: SEOPreviewProps) {
-  const baseUrl = "https://bokkiecleaning.co.za";
-  const fullUrl = url.startsWith("http") ? url : `${baseUrl}${url}`;
-  const displayImage = imageUrl
-    ? imageUrl.startsWith("http")
-      ? imageUrl
-      : `${baseUrl}${imageUrl}`
-    : `${baseUrl}/og-image.jpg`;
+  const fullUrl = url.startsWith("http") ? url : `${siteConfig.url}${url.startsWith("/") ? url : `/${url}`}`;
+  const displayImage = resolveBlogOgImageUrl(imageUrl, undefined);
 
   return (
     <div className="space-y-6">

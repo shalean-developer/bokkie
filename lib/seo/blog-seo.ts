@@ -3,7 +3,7 @@
  */
 
 import type { Metadata } from 'next';
-import { siteConfig, truncateTitle } from '@/lib/seo';
+import { siteConfig, truncateTitle, toAbsoluteUrl } from '@/lib/seo';
 
 export interface BlogSEOMetadata {
   title: string;
@@ -18,6 +18,40 @@ export interface BlogSEOMetadata {
   tags?: string[];
 }
 
+export interface BlogSEOOptions {
+  canonicalUrl?: string | null;
+  ogImageUrl?: string | null;
+  featuredImageUrl?: string | null;
+}
+
+/**
+ * OG image priority: og_image_url → featured_image_url → site default.
+ */
+export function resolveBlogOgImageUrl(
+  ogImageUrl?: string | null,
+  featuredImageUrl?: string | null
+): string {
+  const candidate = ogImageUrl?.trim() || featuredImageUrl?.trim();
+  if (candidate) {
+    return toAbsoluteUrl(candidate);
+  }
+  return toAbsoluteUrl(siteConfig.ogImage);
+}
+
+export function resolveBlogCanonicalUrl(
+  slug: string,
+  canonicalOverride?: string | null
+): string {
+  const override = canonicalOverride?.trim();
+  if (override) {
+    if (override.startsWith('http://') || override.startsWith('https://')) {
+      return override;
+    }
+    return toAbsoluteUrl(override);
+  }
+  return `${siteConfig.url}/blog/${slug}`;
+}
+
 export function generateBlogSEOMetadata(
   postTitle: string,
   postDescription: string,
@@ -25,15 +59,14 @@ export function generateBlogSEOMetadata(
   customTitle?: string,
   customDescription?: string,
   keywords: string[] = [],
-  ogImage?: string,
   publishedTime?: string,
   modifiedTime?: string,
   author?: string,
   category?: string,
-  tags: string[] = []
+  tags: string[] = [],
+  options: BlogSEOOptions = {}
 ): Metadata {
-  const baseUrl = siteConfig.url;
-  const postUrl = `${baseUrl}/blog/${slug}`;
+  const postUrl = resolveBlogCanonicalUrl(slug, options.canonicalUrl);
   
   // Use custom SEO fields if provided, otherwise use post fields
   const seoTitle = customTitle || postTitle;
@@ -47,9 +80,10 @@ export function generateBlogSEOMetadata(
     ? `${seoDescription.substring(0, 152)}...`
     : seoDescription;
 
-  const ogImageUrl = ogImage 
-    ? (ogImage.startsWith('http') ? ogImage : `${baseUrl}${ogImage}`)
-    : `${baseUrl}/og-image.jpg`;
+  const ogImageUrl = resolveBlogOgImageUrl(
+    options.ogImageUrl,
+    options.featuredImageUrl
+  );
 
   const metadata: Metadata = {
     title: { default: finalTitle },
@@ -110,19 +144,25 @@ export function generateBlogSEOMetadata(
 }
 
 export function generateBlogListingSEOMetadata(): Metadata {
+  const blogUrl = `${siteConfig.url}/blog`;
+  const ogImageUrl = toAbsoluteUrl(siteConfig.ogImage);
+
   return {
     title: { default: 'Blog' },
     description: 'Read our latest blog posts about cleaning tips, home maintenance, and professional cleaning services in Cape Town.',
+    alternates: {
+      canonical: blogUrl,
+    },
     openGraph: {
       type: 'website',
       locale: 'en_ZA',
-      url: `${siteConfig.url}/blog`,
+      url: blogUrl,
       siteName: siteConfig.name,
       title: 'Blog | Bokkie Cleaning Services',
       description: 'Read our latest blog posts about cleaning tips, home maintenance, and professional cleaning services in Cape Town.',
       images: [
         {
-          url: `${siteConfig.url}/og-image.jpg`,
+          url: ogImageUrl,
           width: 1200,
           height: 630,
           alt: 'Bokkie Cleaning Services Blog',
@@ -133,7 +173,7 @@ export function generateBlogListingSEOMetadata(): Metadata {
       card: 'summary_large_image',
       title: 'Blog | Bokkie Cleaning Services',
       description: 'Read our latest blog posts about cleaning tips, home maintenance, and professional cleaning services in Cape Town.',
-      images: [`${siteConfig.url}/og-image.jpg`],
+      images: [ogImageUrl],
     },
   };
 }
@@ -161,7 +201,7 @@ export function generateSitemapEntry(
   changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never' = 'weekly'
 ) {
   return {
-    url: `https://www.bokkiecleaning.co.za/blog/${slug}`,
+    url: `${siteConfig.url}/blog/${slug}`,
     lastModified,
     changeFrequency,
     priority,

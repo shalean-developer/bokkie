@@ -1,28 +1,22 @@
 import { MetadataRoute } from "next";
+import { siteConfig } from "@/lib/seo";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = "https://bokkiecleaning.co.za";
+  const disallowedPaths = ["/admin/", "/api/", "/_next/", "/private/"];
 
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: [
-          "/api/",
-          "/_next/",
-          "/private/",
-        ],
+        disallow: disallowedPaths,
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: [
-          "/api/",
-          "/private/",
-        ],
+        disallow: disallowedPaths,
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: `${siteConfig.url}/sitemap.xml`,
   };
 }

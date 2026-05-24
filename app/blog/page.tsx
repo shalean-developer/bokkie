@@ -8,7 +8,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = generateBlogListingSEOMetadata();
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 export default async function BlogPage({
   searchParams,

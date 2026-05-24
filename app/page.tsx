@@ -10,6 +10,7 @@ import CleaningGuides from "@/components/CleaningGuides";
 import ReadyToStart from "@/components/ReadyToStart";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
+import FloatingContactButtons from "@/components/FloatingContactButtons";
 
 export const metadata: Metadata = {
   title: { default: "Professional Cleaning Services Cape Town" },
@@ -122,6 +123,7 @@ export default function Home() {
         <ReadyToStart />
         <Contact />
         <Footer />
+        <FloatingContactButtons />
       </main>
     </>
   );

@@ -10,7 +10,7 @@ export default function BlogPostContent({ content }: BlogPostContentProps) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // Simple HTML rendering - in production, use a proper markdown/HTML renderer
+    // Content is sanitized on the server before render
     if (contentRef.current) {
       contentRef.current.innerHTML = content;
       
