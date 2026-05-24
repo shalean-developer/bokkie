@@ -4,7 +4,11 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calculateReadingTime } from "@/lib/utils/reading-time";
 import { generateUniqueSlug } from "@/lib/utils/slug-generator";
-import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
+/** Load DOMPurify only for mutations — keeps read paths (e.g. /blog) lightweight. */
+async function sanitizeBlogContent(content: string): Promise<string> {
+  const { sanitizeBlogHtml } = await import("@/lib/utils/sanitize-blog-html");
+  return sanitizeBlogHtml(content);
+}
 
 function revalidateBlogCache(slug?: string): void {
   revalidatePath("/blog");
@@ -187,7 +191,7 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ success: b
   const slug = generateUniqueSlug(input.title, existingSlugs);
 
   // Calculate reading time
-  const sanitizedContent = sanitizeBlogHtml(input.content);
+  const sanitizedContent = await sanitizeBlogContent(input.content);
   const readingTime = calculateReadingTime(sanitizedContent);
 
   // Set published_at if status is published
@@ -254,7 +258,7 @@ export async function updateBlogPost(
   // Preserve slug after creation so title edits do not break public URLs
   const slug = existingPost.slug;
 
-  const sanitizedContent = sanitizeBlogHtml(input.content);
+  const sanitizedContent = await sanitizeBlogContent(input.content);
   const readingTime = calculateReadingTime(sanitizedContent);
 
   // Set published_at if status changed to published

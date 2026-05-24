@@ -9,55 +9,56 @@ console.log('🧹 Cleaning up dev server resources...\n');
 // Function to kill processes on a specific port (Windows)
 function killProcessOnPort(port) {
   try {
-    // Find processes using the port
     const result = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf-8' });
-    const lines = result.split('\n').filter(line => line.includes('LISTENING'));
-    
+    const lines = result.split('\n').filter((line) => line.includes('LISTENING'));
+
     if (lines.length === 0) {
       console.log(`✅ No processes found on port ${port}`);
       return;
     }
 
     const pids = new Set();
-    lines.forEach(line => {
+    lines.forEach((line) => {
       const match = line.match(/\s+(\d+)$/);
       if (match) {
         pids.add(match[1]);
       }
     });
 
-    pids.forEach(pid => {
+    pids.forEach((pid) => {
       try {
         execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
         console.log(`✅ Killed process ${pid} on port ${port}`);
-      } catch (error) {
-        // Process might already be dead
+      } catch {
         console.log(`⚠️  Could not kill process ${pid} (may already be terminated)`);
       }
     });
-  } catch (error) {
-    // No processes found or command failed
+  } catch {
     console.log(`✅ No processes found on port ${port}`);
   }
 }
 
-// Remove Next.js lock file
-const lockFile = path.join(process.cwd(), '.next', 'dev', 'lock');
-if (fs.existsSync(lockFile)) {
-  try {
-    fs.unlinkSync(lockFile);
-    console.log('✅ Removed Next.js lock file');
-  } catch (error) {
-    console.log(`⚠️  Could not remove lock file: ${error.message}`);
+function removePath(targetPath, label) {
+  if (!fs.existsSync(targetPath)) {
+    console.log(`✅ No ${label} found`);
+    return;
   }
-} else {
-  console.log('✅ No lock file found');
+
+  try {
+    fs.rmSync(targetPath, { recursive: true, force: true });
+    console.log(`✅ Removed ${label}`);
+  } catch (error) {
+    console.log(`⚠️  Could not remove ${label}: ${error.message}`);
+  }
 }
 
-// Kill processes on port 3000
-killProcessOnPort(3000);
+// Stale Turbopack/dev artifacts cause ENOENT 500s after production builds.
+const nextDir = path.join(process.cwd(), '.next');
+const devDir = path.join(nextDir, 'dev');
+removePath(devDir, 'Turbopack dev cache (.next/dev)');
 
-// Wait a moment for ports to be released
-setTimeout(() => {
-  console.log('\n✨ Cleanup complete!\n');
-}, 500);
+// Kill processes on common dev ports
+killProcessOnPort(3000);
+killProcessOnPort(3001);
+
+console.log('\n✨ Cleanup complete!\n');

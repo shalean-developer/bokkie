@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { generateSlug } from "@/lib/utils/slug-generator";
 import { calculateReadingTime, formatReadingTime } from "@/lib/utils/reading-time";
 import SEOAnalyzer from "./SEOAnalyzer";
 import SEOPreview from "./SEOPreview";
+import BlogFeaturedImageUpload from "./BlogFeaturedImageUpload";
 import { getBlogCategories } from "@/app/actions/blog";
 import type { BlogPostInput } from "@/app/actions/blog";
 
@@ -199,18 +199,13 @@ export default function BlogPostForm({
           </div>
 
           {/* Featured Image */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Featured Image URL
-            </label>
-            <input
-              type="url"
-              value={formData.featured_image_url}
-              onChange={(e) => setFormData({ ...formData, featured_image_url: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="https://example.com/image.jpg"
-            />
-          </div>
+          <BlogFeaturedImageUpload
+            value={formData.featured_image_url || ""}
+            onChange={(url) =>
+              setFormData({ ...formData, featured_image_url: url })
+            }
+            disabled={isSubmitting}
+          />
 
           {/* Category */}
           <div>
