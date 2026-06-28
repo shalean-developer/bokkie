@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { generateSlug, generateUniqueSlug } from "@/lib/utils/slug-generator";
+import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
 
 export interface CMSContent {
   id: string;
@@ -10,9 +11,12 @@ export interface CMSContent {
   content: string | null;
   content_type: 'guide' | 'faq' | 'page' | 'other';
   status: 'draft' | 'published' | 'archived';
+  featured_image_url: string | null;
+  focus_keyword: string | null;
   seo_title: string | null;
   seo_description: string | null;
   seo_keywords: string[] | null;
+  og_image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -22,9 +26,12 @@ export interface CMSContentInput {
   content?: string;
   content_type?: 'guide' | 'faq' | 'page' | 'other';
   status?: 'draft' | 'published' | 'archived';
+  featured_image_url?: string;
+  focus_keyword?: string;
   seo_title?: string;
   seo_description?: string;
   seo_keywords?: string[];
+  og_image_url?: string;
 }
 
 export interface CMSContentFilters {
@@ -154,12 +161,15 @@ export async function createCMSContent(input: CMSContentInput): Promise<{ succes
     .insert({
       slug,
       title: input.title,
-      content: input.content || null,
+      content: input.content ? sanitizeBlogHtml(input.content) : null,
       content_type: input.content_type || 'page',
       status: input.status || 'draft',
+      featured_image_url: input.featured_image_url || null,
+      focus_keyword: input.focus_keyword || null,
       seo_title: input.seo_title || null,
       seo_description: input.seo_description || null,
       seo_keywords: input.seo_keywords || [],
+      og_image_url: input.og_image_url || null,
     })
     .select('id')
     .single();
@@ -210,12 +220,29 @@ export async function updateCMSContent(
     .update({
       slug,
       title: input.title,
-      content: input.content !== undefined ? input.content : existingContent.content,
+      content:
+        input.content !== undefined
+          ? input.content
+            ? sanitizeBlogHtml(input.content)
+            : null
+          : existingContent.content,
       content_type: input.content_type !== undefined ? input.content_type : existingContent.content_type,
       status: input.status !== undefined ? input.status : existingContent.status,
+      featured_image_url:
+        input.featured_image_url !== undefined
+          ? input.featured_image_url || null
+          : existingContent.featured_image_url,
+      focus_keyword:
+        input.focus_keyword !== undefined
+          ? input.focus_keyword || null
+          : existingContent.focus_keyword,
       seo_title: input.seo_title !== undefined ? input.seo_title : existingContent.seo_title,
       seo_description: input.seo_description !== undefined ? input.seo_description : existingContent.seo_description,
       seo_keywords: input.seo_keywords !== undefined ? input.seo_keywords : existingContent.seo_keywords,
+      og_image_url:
+        input.og_image_url !== undefined
+          ? input.og_image_url || null
+          : existingContent.og_image_url,
     })
     .eq('id', id);
 

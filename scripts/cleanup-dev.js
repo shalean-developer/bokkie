@@ -6,36 +6,65 @@ const path = require('path');
 
 console.log('🧹 Cleaning up dev server resources...\n');
 
-// Function to kill processes on a specific port (Windows)
-function killProcessOnPort(port) {
-  try {
-    const result = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf-8' });
-    const lines = result.split('\n').filter((line) => line.includes('LISTENING'));
+function getPidsOnPort(port) {
+  const pids = new Set();
 
-    if (lines.length === 0) {
-      console.log(`✅ No processes found on port ${port}`);
-      return;
+  if (process.platform === 'win32') {
+    try {
+      const psResult = execSync(
+        `powershell -NoProfile -Command "(Get-NetTCPConnection -LocalPort ${port} -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique) -join ','"`,
+        { encoding: 'utf-8' }
+      ).trim();
+
+      if (psResult) {
+        psResult.split(',').forEach((pid) => {
+          const trimmed = pid.trim();
+          if (trimmed && trimmed !== '0') {
+            pids.add(trimmed);
+          }
+        });
+      }
+    } catch {
+      // Fall back to netstat below.
     }
-
-    const pids = new Set();
-    lines.forEach((line) => {
-      const match = line.match(/\s+(\d+)$/);
-      if (match) {
-        pids.add(match[1]);
-      }
-    });
-
-    pids.forEach((pid) => {
-      try {
-        execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
-        console.log(`✅ Killed process ${pid} on port ${port}`);
-      } catch {
-        console.log(`⚠️  Could not kill process ${pid} (may already be terminated)`);
-      }
-    });
-  } catch {
-    console.log(`✅ No processes found on port ${port}`);
   }
+
+  if (pids.size === 0) {
+    try {
+      const result = execSync(`netstat -ano | findstr :${port}`, { encoding: 'utf-8' });
+      result
+        .split('\n')
+        .filter((line) => line.includes('LISTENING'))
+        .forEach((line) => {
+          const match = line.match(/\s+(\d+)\s*$/);
+          if (match) {
+            pids.add(match[1]);
+          }
+        });
+    } catch {
+      // No listeners on this port.
+    }
+  }
+
+  return pids;
+}
+
+function killProcessOnPort(port) {
+  const pids = getPidsOnPort(port);
+
+  if (pids.size === 0) {
+    console.log(`✅ No processes found on port ${port}`);
+    return;
+  }
+
+  pids.forEach((pid) => {
+    try {
+      execSync(`taskkill /F /PID ${pid}`, { stdio: 'ignore' });
+      console.log(`✅ Killed process ${pid} on port ${port}`);
+    } catch {
+      console.log(`⚠️  Could not kill process ${pid} (may already be terminated)`);
+    }
+  });
 }
 
 function removePath(targetPath, label) {
@@ -52,13 +81,15 @@ function removePath(targetPath, label) {
   }
 }
 
+// Stop dev servers before clearing Turbopack cache. Deleting .next/dev while
+// a server is still running causes "Cannot find module [turbopack]_runtime.js".
+killProcessOnPort(3000);
+killProcessOnPort(3001);
+killProcessOnPort(3002);
+
 // Stale Turbopack/dev artifacts cause ENOENT 500s after production builds.
 const nextDir = path.join(process.cwd(), '.next');
 const devDir = path.join(nextDir, 'dev');
 removePath(devDir, 'Turbopack dev cache (.next/dev)');
-
-// Kill processes on common dev ports
-killProcessOnPort(3000);
-killProcessOnPort(3001);
 
 console.log('\n✨ Cleanup complete!\n');

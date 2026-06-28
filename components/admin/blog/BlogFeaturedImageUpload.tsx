@@ -13,6 +13,7 @@ interface BlogFeaturedImageUploadProps {
   onChange: (url: string) => void;
   disabled?: boolean;
   label?: string;
+  uploadUrl?: string;
 }
 
 export default function BlogFeaturedImageUpload({
@@ -20,6 +21,7 @@ export default function BlogFeaturedImageUpload({
   onChange,
   disabled = false,
   label = "Featured Image",
+  uploadUrl = "/api/admin/blog/upload",
 }: BlogFeaturedImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -48,7 +50,7 @@ export default function BlogFeaturedImageUpload({
 
         setProgress(60);
 
-        const response = await fetch("/api/admin/blog/upload", {
+        const response = await fetch(uploadUrl, {
           method: "POST",
           body,
         });
@@ -75,7 +77,7 @@ export default function BlogFeaturedImageUpload({
         setTimeout(() => setProgress(0), 400);
       }
     },
-    [onChange]
+    [onChange, uploadUrl]
   );
 
   const handleFiles = useCallback(

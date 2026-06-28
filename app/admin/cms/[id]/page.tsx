@@ -97,9 +97,12 @@ export default function EditCMSPage() {
             content: content.content ?? undefined,
             content_type: content.content_type,
             status: content.status,
+            featured_image_url: content.featured_image_url ?? undefined,
+            focus_keyword: content.focus_keyword ?? undefined,
             seo_title: content.seo_title ?? undefined,
             seo_description: content.seo_description ?? undefined,
             seo_keywords: content.seo_keywords ?? undefined,
+            og_image_url: content.og_image_url ?? undefined,
             id: content.id,
             slug: content.slug,
           }}
