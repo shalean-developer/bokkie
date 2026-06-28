@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Dancing_Script } from "next/font/google";
 import "./globals.css";
 import { generateStructuredData } from "@/lib/structured-data";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
+import { indexableRobots, siteConfig } from "@/lib/seo";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-script",
 });
 
 export const metadata: Metadata = {
@@ -72,27 +78,20 @@ export const metadata: Metadata = {
     creator: "@bokkiecleaning",
     site: "@bokkiecleaning",
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+  robots: indexableRobots,
   alternates: {
-    canonical: "https://www.bokkiecleaning.co.za",
+    canonical: siteConfig.url,
     languages: {
-      "en-ZA": "https://www.bokkiecleaning.co.za",
+      "en-ZA": siteConfig.url,
     },
   },
-  verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || "",
-    // Add other verification codes when available
-  },
+  ...(process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION
+    ? {
+        verification: {
+          google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+        },
+      }
+    : {}),
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -136,16 +135,16 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
         />
-        <link rel="manifest" href="/manifest.json" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
         <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <meta name="theme-color" content="#10b981" />
+        <meta name="theme-color" content="#0a2540" />
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
       </head>
       <body
-        className={`${inter.variable} antialiased`}
+        className={`${inter.variable} ${dancingScript.variable} antialiased`}
       >
         {/* Google Tag Manager (noscript) */}
         <noscript

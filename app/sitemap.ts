@@ -62,6 +62,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
     {
+      url: makeUrl("/book"),
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.95,
+    },
+    {
       url: makeUrl("/booking/quote"),
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
@@ -78,6 +84,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "monthly" as const,
       priority: 0.8,
+    },
+    {
+      url: makeUrl("/coupons"),
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.7,
     },
   ];
 
@@ -106,7 +118,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Guide pages
   const guides = [
     "maintain-spotless-home",
-    "eco-friendly-cleaning",
     "move-in-cleaning",
     "office-cleaning-best-practices",
   ];

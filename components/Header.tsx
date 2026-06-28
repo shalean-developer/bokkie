@@ -4,26 +4,62 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { Menu, X, LayoutDashboard } from "lucide-react";
+import { Menu, X, LayoutDashboard, ArrowRight } from "lucide-react";
 import { useUser } from "@/lib/hooks/useSupabase";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/how-it-works", label: "How It Works" },
-  { href: "/service-areas", label: "Locations" },
-  { href: "/services", label: "Services" },
+  { href: "/how-it-works", label: "About Us" },
+  { href: "/#services", label: "Services" },
+  { href: "/how-it-works#faq", label: "FAQ" },
+  { href: "/coupons", label: "Coupons" },
+  { href: "/blog", label: "Blog" },
 ];
+
+function ContactButton({ className = "" }: { className?: string }) {
+  return (
+    <Link
+      href="/contact"
+      className={`inline-flex items-center rounded-2xl border-2 border-white bg-brand-primary p-1 pl-4 sm:pl-5 hover:opacity-95 transition-opacity ${className}`}
+    >
+      <span className="text-white text-sm font-semibold whitespace-nowrap pr-3 sm:pr-4">
+        Contact Us
+      </span>
+      <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white shrink-0">
+        <ArrowRight className="w-4 h-4 text-brand-primary" strokeWidth={2.5} />
+      </span>
+    </Link>
+  );
+}
+
+function Logo() {
+  return (
+    <Link href="/" className="flex items-center gap-2.5 shrink-0" aria-label="Bokkie Cleaning Services Home">
+      <Image
+        src="/bokkie-logo.png"
+        alt="Bokkie Cleaning Services"
+        width={40}
+        height={40}
+        className="w-9 h-9 sm:w-10 sm:h-10 object-contain"
+        priority
+      />
+      <span className="text-lg sm:text-xl font-bold tracking-tight text-gray-900">
+        Bokkie
+      </span>
+    </Link>
+  );
+}
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user, loading: userLoading } = useUser();
 
-  // Hide header on booking form pages, auth pages, cleaner pages, and admin pages
   if (
     pathname === "/booking/quote" ||
     pathname === "/booking/quote/confirmation" ||
     pathname?.startsWith("/booking/service/") ||
+    pathname?.startsWith("/book") ||
     pathname?.startsWith("/auth") ||
     pathname?.startsWith("/cleaner") ||
     pathname?.startsWith("/admin")
@@ -32,122 +68,71 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          {/* Logo */}
-          <div className="flex-shrink-0">
-            <Link href="/" className="flex items-center gap-2" aria-label="Bokkie Cleaning Services Home">
-              <Image 
-                src="/bokkie-logo.png" 
-                alt="Bokkie" 
-                width={40}
-                height={40}
-                className="h-8 md:h-10 w-auto"
-                priority
-              />
-              <span className="text-2xl md:text-3xl font-bold text-gray-900" style={{ fontFamily: 'cursive, system-ui' }}>
-                Bokkie
-              </span>
-            </Link>
-          </div>
+    <header className="sticky top-0 z-50 w-full px-4 sm:px-6 lg:px-8 pt-4 md:pt-5 pointer-events-none">
+      <div className="container mx-auto max-w-7xl pointer-events-auto">
+        <div className="flex items-center justify-between gap-3 sm:gap-4 bg-white border border-gray-900/10 rounded-2xl px-4 sm:px-5 md:px-6 py-2 sm:py-2.5 shadow-[0_4px_24px_rgba(0,0,0,0.08)]">
+          <Logo />
 
-          {/* Navigation Links - Desktop */}
-          <nav className="hidden md:flex items-center space-x-6 lg:space-x-8 flex-1 justify-center">
+          <nav className="hidden xl:flex items-center justify-center gap-4 2xl:gap-6 flex-1 px-4">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-700 hover:text-gray-900 font-medium transition-colors"
+                className="text-sm font-medium text-gray-700 hover:text-brand-primary transition-colors whitespace-nowrap"
               >
                 {link.label}
               </Link>
             ))}
           </nav>
 
-          {/* Right Side Actions - Desktop */}
-          <div className="hidden md:flex items-center gap-4 flex-shrink-0">
-            {!userLoading && user && (
-              <Link
-                href="/dashboard"
-                className="flex items-center gap-2 px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg transition-colors border border-gray-300 text-sm"
-              >
-                <LayoutDashboard className="w-4 h-4" />
-                Dashboard
-              </Link>
-            )}
-            <Link
-              href="/booking/quote"
-              className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg transition-colors border border-gray-300 text-sm"
-            >
-              Get Free Quote
-            </Link>
-            {!userLoading && !user && (
-              <Link
-                href="/auth/login"
-                className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg transition-colors border border-gray-300 text-sm"
-              >
-                Login
-              </Link>
-            )}
+          <div className="hidden xl:flex items-center shrink-0">
+            <ContactButton />
           </div>
 
-          {/* Mobile Menu Button */}
           <button
-            className="md:hidden p-2 rounded-md text-gray-700 hover:bg-gray-100 transition-colors"
+            className="xl:hidden p-2 rounded-2xl text-gray-900 hover:bg-gray-100 transition-colors shrink-0"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             aria-label="Toggle menu"
             aria-expanded={isMenuOpen}
           >
-            {isMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden pb-4 border-t border-gray-200 mt-2 pt-4">
-            <nav className="flex flex-col space-y-4">
+          <div className="xl:hidden mt-3 bg-white border border-gray-900 rounded-2xl shadow-[0_4px_24px_rgba(0,0,0,0.08)] overflow-hidden">
+            <nav className="flex flex-col px-5 py-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className="text-gray-700 hover:text-gray-900 font-medium transition-colors py-2"
+                  className="text-gray-800 hover:text-brand-primary font-medium transition-colors py-2.5 border-b border-gray-100 last:border-0"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="flex flex-col gap-3 pt-2 border-t border-gray-200">
+              <div className="flex flex-col gap-3 pt-4 mt-2">
                 {!userLoading && user && (
                   <Link
                     href="/dashboard"
-                    className="flex items-center justify-center gap-2 px-6 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg transition-colors border border-gray-300 text-center"
+                    className="flex items-center justify-center gap-2 px-6 py-2.5 text-brand-primary font-medium rounded-2xl border border-gray-900 text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <LayoutDashboard className="w-4 h-4" />
                     Dashboard
                   </Link>
                 )}
-                <Link
-                  href="/booking/quote"
-                  className="px-6 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg transition-colors border border-gray-300 text-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Get Free Quote
-                </Link>
                 {!userLoading && !user && (
                   <Link
                     href="/auth/login"
-                    className="px-6 py-2 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg transition-colors border border-gray-300 text-center"
+                    className="px-6 py-2.5 text-brand-primary font-medium rounded-2xl border border-gray-900 text-center"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Login
                   </Link>
                 )}
+                <ContactButton className="w-full justify-between" />
               </div>
             </nav>
           </div>

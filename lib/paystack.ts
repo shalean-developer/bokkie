@@ -11,6 +11,7 @@ export interface PaystackConfig {
   metadata?: Record<string, any>;
   callback_url?: string;
   onClose?: () => void;
+  onSuccess?: (reference: string) => void;
 }
 
 /**
@@ -113,7 +114,9 @@ export function initializePaystack(config: PaystackConfig): void {
         callback: function (response: any) {
           // Payment successful
           console.log("Payment successful:", response);
-          if (config.callback_url) {
+          if (config.onSuccess) {
+            config.onSuccess(response.reference);
+          } else if (config.callback_url) {
             // Add reference to callback URL
             const url = new URL(config.callback_url);
             url.searchParams.set("reference", response.reference);
