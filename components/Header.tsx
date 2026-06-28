@@ -86,7 +86,24 @@ export default function Header() {
             ))}
           </nav>
 
-          <div className="hidden xl:flex items-center shrink-0">
+          <div className="hidden xl:flex items-center gap-3 shrink-0">
+            {!userLoading && user && (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-brand-primary rounded-2xl border border-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                Dashboard
+              </Link>
+            )}
+            {!userLoading && !user && (
+              <Link
+                href="/auth/login"
+                className="inline-flex items-center px-4 py-2.5 text-sm font-semibold text-brand-primary rounded-2xl border border-gray-900 hover:bg-gray-50 transition-colors whitespace-nowrap"
+              >
+                Login
+              </Link>
+            )}
             <QuoteButton />
           </div>
 
