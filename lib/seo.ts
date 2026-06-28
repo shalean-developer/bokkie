@@ -2,6 +2,8 @@
  * SEO utility functions for Bokkie Cleaning Services
  */
 
+import type { Metadata } from "next";
+
 export const siteConfig = {
   name: "Bokkie Cleaning Services",
   url: "https://www.bokkiecleaning.co.za",
@@ -131,3 +133,50 @@ export const longTailKeywords = [
   "cleaning services Camps Bay",
   "professional cleaners South Africa",
 ];
+
+/** Robots directives for public, indexable pages */
+export const indexableRobots: NonNullable<Metadata["robots"]> = {
+  index: true,
+  follow: true,
+  googleBot: {
+    index: true,
+    follow: true,
+    "max-video-preview": -1,
+    "max-image-preview": "large",
+    "max-snippet": -1,
+  },
+};
+
+/** Robots directives for authenticated, transactional, or utility pages */
+export const noIndexRobots: NonNullable<Metadata["robots"]> = {
+  index: false,
+  follow: false,
+  googleBot: {
+    index: false,
+    follow: false,
+  },
+};
+
+/** Geographic meta tags shared across Cape Town pages */
+export const capeTownGeoMeta: NonNullable<Metadata["other"]> = {
+  "geo.region": "ZA-WC",
+  "geo.placename": "Cape Town",
+  "geo.position": "-33.9806;18.4653",
+  ICBM: "-33.9806, 18.4653",
+};
+
+/** Absolute URL for the default Open Graph image */
+export function getOgImageUrl(): string {
+  return toAbsoluteUrl(siteConfig.ogImage);
+}
+
+/** Standard Open Graph image metadata entry */
+export function getOgImageMetadata(alt: string) {
+  return {
+    url: getOgImageUrl(),
+    width: 1200,
+    height: 630,
+    alt,
+    type: "image/jpeg" as const,
+  };
+}
