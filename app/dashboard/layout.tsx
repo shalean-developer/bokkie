@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -7,6 +8,12 @@ import DashboardNav from "@/components/dashboard/DashboardNav";
 import CleanerNav from "@/components/cleaner/CleanerNav";
 import UserMenu from "@/components/dashboard/UserMenu";
 import PageviewTracker from "@/components/PageviewTracker";
+import { noIndexRobots } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { default: "Dashboard" },
+  robots: noIndexRobots,
+};
 
 export default async function DashboardLayout({
   children,

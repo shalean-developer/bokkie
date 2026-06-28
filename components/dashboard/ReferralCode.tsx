@@ -56,7 +56,7 @@ export default function ReferralCode({ code, referralUrl, description }: Referra
           </div>
           <button
             onClick={copyCode}
-            className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
           >
             {copied ? (
               <>
@@ -84,7 +84,7 @@ export default function ReferralCode({ code, referralUrl, description }: Referra
           </div>
           <button
             onClick={copyUrl}
-            className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+            className="px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
           >
             {copiedUrl ? (
               <>

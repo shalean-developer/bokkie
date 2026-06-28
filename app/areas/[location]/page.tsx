@@ -6,6 +6,13 @@ import { notFound } from "next/navigation";
 import { capeTownAreas, formatLocationName, getLocationSlug } from "@/lib/constants/areas";
 import { generateLocationStructuredData } from "@/lib/structured-data";
 import { getLocationContent, getServiceLocations } from "@/lib/supabase/booking-data";
+import {
+  capeTownGeoMeta,
+  generateCanonicalUrl,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+} from "@/lib/seo";
 
 // Helper function to get valid locations from database
 async function getValidLocations(): Promise<string[]> {
@@ -72,6 +79,8 @@ export async function generateMetadata({
       ];
   
   const title = `Cleaning Services in ${locationName}, Cape Town`;
+  const pageUrl = generateCanonicalUrl(`/areas/${location}`);
+  const ogAlt = `Bokkie Cleaning Services - Cleaning Services in ${locationName}`;
 
   return {
     title: { default: title },
@@ -80,16 +89,9 @@ export async function generateMetadata({
     openGraph: {
       title,
       description,
-      url: `https://bokkiecleaning.co.za/areas/${location}`,
+      url: pageUrl,
       siteName: "Bokkie Cleaning Services",
-      images: [
-        {
-          url: "https://bokkiecleaning.co.za/og-image.jpg",
-          width: 1200,
-          height: 630,
-          alt: `Bokkie Cleaning Services - Cleaning Services in ${locationName}`,
-        },
-      ],
+      images: [getOgImageMetadata(ogAlt)],
       locale: "en_ZA",
       type: "website",
     },
@@ -97,29 +99,17 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: ["https://bokkiecleaning.co.za/og-image.jpg"],
+      images: [getOgImageUrl()],
       creator: "@bokkiecleaning",
       site: "@bokkiecleaning",
     },
     alternates: {
-      canonical: `https://bokkiecleaning.co.za/areas/${location}`,
+      canonical: pageUrl,
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
+    robots: indexableRobots,
     other: {
-      "geo.region": "ZA-WC",
+      ...capeTownGeoMeta,
       "geo.placename": locationName,
-      "geo.position": "-33.9806;18.4653",
-      "ICBM": "-33.9806, 18.4653",
     },
   };
 }
@@ -197,7 +187,7 @@ export default async function LocationPage({
               </div>
               <Link
                 href="/booking/quote"
-                className="px-8 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg transition-colors shadow-lg text-lg"
+                className="px-8 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-2xl transition-colors shadow-lg text-lg"
               >
                 BOOK A CLEAN
               </Link>
@@ -319,13 +309,13 @@ export default async function LocationPage({
               <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
                 <Link
                   href="/service-areas"
-                  className="px-8 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg transition-colors text-center"
+                  className="px-8 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-2xl transition-colors text-center"
                 >
                   Cleaning Services Near Me
                 </Link>
                 <Link
                   href="/services"
-                  className="px-8 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg transition-colors text-center"
+                  className="px-8 py-4 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-2xl transition-colors text-center"
                 >
                   All Cleaning Services
                 </Link>
@@ -376,7 +366,7 @@ export default async function LocationPage({
                 />
                 <button
                   type="submit"
-                  className="px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg transition-colors"
+                  className="px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-2xl transition-colors"
                 >
                   Subscribe
                 </button>

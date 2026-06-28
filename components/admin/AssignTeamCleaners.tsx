@@ -244,7 +244,7 @@ export default function AssignTeamCleaners({ booking }: AssignTeamCleanersProps)
           <button
             onClick={handleSave}
             disabled={saving || selectedCleanerIds.size === 0}
-            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+            className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-medium rounded-2xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
           >
             {saving ? (
               <>

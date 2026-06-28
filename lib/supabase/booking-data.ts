@@ -4,6 +4,7 @@
  */
 
 import { createClient as createBrowserClient } from '@/lib/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 
 // ============================================================================
@@ -633,6 +634,15 @@ export async function getRoomPricingByServiceType(serviceType: string): Promise<
  * Use this in Server Components, Server Actions, and Route Handlers
  */
 export async function getServiceCategoryPricing(): Promise<ServiceCategoryPricing[]> {
+  if (!isSupabaseConfigured()) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY; using fallback service category pricing'
+      );
+    }
+    return [];
+  }
+
   try {
     const supabase = await createServerClient();
     const { data, error } = await supabase
@@ -648,23 +658,17 @@ export async function getServiceCategoryPricing(): Promise<ServiceCategoryPricin
           'service_category_pricing table does not exist. Please run migration 057_service_category_pricing.sql'
         );
       } else {
-        console.error('Error fetching service category pricing:', {
-          message: error.message,
-          details: error.details,
-          hint: error.hint,
-          code: error.code,
-        });
+        console.error('Error fetching service category pricing:', error.message, error.code);
       }
       return [];
     }
 
     return data || [];
-  } catch (error: any) {
-    console.error('Error fetching service category pricing:', {
-      message: error?.message || 'Unknown error',
-      stack: error?.stack,
-      error: error,
-    });
+  } catch (error: unknown) {
+    console.error(
+      'Error fetching service category pricing:',
+      error instanceof Error ? error.message : error
+    );
     return [];
   }
 }
@@ -674,6 +678,10 @@ export async function getServiceCategoryPricing(): Promise<ServiceCategoryPricin
  * Fetch a specific service category pricing by category ID (Server-side)
  */
 export async function getServiceCategoryPricingByCategoryId(categoryId: string): Promise<ServiceCategoryPricing | null> {
+  if (!isSupabaseConfigured()) {
+    return null;
+  }
+
   try {
     const supabase = await createServerClient();
     const { data, error } = await supabase
@@ -684,18 +692,20 @@ export async function getServiceCategoryPricingByCategoryId(categoryId: string):
       .single();
 
     if (error) {
-      console.error(`Error fetching service category pricing for ${categoryId}:`, {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-      });
+      console.error(
+        `Error fetching service category pricing for ${categoryId}:`,
+        error.message,
+        error.code
+      );
       return null;
     }
 
     return data;
-  } catch (error) {
-    console.error(`Error fetching service category pricing for ${categoryId}:`, error);
+  } catch (error: unknown) {
+    console.error(
+      `Error fetching service category pricing for ${categoryId}:`,
+      error instanceof Error ? error.message : error
+    );
     return null;
   }
 }

@@ -32,7 +32,7 @@ export default function RebookButton({ booking, onSuccess }: RebookButtonProps) 
     <>
       <button
         onClick={handleRebook}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
       >
         <RotateCcw className="w-4 h-4" />
         Rebook

@@ -577,7 +577,7 @@ export default function RecurringSchedulesPage() {
           <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={openCreateModal}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
             >
               <Plus className="w-4 h-4" />
               <span>Create New</span>
@@ -585,7 +585,7 @@ export default function RecurringSchedulesPage() {
             <button
               onClick={handleSyncBookings}
               disabled={isSyncing}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-300 rounded-lg hover:bg-purple-100 active:bg-purple-200 transition-colors touch-manipulation disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-300 rounded-2xl hover:bg-purple-100 active:bg-purple-200 transition-colors touch-manipulation disabled:opacity-50"
             >
               <RefreshCw className={`w-4 h-4 ${isSyncing ? "animate-spin" : ""}`} />
               <span>{isSyncing ? "Syncing..." : "Sync from Bookings"}</span>
@@ -593,14 +593,14 @@ export default function RecurringSchedulesPage() {
             <button
               onClick={handleGenerateBookings}
               disabled={isGenerating}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-green-700 bg-green-50 border border-green-300 rounded-lg hover:bg-green-100 active:bg-green-200 transition-colors touch-manipulation disabled:opacity-50"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-green-700 bg-green-50 border border-green-300 rounded-2xl hover:bg-green-100 active:bg-green-200 transition-colors touch-manipulation disabled:opacity-50"
             >
               <Calendar className={`w-4 h-4 ${isGenerating ? "animate-spin" : ""}`} />
               <span>{isGenerating ? "Generating..." : "Generate Monthly"}</span>
             </button>
             <button
               onClick={fetchRecurringSchedules}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
@@ -812,7 +812,7 @@ export default function RecurringSchedulesPage() {
                             e.stopPropagation();
                             openEditModal(schedule);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-2xl hover:bg-blue-100 transition-colors flex items-center gap-1"
                           title="Edit recurring schedule"
                         >
                           <Edit className="w-3 h-3" />
@@ -823,7 +823,7 @@ export default function RecurringSchedulesPage() {
                             e.stopPropagation();
                             openAssignCleanerModal(schedule);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 rounded-2xl hover:bg-purple-100 transition-colors flex items-center gap-1"
                           title="Assign cleaner"
                         >
                           <UserPlus className="w-3 h-3" />
@@ -834,7 +834,7 @@ export default function RecurringSchedulesPage() {
                             e.stopPropagation();
                             openRescheduleModal(schedule);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-2xl hover:bg-blue-100 transition-colors flex items-center gap-1"
                           title="Reschedule recurring schedule"
                         >
                           <Calendar className="w-3 h-3" />
@@ -845,7 +845,7 @@ export default function RecurringSchedulesPage() {
                             e.stopPropagation();
                             openDeleteModal(schedule);
                           }}
-                          className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-2xl hover:bg-red-100 transition-colors flex items-center gap-1"
                           title="Delete recurring schedule"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -1100,14 +1100,14 @@ export default function RecurringSchedulesPage() {
                         type="button"
                         onClick={closeRescheduleModal}
                         disabled={isSubmitting}
-                        className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting || !selectedDate || !selectedTime}
-                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                        className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
                         {isSubmitting ? (
                           <>
@@ -1339,14 +1339,14 @@ export default function RecurringSchedulesPage() {
                       type="button"
                       onClick={closeCreateModal}
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -1584,14 +1584,14 @@ export default function RecurringSchedulesPage() {
                       type="button"
                       onClick={closeEditModal}
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       {isSubmitting ? (
                         <>
@@ -1654,14 +1654,14 @@ export default function RecurringSchedulesPage() {
                   type="button"
                   onClick={closeDeleteModal}
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                  className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDelete}
                   disabled={isSubmitting}
-                  className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                  className="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 flex items-center gap-2"
                 >
                   {isSubmitting ? (
                     <>
@@ -1741,14 +1741,14 @@ export default function RecurringSchedulesPage() {
                       type="button"
                       onClick={closeAssignCleanerModal}
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                      className="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleAssignCleaner}
                       disabled={isSubmitting}
-                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2"
+                      className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 flex items-center gap-2"
                     >
                       {isSubmitting ? (
                         <>

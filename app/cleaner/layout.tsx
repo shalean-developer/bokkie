@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -5,6 +6,12 @@ import { getCurrentCleaner } from "@/lib/storage/cleaner-auth-supabase";
 import CleanerNav from "@/components/cleaner/CleanerNav";
 import PageviewTracker from "@/components/PageviewTracker";
 import { headers } from "next/headers";
+import { noIndexRobots } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { default: "Cleaner Portal" },
+  robots: noIndexRobots,
+};
 
 export const dynamic = "force-dynamic";
 

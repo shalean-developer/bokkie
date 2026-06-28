@@ -54,7 +54,7 @@ export default function AdminDashboardClient({
                 key={range.value}
                 onClick={() => handleDateRangeChange(range.value)}
                 disabled={isPending}
-                className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                className={`px-3 py-1.5 text-sm font-medium rounded-2xl transition-colors ${
                   dateRange === range.value
                     ? "bg-blue-600 text-white"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -68,7 +68,7 @@ export default function AdminDashboardClient({
             <button
               onClick={handleRefresh}
               disabled={isPending}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <RefreshCw className={`w-4 h-4 ${isPending ? "animate-spin" : ""}`} />
               <span>Refresh</span>

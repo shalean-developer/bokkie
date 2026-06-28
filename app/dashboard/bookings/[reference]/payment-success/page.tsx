@@ -105,13 +105,13 @@ export default function PaymentSuccessPage() {
             <div className="flex gap-4 justify-center">
               <Link
                 href={`/dashboard/bookings/${bookingReference}`}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
               >
                 View Booking <ArrowRight className="w-4 h-4" />
               </Link>
               <Link
                 href="/dashboard/bookings"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-900 font-semibold rounded-2xl transition-colors"
               >
                 All Bookings
               </Link>

@@ -17,7 +17,7 @@ export default function AdminEditBookingButton({ booking, onSuccess }: AdminEdit
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
       >
         <Edit className="w-4 h-4" />
         Edit Booking

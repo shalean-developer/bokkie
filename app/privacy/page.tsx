@@ -1,5 +1,40 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import {
+  generateCanonicalUrl,
+  generateMetaDescription,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { default: "Privacy Policy" },
+  description: generateMetaDescription(
+    "Bokkie Cleaning Services privacy policy. Learn how we collect, use, and protect your personal information when you book professional cleaning services in Cape Town."
+  ),
+  alternates: {
+    canonical: generateCanonicalUrl("/privacy"),
+  },
+  openGraph: {
+    title: "Privacy Policy | Bokkie Cleaning Services",
+    description: "How Bokkie Cleaning Services collects, uses, and protects your personal information.",
+    url: generateCanonicalUrl("/privacy"),
+    siteName: siteConfig.name,
+    images: [getOgImageMetadata("Bokkie Cleaning Services - Privacy Policy")],
+    locale: "en_ZA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Privacy Policy | Bokkie Cleaning Services",
+    description: "Privacy policy for Bokkie Cleaning Services.",
+    images: [getOgImageUrl()],
+  },
+  robots: indexableRobots,
+};
 
 export default function PrivacyPage() {
   return (

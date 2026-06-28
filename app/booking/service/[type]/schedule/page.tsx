@@ -732,13 +732,13 @@ export default function SchedulePage() {
             <div className="flex justify-between">
               <button
                 onClick={handleBack}
-                className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-colors border border-gray-300"
+                className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-2xl transition-colors border border-gray-300"
               >
                 Back
               </button>
               <button
                 onClick={handleContinue}
-                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors"
               >
                 Continue
               </button>

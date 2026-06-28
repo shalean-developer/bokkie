@@ -735,7 +735,7 @@ export default function AdminPricingPage() {
           </div>
           <button
             onClick={fetchPricingData}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>
@@ -757,7 +757,7 @@ export default function AdminPricingPage() {
           </div>
           <button
             onClick={() => setShowAddPopularModal(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
           >
             <Plus className="w-4 h-4" />
             <span>Add Service</span>
@@ -912,7 +912,7 @@ export default function AdminPricingPage() {
           </div>
           <button
             onClick={() => setShowAddForm(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
           >
             <Plus className="w-4 h-4" />
             <span>Add Service</span>
@@ -984,7 +984,7 @@ export default function AdminPricingPage() {
               <button
                 onClick={handleAddService}
                 disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? "Adding..." : "Add Service"}
               </button>
@@ -1000,7 +1000,7 @@ export default function AdminPricingPage() {
                   setError(null);
                 }}
                 disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -1236,7 +1236,7 @@ export default function AdminPricingPage() {
           </div>
           <button
             onClick={() => setShowAddAdditionalForm(true)}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
           >
             <Plus className="w-4 h-4" />
             <span>Add Service</span>
@@ -1322,7 +1322,7 @@ export default function AdminPricingPage() {
               <button
                 onClick={handleAddAdditionalService}
                 disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? "Adding..." : "Add Service"}
               </button>
@@ -1339,7 +1339,7 @@ export default function AdminPricingPage() {
                   setError(null);
                 }}
                 disabled={saving}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Cancel
               </button>
@@ -1449,14 +1449,14 @@ export default function AdminPricingPage() {
                                 <button
                                   onClick={handleSaveAdditionalService}
                                   disabled={saving}
-                                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   {saving ? "Saving..." : "Save Changes"}
                                 </button>
                                 <button
                                   onClick={handleCancelEditAdditionalService}
                                   disabled={saving}
-                                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   Cancel
                                 </button>
@@ -1838,14 +1838,14 @@ export default function AdminPricingPage() {
                     setNewPopularService({ name: "", slug: "", description: "", base_price: "" });
                     setError(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isAddingPopular || !newPopularService.name.trim() || !newPopularService.slug.trim()}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isAddingPopular ? "Adding..." : "Add Service"}
                 </button>
@@ -1877,7 +1877,7 @@ export default function AdminPricingPage() {
                     setDeletePopularConfirmId(null);
                     setError(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
@@ -1999,14 +1999,14 @@ export default function AdminPricingPage() {
                     setEditPopularService({ name: "", slug: "", description: "", base_price: "" });
                     setError(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdatingPopular || !editPopularService.name.trim() || !editPopularService.slug.trim()}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isUpdatingPopular ? "Updating..." : "Update Service"}
                 </button>

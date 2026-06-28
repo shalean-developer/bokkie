@@ -1,20 +1,31 @@
 import { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/seo";
 
-export default function robots(): MetadataRoute.Robots {
-  const disallowedPaths = ["/admin/", "/api/", "/_next/", "/private/"];
+const PRIVATE_PATHS = [
+  "/admin/",
+  "/api/",
+  "/_next/",
+  "/private/",
+  "/dashboard/",
+  "/cleaner/",
+  "/auth/",
+  "/booking/service/",
+  "/booking/pay/",
+  "/booking/quote/confirmation",
+];
 
+export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
       {
         userAgent: "*",
         allow: "/",
-        disallow: disallowedPaths,
+        disallow: PRIVATE_PATHS,
       },
       {
         userAgent: "Googlebot",
         allow: "/",
-        disallow: disallowedPaths,
+        disallow: PRIVATE_PATHS,
       },
     ],
     sitemap: `${siteConfig.url}/sitemap.xml`,

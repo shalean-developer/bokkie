@@ -112,7 +112,7 @@ export default function EarningsPage() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setActiveTab("this-week")}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium transition-colors ${
               activeTab === "this-week"
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
@@ -124,7 +124,7 @@ export default function EarningsPage() {
           </button>
           <button
             onClick={() => setActiveTab("history")}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium transition-colors ${
               activeTab === "history"
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
@@ -151,7 +151,7 @@ export default function EarningsPage() {
                   setError(null);
                   setRetryKey((prev) => prev + 1);
                 }}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors"
               >
                 Retry
               </button>

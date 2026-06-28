@@ -188,7 +188,7 @@ export default function BookingStatusActions({
           <button
             onClick={() => handleJobProgress("on-my-way")}
             disabled={isUpdating}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >
             {isUpdating ? (
               <Loader2 className="w-4 h-4 animate-spin" />

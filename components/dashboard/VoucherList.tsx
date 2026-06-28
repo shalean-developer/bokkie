@@ -255,7 +255,7 @@ export default function VoucherList({ vouchers }: VoucherListProps) {
                 <button
                   onClick={() => handleRedeem(voucher)}
                   disabled={isPending && redeemingCode === voucher.code}
-                  className={`w-full mt-4 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  className={`w-full mt-4 px-4 py-2 rounded-2xl font-medium transition-colors ${
                     isPending && redeemingCode === voucher.code
                       ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                       : "bg-blue-600 text-white hover:bg-green-700"

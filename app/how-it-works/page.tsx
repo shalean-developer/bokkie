@@ -15,7 +15,8 @@ import {
   Leaf,
   Award
 } from "lucide-react";
-import { generateCanonicalUrl, generateMetaDescription } from "@/lib/seo";
+import { generateCanonicalUrl, generateMetaDescription, capeTownGeoMeta, getOgImageMetadata, getOgImageUrl, indexableRobots } from "@/lib/seo";
+import { generateHowItWorksStructuredData } from "@/lib/structured-data";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
@@ -34,15 +35,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "How It Works: Book Professional Cleaning Services in Cape Town",
     description: "Learn how to book professional cleaning services in Cape Town with Bokkie. Simple 5-step process with same-day booking available.",
-    url: "https://bokkiecleaning.co.za/how-it-works",
+    url: generateCanonicalUrl("/how-it-works"),
     siteName: "Bokkie Cleaning Services",
     images: [
-      {
-        url: "https://bokkiecleaning.co.za/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "How It Works - Bokkie Cleaning Services Cape Town",
-      },
+      getOgImageMetadata("How It Works - Bokkie Cleaning Services Cape Town"),
     ],
     locale: "en_ZA",
     type: "website",
@@ -51,28 +47,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "How It Works: Book Professional Cleaning Services in Cape Town",
     description: "Learn how to book professional cleaning services in Cape Town. Simple 5-step process with same-day booking.",
-    images: ["https://bokkiecleaning.co.za/og-image.jpg"],
+    images: [getOgImageUrl()],
   },
   alternates: {
     canonical: generateCanonicalUrl("/how-it-works"),
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  other: {
-    "geo.region": "ZA-WC",
-    "geo.placename": "Cape Town",
-    "geo.position": "-33.9806;18.4653",
-    "ICBM": "-33.9806, 18.4653",
-  },
+  robots: indexableRobots,
+  other: capeTownGeoMeta,
 };
 
 // Step-by-step process data
@@ -246,94 +227,13 @@ const benefits = [
 ];
 
 export default function HowItWorksPage() {
-  // Generate structured data for this page
-  const howToStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    name: "How to Book Professional Cleaning Services in Cape Town",
-    description: "Step-by-step guide on how to book professional cleaning services with Bokkie Cleaning Services in Cape Town",
-    step: bookingSteps.map((step) => ({
-      "@type": "HowToStep",
-      position: step.number,
-      name: step.title,
-      text: step.description,
-      itemListElement: step.details.map((detail, index) => ({
-        "@type": "HowToDirection",
-        position: index + 1,
-        text: detail,
-      })),
-    })),
-  };
-
-  const faqStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: faqs.map((faq) => ({
-      "@type": "Question",
-      name: faq.question,
-      acceptedAnswer: {
-        "@type": "Answer",
-        text: faq.answer,
-      },
-    })),
-  };
-
-  const breadcrumbStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: "https://bokkiecleaning.co.za",
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "How It Works",
-        item: "https://bokkiecleaning.co.za/how-it-works",
-      },
-    ],
-  };
-
-  const webpageStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "@id": "https://bokkiecleaning.co.za/how-it-works#webpage",
-    url: "https://bokkiecleaning.co.za/how-it-works",
-    name: "How It Works: Book Professional Cleaning Services in Cape Town",
-    description: "Learn how to book professional cleaning services in Cape Town with Bokkie. Simple 5-step process with same-day booking available.",
-    inLanguage: "en-ZA",
-    isPartOf: {
-      "@id": "https://bokkiecleaning.co.za#website",
-    },
-    about: {
-      "@id": "https://bokkiecleaning.co.za#organization",
-    },
-    breadcrumb: {
-      "@id": "https://bokkiecleaning.co.za/how-it-works#breadcrumb",
-    },
-  };
+  const structuredData = generateHowItWorksStructuredData();
 
   return (
     <>
-      {/* Structured Data */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToStructuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbStructuredData) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(webpageStructuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
 
       <main className="min-h-screen bg-white">
@@ -387,13 +287,13 @@ export default function HowItWorksPage() {
                   <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
                     <Link
                       href="/booking/quote"
-                      className="inline-flex items-center justify-center px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-xl transition-colors shadow-lg"
+                      className="inline-flex items-center justify-center px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-2xl transition-colors shadow-lg"
                     >
                       Book Your Clean Today
                     </Link>
                     <a
                       href="tel:+27724162547"
-                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-xl transition-colors shadow-lg border border-gray-300"
+                      className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-2xl transition-colors shadow-lg border border-gray-300"
                     >
                       <Phone className="w-5 h-5" />
                       Call Us Now
@@ -659,7 +559,7 @@ export default function HowItWorksPage() {
         </section>
 
         {/* FAQ Section */}
-        <section className="py-20 bg-gray-50">
+        <section id="faq" className="py-20 bg-gray-50">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-16">
@@ -722,13 +622,13 @@ export default function HowItWorksPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/booking/quote"
-                  className="inline-flex items-center justify-center px-8 py-4 bg-white hover:bg-gray-100 text-[#007bff] font-semibold rounded-xl transition-colors shadow-lg"
+                  className="inline-flex items-center justify-center px-8 py-4 bg-white hover:bg-gray-100 text-[#007bff] font-semibold rounded-2xl transition-colors shadow-lg"
                 >
                   Get Started Now
                 </Link>
                 <a
                   href="tel:+27724162547"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent hover:bg-white/10 text-white font-semibold rounded-xl transition-colors border-2 border-white"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-transparent hover:bg-white/10 text-white font-semibold rounded-2xl transition-colors border-2 border-white"
                 >
                   <Phone className="w-5 h-5" />
                   Call +27 72 416 2547

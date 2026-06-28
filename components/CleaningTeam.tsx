@@ -76,7 +76,7 @@ export default function CleaningTeam() {
               <div className="pt-4">
                 <a
                   href="/contact"
-                  className="inline-block px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-xl transition-colors shadow-lg"
+                  className="inline-block px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-2xl transition-colors shadow-lg"
                 >
                   Find Your Cleaner
                 </a>

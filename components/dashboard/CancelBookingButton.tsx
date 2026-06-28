@@ -60,7 +60,7 @@ export default function CancelBookingButton({ booking, onSuccess }: CancelBookin
     <>
       <button
         onClick={handleCancel}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl transition-colors"
       >
         <X className="w-4 h-4" />
         Cancel Booking
@@ -91,14 +91,14 @@ export default function CancelBookingButton({ booking, onSuccess }: CancelBookin
               <button
                 onClick={handleClose}
                 disabled={isCancelling}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50"
               >
                 Keep Booking
               </button>
               <button
                 onClick={handleConfirmCancel}
                 disabled={isCancelling}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isCancelling ? (
                   <>

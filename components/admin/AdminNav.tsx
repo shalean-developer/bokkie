@@ -192,7 +192,7 @@ export default function AdminNav({ onMobileMenuClose, variant }: AdminNavProps) 
       {variant === "mobile" && (
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? (
@@ -226,7 +226,7 @@ export default function AdminNav({ onMobileMenuClose, variant }: AdminNavProps) 
                           key={item.href}
                           href={item.href}
                           onClick={handleLinkClick}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                          className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all ${
                             active
                               ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                               : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
@@ -262,7 +262,7 @@ export default function AdminNav({ onMobileMenuClose, variant }: AdminNavProps) 
                       <Link
                         key={item.href}
                         href={item.href}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                        className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all ${
                           active
                             ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                             : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"

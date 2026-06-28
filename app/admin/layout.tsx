@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -5,6 +6,12 @@ import { getUserDisplayName, isUserAdmin } from "@/lib/storage/profile-supabase"
 import AdminNav from "@/components/admin/AdminNav";
 import UserMenu from "@/components/dashboard/UserMenu";
 import { Bell } from "lucide-react";
+import { noIndexRobots } from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { default: "Admin" },
+  robots: noIndexRobots,
+};
 
 export default async function AdminLayout({
   children,
@@ -73,7 +80,7 @@ export default async function AdminLayout({
               </div>
               {/* User Menu */}
               <div className="flex items-center gap-2 md:gap-4">
-                <button className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                <button className="p-2 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors">
                   <Bell className="w-5 h-5" />
                 </button>
                 <UserMenu userEmail={user.email || ""} displayName={displayName} />

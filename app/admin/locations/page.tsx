@@ -319,14 +319,14 @@ export default function LocationsPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={fetchLocations}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
             >
               <RefreshCw className="w-4 h-4" />
               <span className="hidden sm:inline">Refresh</span>
             </button>
             <button
               onClick={() => handleOpenModal()}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
             >
               <Plus className="w-4 h-4" />
               <span>Add Location</span>
@@ -422,7 +422,7 @@ export default function LocationsPage() {
             {!searchQuery && statusFilter === "all" && (
               <button
                 onClick={() => handleOpenModal()}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-4 h-4" />
                 Add Your First Location
@@ -626,7 +626,7 @@ export default function LocationsPage() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
                   disabled={formLoading}
                 >
                   Cancel
@@ -634,7 +634,7 @@ export default function LocationsPage() {
                 <button
                   type="submit"
                   disabled={formLoading}
-                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {formLoading ? (
                     <>
@@ -688,7 +688,7 @@ export default function LocationsPage() {
               <div className="flex items-center justify-end gap-3">
                 <button
                   onClick={handleCloseDeleteDialog}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
                   disabled={formLoading}
                 >
                   Cancel

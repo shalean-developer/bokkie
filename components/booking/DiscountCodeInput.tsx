@@ -102,7 +102,7 @@ export default function DiscountCodeInput({
           <button
             type="button"
             onClick={handleRemove}
-            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors flex items-center gap-2"
+            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-2xl transition-colors flex items-center gap-2"
           >
             <X className="w-4 h-4" />
             Remove
@@ -112,7 +112,7 @@ export default function DiscountCodeInput({
             type="button"
             onClick={handleApply}
             disabled={isPending || !code.trim()}
-            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+            className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
           >
             {isPending ? (
               <>

@@ -18,7 +18,7 @@ export default function EditBookingButton({ booking, onSuccess }: EditBookingBut
     return (
       <button
         disabled
-        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-400 text-white font-semibold rounded-lg transition-colors cursor-not-allowed opacity-50"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-400 text-white font-semibold rounded-2xl transition-colors cursor-not-allowed opacity-50"
         title="Cannot edit cancelled or completed bookings"
       >
         <Edit className="w-4 h-4" />
@@ -31,7 +31,7 @@ export default function EditBookingButton({ booking, onSuccess }: EditBookingBut
     <>
       <button
         onClick={() => setIsModalOpen(true)}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
       >
         <Edit className="w-4 h-4" />
         Edit Booking

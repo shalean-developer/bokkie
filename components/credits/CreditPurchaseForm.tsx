@@ -91,7 +91,7 @@ export default function CreditPurchaseForm({
             <button
               key={preset}
               onClick={() => handlePresetClick(preset)}
-              className={`px-4 py-3 rounded-lg border-2 font-medium transition-all ${
+              className={`px-4 py-3 rounded-2xl border-2 font-medium transition-all ${
                 amount === preset && !customAmount
                   ? "border-blue-500 bg-blue-50 text-blue-700"
                   : "border-gray-200 bg-white text-gray-700 hover:border-gray-300"

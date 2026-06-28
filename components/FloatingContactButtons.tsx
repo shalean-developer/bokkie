@@ -35,7 +35,7 @@ export default function FloatingContactButtons() {
       </a>
       <a
         href={`tel:${PHONE_E164}`}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-[#0C53ED] text-white shadow-lg transition-colors hover:bg-[#0A3FC7] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0C53ED] focus-visible:ring-offset-2"
+        className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-primary text-white shadow-lg transition-colors hover:bg-brand-primary-dark focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-primary focus-visible:ring-offset-2"
         aria-label={`Call us at ${PHONE_DISPLAY}`}
         title="Call"
       >

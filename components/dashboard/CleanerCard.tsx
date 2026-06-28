@@ -212,13 +212,13 @@ export default function CleanerCard({ cleaner, isPreviouslyBooked = false }: Cle
                   // Fallback to booking form if modal fails
                   window.location.href = `/booking/service/standard/details?cleaner=${cleaner.cleaner_id}`;
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-2xl transition-colors"
               >
                 Use Booking Form Instead
               </button>
               <button
                 onClick={() => setBookingError(null)}
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
               >
                 Close
               </button>

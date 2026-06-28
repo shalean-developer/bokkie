@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { truncateTitle, generateMetaDescription, generateCanonicalUrl, generateImageAlt } from "@/lib/seo";
+import { truncateTitle, generateMetaDescription, generateCanonicalUrl, generateImageAlt, capeTownGeoMeta, getOgImageMetadata, getOgImageUrl, indexableRobots } from "@/lib/seo";
 import { generateServicesPageStructuredData } from "@/lib/structured-data";
 import ServiceImage from "@/components/services/ServiceImage";
 import FAQItem from "@/components/services/FAQItem";
@@ -42,13 +42,7 @@ export const metadata: Metadata = {
     url: generateCanonicalUrl("/services"),
     siteName: "Bokkie Cleaning Services",
     images: [
-      {
-        url: "https://bokkiecleaning.co.za/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: generateImageAlt("Professional Cleaning Services", "Cape Town"),
-        type: "image/jpeg",
-      },
+      getOgImageMetadata(generateImageAlt("Professional Cleaning Services", "Cape Town")),
     ],
     locale: "en_ZA",
     type: "website",
@@ -58,27 +52,12 @@ export const metadata: Metadata = {
     title: "Professional Cleaning Services in Cape Town | Bokkie Cleaning Services",
     description:
       "Comprehensive cleaning services in Cape Town: residential, commercial, deep cleaning, move-in/out, Airbnb cleaning, and specialized services.",
-    images: ["https://bokkiecleaning.co.za/og-image.jpg"],
+    images: [getOgImageUrl()],
     creator: "@bokkiecleaning",
     site: "@bokkiecleaning",
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  other: {
-    "geo.region": "ZA-WC",
-    "geo.placename": "Cape Town",
-    "geo.position": "-33.9806;18.4653",
-    "ICBM": "-33.9806, 18.4653",
-  },
+  robots: indexableRobots,
+  other: capeTownGeoMeta,
 };
 
 // Base service definitions (prices will be fetched dynamically)

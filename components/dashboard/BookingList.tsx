@@ -232,7 +232,7 @@ export default function BookingList({ bookings }: BookingListProps) {
           {bookings.length === 0 && (
             <a
               href="/booking/service/standard/details"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-2xl hover:bg-blue-700 transition-colors"
             >
               Book Your First Service
             </a>

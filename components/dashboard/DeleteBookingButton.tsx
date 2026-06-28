@@ -55,7 +55,7 @@ export default function DeleteBookingButton({ booking, onSuccess }: DeleteBookin
     <>
       <button
         onClick={handleDelete}
-        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors"
+        className="inline-flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl transition-colors"
       >
         <Trash2 className="w-4 h-4" />
         Delete Booking
@@ -89,14 +89,14 @@ export default function DeleteBookingButton({ booking, onSuccess }: DeleteBookin
               <button
                 onClick={handleClose}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-2xl transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDelete}
                 disabled={isDeleting}
-                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isDeleting ? (
                   <>

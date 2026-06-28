@@ -166,7 +166,7 @@ export default function ProfileForm({ initialProfile, userEmail, cancelLink = "/
           <button
             type="submit"
             disabled={isLoading}
-            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
+            className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-2xl hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
               <>
@@ -182,7 +182,7 @@ export default function ProfileForm({ initialProfile, userEmail, cancelLink = "/
           </button>
           <a
             href={cancelLink}
-            className="px-6 py-3 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition-colors"
+            className="px-6 py-3 text-gray-700 font-medium rounded-2xl hover:bg-gray-100 transition-colors"
           >
             Cancel
           </a>

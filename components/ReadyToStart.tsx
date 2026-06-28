@@ -30,7 +30,7 @@ export default function ReadyToStart() {
               </p>
               <Link
                 href="/auth/signup"
-                className="inline-block px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-xl transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-2xl transition-colors shadow-lg"
               >
                 Sign up
               </Link>
@@ -51,7 +51,7 @@ export default function ReadyToStart() {
               </p>
               <Link
                 href="/contact"
-                className="inline-block px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-xl transition-colors shadow-lg"
+                className="inline-block px-8 py-4 bg-[#007bff] hover:bg-[#0056b3] text-white font-semibold rounded-2xl transition-colors shadow-lg"
               >
                 Become a Cleaner
               </Link>

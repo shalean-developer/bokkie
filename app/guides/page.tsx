@@ -1,6 +1,42 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
+import {
+  generateCanonicalUrl,
+  generateMetaDescription,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { default: "Cleaning Guides & Tips" },
+  description: generateMetaDescription(
+    "Expert cleaning guides and tips from Bokkie Cleaning Services. Learn how to maintain a spotless home, prepare for move-in cleaning, and follow office cleaning best practices in Cape Town."
+  ),
+  alternates: {
+    canonical: generateCanonicalUrl("/guides"),
+  },
+  openGraph: {
+    title: "Cleaning Guides & Tips | Bokkie Cleaning Services",
+    description:
+      "Expert cleaning guides and tips for homes and offices in Cape Town from Bokkie Cleaning Services.",
+    url: generateCanonicalUrl("/guides"),
+    siteName: siteConfig.name,
+    images: [getOgImageMetadata("Bokkie Cleaning Services - Cleaning Guides")],
+    locale: "en_ZA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cleaning Guides & Tips | Bokkie Cleaning Services",
+    description: "Expert cleaning guides and tips for homes and offices in Cape Town.",
+    images: [getOgImageUrl()],
+  },
+  robots: indexableRobots,
+};
 
 const guides = [
   {

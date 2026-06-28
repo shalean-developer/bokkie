@@ -61,8 +61,12 @@ function LoginForm() {
         type: "success",
         message: result.message,
       });
-      // Get the appropriate redirect path based on user role (admin vs regular user)
-      const redirectPath = await getLoginRedirectPath();
+      const redirectParam = searchParams.get("redirect");
+      const safeRedirect =
+        redirectParam?.startsWith("/") && !redirectParam.startsWith("//")
+          ? redirectParam
+          : null;
+      const redirectPath = safeRedirect ?? (await getLoginRedirectPath());
       router.push(redirectPath);
     } else {
       setSubmitStatus({
@@ -213,7 +217,7 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Signing in..." : "Sign In"}
               </button>

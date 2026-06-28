@@ -248,7 +248,7 @@ export default function AdminReviewsPage() {
           </div>
           <button
             onClick={handleCreate}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors"
           >
             <Plus className="w-5 h-5" />
             New Review
@@ -293,7 +293,7 @@ export default function AdminReviewsPage() {
           </select>
           <button
             onClick={handleSearch}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors"
           >
             Search
           </button>
@@ -320,7 +320,7 @@ export default function AdminReviewsPage() {
           {!searchQuery && statusFilter === "all" && (
             <button
               onClick={handleCreate}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-2xl hover:bg-blue-700 transition-colors"
             >
               <Plus className="w-5 h-5" />
               Create First Review
@@ -595,7 +595,7 @@ export default function AdminReviewsPage() {
                   setEditingReview(null);
                   setIsCreating(false);
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
                 disabled={saving}
               >
                 Cancel
@@ -603,7 +603,7 @@ export default function AdminReviewsPage() {
               <button
                 onClick={handleSave}
                 disabled={saving || !formData.customer_name || !formData.review_text}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {saving ? (
                   <>

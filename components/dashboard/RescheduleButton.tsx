@@ -23,7 +23,7 @@ export default function RescheduleButton({ booking }: RescheduleButtonProps) {
   return (
     <button
       onClick={handleReschedule}
-      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
+      className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-2xl transition-colors"
     >
       <Calendar className="w-4 h-4" />
       Reschedule

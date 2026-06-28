@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import { useUser } from "@/lib/hooks/useSupabase";
 import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -45,7 +46,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
   // Check if user is a cleaner
   useEffect(() => {
     async function checkCleanerStatus() {
-      if (!user) {
+      if (!user || !isSupabaseConfigured()) {
         setIsCleaner(false);
         return;
       }
@@ -219,6 +220,12 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
   };
 
   const handleLogout = async () => {
+    if (!isSupabaseConfigured()) {
+      router.push("/");
+      onClose();
+      return;
+    }
+
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/");
@@ -280,7 +287,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
                     key={item.href}
                     href={item.href}
                     onClick={onClose}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all ${
+                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all ${
                       active
                         ? "bg-blue-50 text-blue-600 border-l-4 border-blue-600"
                         : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
@@ -305,7 +312,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
                         window.location.reload();
                         onClose();
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-all"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-all"
                     >
                       <RefreshCw className="w-5 h-5" />
                       Refresh Page
@@ -317,7 +324,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
                         router.push("/cleaner/login");
                         onClose();
                       }}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-all"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-red-600 hover:bg-red-50 transition-all"
                     >
                       <LogOut className="w-5 h-5" />
                       Sign Out
@@ -328,14 +335,14 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
                     <Link
                       href="/dashboard/profile"
                       onClick={onClose}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-all"
+                      className="flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 transition-all"
                     >
                       <Settings className="w-5 h-5" />
                       Settings
                     </Link>
                     <button
                       onClick={handleLogout}
-                      className="w-full flex items-center gap-3 px-4 py-3 rounded-lg font-medium text-red-600 hover:bg-red-50 transition-all"
+                      className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl font-medium text-red-600 hover:bg-red-50 transition-all"
                     >
                       <LogOut className="w-5 h-5" />
                       Sign Out
@@ -347,7 +354,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
               <Link
                 href="/auth/login"
                 onClick={onClose}
-                className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+                className="flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
                 Sign In
               </Link>

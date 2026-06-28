@@ -966,7 +966,7 @@ export default function ServiceDetailsPage() {
             <div className="flex justify-end">
               <button
                 onClick={handleContinue}
-                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Continue
               </button>

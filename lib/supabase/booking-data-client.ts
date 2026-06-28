@@ -4,6 +4,7 @@
  */
 
 import { createClient } from '@/lib/supabase/client';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 
 // Type definition (duplicated from booking-data.ts to avoid importing server-only code)
 export interface ServiceCategoryPricing {
@@ -28,6 +29,15 @@ export const FALLBACK_SERVICE_CATEGORY_PRICING: Record<string, number> = {
  * Use this in Client Components
  */
 export async function getServiceCategoryPricingClient(): Promise<ServiceCategoryPricing[]> {
+  if (!isSupabaseConfigured()) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(
+        '[Supabase] Missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY; using fallback service category pricing'
+      );
+    }
+    return [];
+  }
+
   try {
     const supabase = createClient();
     const { data, error } = await supabase
@@ -54,12 +64,11 @@ export async function getServiceCategoryPricingClient(): Promise<ServiceCategory
     }
 
     return data || [];
-  } catch (error: any) {
-    console.error('Error fetching service category pricing (client):', {
-      message: error?.message || 'Unknown error',
-      stack: error?.stack,
-      error: error,
-    });
+  } catch (error: unknown) {
+    console.error(
+      'Error fetching service category pricing (client):',
+      error instanceof Error ? error.message : error
+    );
     return [];
   }
 }

@@ -320,7 +320,7 @@ export default function AdminNotificationsPage() {
             <button
               onClick={handleMarkAllRead}
               disabled={actionLoading === "mark-all" || notifications.filter((n) => !n.isRead).length === 0}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {actionLoading === "mark-all" ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
@@ -331,7 +331,7 @@ export default function AdminNotificationsPage() {
             </button>
             <button
               onClick={fetchNotifications}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
@@ -473,7 +473,7 @@ export default function AdminNotificationsPage() {
                 <button
                   onClick={handleDeleteAllRead}
                   disabled={actionLoading === "delete-all-read"}
-                  className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+                  className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-2xl hover:bg-red-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
                 >
                   {actionLoading === "delete-all-read" ? (
                     <RefreshCw className="w-3 h-3 animate-spin" />

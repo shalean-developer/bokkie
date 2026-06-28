@@ -1,6 +1,14 @@
 import type { Metadata } from "next";
 import { getServiceLocations } from "@/lib/supabase/booking-data";
 import ServiceAreasClient from "@/components/ServiceAreasClient";
+import {
+  capeTownGeoMeta,
+  generateCanonicalUrl,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { default: "Service Areas in Cape Town" },
@@ -19,15 +27,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Service Areas in Cape Town | Bokkie Cleaning Services",
     description: "Find professional cleaning services in your area. We serve all major suburbs across Cape Town.",
-    url: "https://bokkiecleaning.co.za/service-areas",
+    url: generateCanonicalUrl("/service-areas"),
     siteName: "Bokkie Cleaning Services",
     images: [
-      {
-        url: "https://bokkiecleaning.co.za/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Bokkie Cleaning Services - Service Areas in Cape Town",
-      },
+      getOgImageMetadata("Bokkie Cleaning Services - Service Areas in Cape Town"),
     ],
     locale: "en_ZA",
     type: "website",
@@ -36,28 +39,13 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Service Areas in Cape Town | Bokkie Cleaning Services",
     description: "Find professional cleaning services in your area. We serve all major suburbs across Cape Town.",
-    images: ["https://bokkiecleaning.co.za/og-image.jpg"],
+    images: [getOgImageUrl()],
   },
   alternates: {
-    canonical: "https://bokkiecleaning.co.za/service-areas",
+    canonical: generateCanonicalUrl("/service-areas"),
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  other: {
-    "geo.region": "ZA-WC",
-    "geo.placename": "Cape Town",
-    "geo.position": "-33.9806;18.4653",
-    "ICBM": "-33.9806, 18.4653",
-  },
+  robots: indexableRobots,
+  other: capeTownGeoMeta,
 };
 
 export default async function ServiceAreasPage() {
@@ -101,7 +89,7 @@ export default async function ServiceAreasPage() {
   const totalSuburbs = allSuburbs.length;
 
   // Generate structured data for SEO
-  const baseUrl = "https://bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",

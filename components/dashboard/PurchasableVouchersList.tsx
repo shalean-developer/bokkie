@@ -265,7 +265,7 @@ export default function PurchasableVouchersList({ vouchers }: PurchasableVoucher
               <button
                 onClick={() => handlePurchase(voucher)}
                 disabled={isPurchasing}
-                className={`w-full px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 ${
+                className={`w-full px-4 py-2 rounded-2xl font-medium transition-colors flex items-center justify-center gap-2 ${
                   isPurchasing
                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                     : "bg-blue-600 text-white hover:bg-blue-700"

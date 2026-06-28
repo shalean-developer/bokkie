@@ -146,7 +146,7 @@ export default function AdminPaymentsPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Payments</h1>
           <button
             onClick={fetchPayments}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
           >
             <RefreshCw className="w-4 h-4" />
             <span>Refresh</span>

@@ -71,7 +71,7 @@ export default function ShareProfileClient({ cleaner, profileLink }: ShareProfil
             </div>
             <button
               onClick={copyToClipboard}
-              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 flex-shrink-0"
+              className="px-6 py-3 bg-blue-600 text-white font-medium rounded-2xl hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 flex-shrink-0"
             >
               {copied ? (
                 <>

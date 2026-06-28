@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { truncateTitle, generateMetaDescription, generateCanonicalUrl, generateImageAlt } from "@/lib/seo";
+import { truncateTitle, generateMetaDescription, generateCanonicalUrl, generateImageAlt, capeTownGeoMeta, getOgImageMetadata, getOgImageUrl, indexableRobots, siteConfig } from "@/lib/seo";
 import ServiceImage from "@/components/services/ServiceImage";
 import FAQItem from "@/components/services/FAQItem";
 import Footer from "@/components/Footer";
@@ -282,15 +282,7 @@ export async function generateMetadata({
       description: description,
       url: generateCanonicalUrl(`/services/${slug}`),
       siteName: "Bokkie Cleaning Services",
-      images: [
-        {
-          url: "https://bokkiecleaning.co.za/og-image.jpg",
-          width: 1200,
-          height: 630,
-          alt: generateImageAlt(service.shortName, "Cape Town"),
-          type: "image/jpeg",
-        },
-      ],
+      images: [getOgImageMetadata(generateImageAlt(service.shortName, "Cape Town"))],
       locale: "en_ZA",
       type: "website",
     },
@@ -298,27 +290,12 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: `${service.shortName} in Cape Town | Bokkie Cleaning Services`,
       description: description,
-      images: ["https://bokkiecleaning.co.za/og-image.jpg"],
+      images: [getOgImageUrl()],
       creator: "@bokkiecleaning",
       site: "@bokkiecleaning",
     },
-    robots: {
-      index: true,
-      follow: true,
-      googleBot: {
-        index: true,
-        follow: true,
-        "max-video-preview": -1,
-        "max-image-preview": "large",
-        "max-snippet": -1,
-      },
-    },
-    other: {
-      "geo.region": "ZA-WC",
-      "geo.placename": "Cape Town",
-      "geo.position": "-33.9806;18.4653",
-      "ICBM": "-33.9806, 18.4653",
-    },
+    robots: indexableRobots,
+    other: capeTownGeoMeta,
   };
   } catch (error) {
     console.error("Error generating metadata for service page:", error);
@@ -331,7 +308,7 @@ export async function generateMetadata({
 
 // Generate structured data for service page
 function generateServiceStructuredData(slug: string, service: typeof serviceData[string], price: number) {
-  const baseUrl = "https://bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
   const serviceUrl = `${baseUrl}/services/${slug}`;
 
   return {

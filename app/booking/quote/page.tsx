@@ -337,7 +337,7 @@ export default function QuotePage() {
             <div className="flex items-center gap-4">
               <Link
                 href="#"
-                className="hidden md:block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors text-sm"
+                className="hidden md:block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors text-sm"
               >
                 Become a Cleaner
               </Link>
@@ -779,7 +779,7 @@ export default function QuotePage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors mb-3 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {isSubmitting ? "Submitting..." : "Confirm Quote & Continue"}
                     {!isSubmitting && <span>→</span>}
@@ -788,7 +788,7 @@ export default function QuotePage() {
                   <button
                     type="button"
                     onClick={handleSkipToBooking}
-                    className="block w-full px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-colors border border-gray-300 text-center"
+                    className="block w-full px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-2xl transition-colors border border-gray-300 text-center"
                   >
                     Skip to Full Booking
                   </button>

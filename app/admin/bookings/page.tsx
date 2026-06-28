@@ -284,14 +284,14 @@ export default function AdminBookingsPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/booking/service/standard/details"
-              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
+              className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 active:bg-blue-800 transition-colors touch-manipulation"
             >
               <Plus className="w-4 h-4" />
               <span>Create New Booking</span>
             </Link>
             <button
               onClick={fetchBookings}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>

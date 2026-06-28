@@ -1,5 +1,40 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import {
+  generateCanonicalUrl,
+  generateMetaDescription,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
+
+export const metadata: Metadata = {
+  title: { default: "Terms & Conditions" },
+  description: generateMetaDescription(
+    "Read the terms and conditions for Bokkie Cleaning Services. Booking policies, payment terms, service guarantees, and cancellation rules for professional cleaning in Cape Town."
+  ),
+  alternates: {
+    canonical: generateCanonicalUrl("/terms"),
+  },
+  openGraph: {
+    title: "Terms & Conditions | Bokkie Cleaning Services",
+    description: "Terms and conditions for booking professional cleaning services with Bokkie Cleaning Services in Cape Town.",
+    url: generateCanonicalUrl("/terms"),
+    siteName: siteConfig.name,
+    images: [getOgImageMetadata("Bokkie Cleaning Services - Terms and Conditions")],
+    locale: "en_ZA",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Terms & Conditions | Bokkie Cleaning Services",
+    description: "Terms and conditions for Bokkie Cleaning Services.",
+    images: [getOgImageUrl()],
+  },
+  robots: indexableRobots,
+};
 
 export default function TermsPage() {
   return (

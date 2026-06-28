@@ -241,13 +241,13 @@ export default function ServiceAreasClient({
             <div className="flex gap-2">
               <button
                 onClick={expandAll}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
               >
                 Expand All
               </button>
               <button
                 onClick={collapseAll}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
               >
                 Collapse All
               </button>
@@ -339,7 +339,7 @@ export default function ServiceAreasClient({
               </h2>
               <button
                 onClick={() => setShowAllLocations(!showAllLocations)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-2xl hover:bg-gray-200 transition-colors"
               >
                 {showAllLocations ? "Hide" : "Show"} All
               </button>
@@ -381,7 +381,7 @@ export default function ServiceAreasClient({
             </p>
             <Link
               href="/booking/quote"
-              className="inline-block px-8 py-4 bg-white text-[#007bff] font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
+              className="inline-block px-8 py-4 bg-white text-[#007bff] font-semibold rounded-2xl hover:bg-gray-100 transition-colors shadow-lg"
             >
               Request a Quote
             </Link>
@@ -404,7 +404,7 @@ export default function ServiceAreasClient({
               />
               <button
                 type="submit"
-                className="px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-lg transition-colors"
+                className="px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-2xl transition-colors"
               >
                 Subscribe
               </button>

@@ -448,7 +448,7 @@ function ConfirmationPageContent() {
             </p>
             <Link
               href="/"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors"
             >
               <Home className="w-5 h-5" />
               Return to Home
@@ -720,21 +720,21 @@ function ConfirmationPageContent() {
                 }
               }}
               disabled={authLoading}
-              className="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold rounded-lg transition-colors text-center flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white font-semibold rounded-2xl transition-colors text-center flex items-center justify-center gap-2"
             >
               <LayoutDashboard className="w-5 h-5" />
               {authLoading ? "Loading..." : isAuthenticated ? "View Dashboard" : "Sign In"}
             </button>
             <Link
               href="/"
-              className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-colors border border-gray-300 text-center flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-2xl transition-colors border border-gray-300 text-center flex items-center justify-center gap-2"
             >
               Return to Home
               <ArrowRight className="w-5 h-5" />
             </Link>
             <Link
               href={`/booking/service/${booking.service || "standard"}/details`}
-              className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-colors border border-gray-300 text-center"
+              className="flex-1 px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-2xl transition-colors border border-gray-300 text-center"
             >
               Book Another Service
             </Link>

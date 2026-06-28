@@ -1,80 +1,140 @@
-import { CheckCircle } from "lucide-react";
-import Avatar from "./Avatar";
+"use client";
 
-const featuredCleaners = [
+import { Sparkles, Linkedin, Instagram, Facebook, Mail } from "lucide-react";
+
+const teamMembers = [
   {
     id: 1,
-    name: "Lucia",
-    positiveReviews: 100,
-    completedTasks: "98",
-    tagline: "Expert cleaning professional",
+    name: "Lucia Pazvakavambwa",
+    role: "Residential Care Lead",
+    initial: "LP",
+    accent: "bg-brand-primary",
+    socials: [
+      { icon: Linkedin, href: "#", label: "LinkedIn" },
+      { icon: Instagram, href: "#", label: "Instagram" },
+      { icon: Facebook, href: "#", label: "Facebook" },
+      { icon: Mail, href: "#", label: "Email" },
+    ],
   },
   {
     id: 2,
-    name: "Nyasha",
-    positiveReviews: 100,
-    completedTasks: "87",
-    tagline: "Expert cleaning professional",
+    name: "Nyasha Mudani",
+    role: "Residential Care Lead",
+    initial: "NM",
+    accent: "bg-brand-primary-light",
+    socials: [
+      { icon: Linkedin, href: "#", label: "LinkedIn" },
+      { icon: Instagram, href: "#", label: "Instagram" },
+      { icon: Facebook, href: "#", label: "Facebook" },
+      { icon: Mail, href: "#", label: "Email" },
+    ],
   },
   {
     id: 3,
-    name: "Normatter",
-    positiveReviews: 100,
-    completedTasks: "76",
-    tagline: "Expert cleaning professional",
+    name: "Normatter Mazhinji",
+    role: "Commercial Cleaning Manager",
+    initial: "NM",
+    accent: "bg-brand-primary-dark",
+    socials: [
+      { icon: Linkedin, href: "#", label: "LinkedIn" },
+      { icon: Instagram, href: "#", label: "Instagram" },
+      { icon: Facebook, href: "#", label: "Facebook" },
+      { icon: Mail, href: "#", label: "Email" },
+    ],
+  },
+  {
+    id: 4,
+    name: "Beaulla Chemugarira",
+    role: "Residential Care Lead",
+    initial: "BC",
+    accent: "bg-brand-accent",
+    socials: [
+      { icon: Linkedin, href: "#", label: "LinkedIn" },
+      { icon: Instagram, href: "#", label: "Instagram" },
+      { icon: Facebook, href: "#", label: "Facebook" },
+      { icon: Mail, href: "#", label: "Email" },
+    ],
   },
 ];
 
+function TeamMemberCard({
+  name,
+  role,
+  initial,
+  accent,
+  socials,
+}: (typeof teamMembers)[number]) {
+  return (
+    <div className="group text-center">
+      <div className="relative aspect-[3/4] rounded-2xl overflow-hidden mb-5">
+        <div className={`absolute inset-0 ${accent} flex items-center justify-center`}>
+          <span className="text-5xl sm:text-6xl font-bold text-white/90">{initial}</span>
+        </div>
+
+        {/* Hover overlay card */}
+        <div className="absolute inset-x-4 bottom-4 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out">
+          <div className="bg-white rounded-2xl px-5 py-4 shadow-lg">
+            <div className="flex items-center justify-center gap-2 mb-3">
+              {socials.map((social, index) => {
+                const Icon = social.icon;
+                return (
+                  <a
+                    key={social.label}
+                    href={social.href}
+                    aria-label={social.label}
+                    className={`flex items-center justify-center w-9 h-9 rounded-full border transition-colors ${
+                      index === 0
+                        ? "bg-brand-primary border-brand-primary text-white"
+                        : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" strokeWidth={1.75} />
+                  </a>
+                );
+              })}
+            </div>
+            <p className="font-bold text-gray-900 text-sm sm:text-base">{name}</p>
+            <p className="text-gray-500 text-xs sm:text-sm mt-0.5">{role}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Default name & role below photo */}
+      <div className="group-hover:opacity-0 transition-opacity duration-200">
+        <p className="font-bold text-gray-900 text-base sm:text-lg">{name}</p>
+        <p className="text-gray-500 text-sm mt-1">{role}</p>
+      </div>
+    </div>
+  );
+}
+
 export default function FeaturedCleaners() {
   return (
-    <section className="py-20 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* H2 Heading */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Featured Cleaners
+    <section id="team" className="py-16 sm:py-20 lg:py-24 bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        {/* Header */}
+        <div className="text-center max-w-3xl mx-auto mb-12 lg:mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 bg-white/60 text-sm text-gray-600 mb-6">
+            <Sparkles className="w-3.5 h-3.5 text-brand-primary" />
+            Our Team
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight mb-5">
+            Meet the People Who Take Care{" "}
+            <span className="font-serif italic font-normal">of Your Space</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Meet our top-rated professional cleaners ready to make your space spotless
+
+          <p className="text-gray-500 text-base sm:text-lg leading-relaxed">
+            Behind every reliable service is a team that truly cares. Our professionals
+            aren&apos;t just &apos;cleaners&apos;. They&apos;re trained specialists who follow clear
+            standards, respect your space, and take pride in doing things right.
           </p>
         </div>
 
-        {/* Cleaner Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 max-w-7xl mx-auto">
-          {featuredCleaners.map((cleaner) => (
-            <div
-              key={cleaner.id}
-              className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-200 group"
-            >
-              {/* Profile Picture */}
-              <div className="relative h-64 bg-gradient-to-br from-[#e6f0ff] to-[#cce0ff] flex items-center justify-center p-8">
-                <div className="relative w-48 h-48 rounded-full overflow-visible shadow-lg">
-                  <Avatar name={cleaner.name} size={192} />
-                  {/* Verified Badge */}
-                  <div className="absolute bottom-0 right-0 bg-[#007bff] rounded-full p-1.5 shadow-md border-2 border-white">
-                    <CheckCircle className="w-5 h-5 text-white" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Cleaner Info */}
-              <div className="p-6 text-center">
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {cleaner.name}
-                </h3>
-                <div className="flex items-center justify-center gap-1 mb-2">
-                  <span className="text-sm font-semibold text-[#28a745]">
-                    {cleaner.positiveReviews}% positive reviews
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mb-3">
-                  {cleaner.completedTasks} Cleaning Jobs Completed
-                </p>
-                <p className="text-sm text-gray-500 italic">
-                  "{cleaner.tagline}"
-                </p>
-              </div>
-            </div>
+        {/* Team grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {teamMembers.map((member) => (
+            <TeamMemberCard key={member.id} {...member} />
           ))}
         </div>
       </div>

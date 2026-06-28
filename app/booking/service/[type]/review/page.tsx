@@ -840,14 +840,14 @@ export default function ReviewPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={handleSaveAll}
-                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Save All Changes
               </button>
               <button
                 onClick={handleCancelEdit}
-                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition-colors flex items-center gap-2"
+                className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-2xl transition-colors flex items-center gap-2"
               >
                 <X className="w-4 h-4" />
                 Cancel
@@ -1712,7 +1712,7 @@ export default function ReviewPage() {
               <button
                 onClick={handleBack}
                 disabled={isProcessing}
-                className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-lg transition-colors border border-gray-300 disabled:opacity-50"
+                className="px-6 py-3 bg-white hover:bg-gray-50 text-gray-900 font-semibold rounded-2xl transition-colors border border-gray-300 disabled:opacity-50"
               >
                 Back
               </button>
@@ -1723,7 +1723,7 @@ export default function ReviewPage() {
                   editingSection !== null ||
                   (paymentMethod === "credits" && (!user || creditBalance < monthlyTotal))
                 }
-                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {isProcessing ? (
                   <>

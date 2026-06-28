@@ -1,7 +1,8 @@
 import { capeTownAreas, getLocationSlug } from "@/lib/constants/areas";
+import { siteConfig } from "@/lib/seo";
 
 export function generateStructuredData() {
-  const baseUrl = "https://www.bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
 
   const organization = {
     "@context": "https://schema.org",
@@ -23,7 +24,9 @@ export function generateStructuredData() {
       addressCountry: "ZA",
     },
     sameAs: [
-      // Add social media links when available
+      siteConfig.links.facebook,
+      siteConfig.links.instagram,
+      siteConfig.links.twitter,
     ],
     contactPoint: {
       "@type": "ContactPoint",
@@ -262,12 +265,12 @@ export function generateStructuredData() {
       "@id": `${baseUrl}#organization`,
     },
     potentialAction: {
-      "@type": "SearchAction",
+      "@type": "ReserveAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${baseUrl}/search?q={search_term_string}`,
+        urlTemplate: `${baseUrl}/booking/quote`,
       },
-      "query-input": "required name=search_term_string",
+      name: "Get a cleaning quote",
     },
   };
 
@@ -349,7 +352,7 @@ export function generateStructuredData() {
  * Generate structured data for the How It Works page
  */
 export function generateHowItWorksStructuredData() {
-  const baseUrl = "https://www.bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
 
   const howTo = {
     "@context": "https://schema.org",
@@ -493,7 +496,7 @@ export function generateHowItWorksStructuredData() {
  * Generate structured data for the Service Areas page
  */
 export function generateServiceAreasStructuredData() {
-  const baseUrl = "https://www.bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
 
   const serviceAreasBreadcrumb = {
     "@context": "https://schema.org",
@@ -604,7 +607,7 @@ export function generateServiceAreasStructuredData() {
  * Generate structured data for individual location pages
  */
 export function generateLocationStructuredData(locationName: string, slug: string) {
-  const baseUrl = "https://www.bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
   const locationUrl = `${baseUrl}/areas/${slug}`;
 
   const locationBreadcrumb = {
@@ -721,7 +724,7 @@ export function generateLocationStructuredData(locationName: string, slug: strin
  * Generate structured data for the Services page
  */
 export function generateServicesPageStructuredData() {
-  const baseUrl = "https://www.bokkiecleaning.co.za";
+  const baseUrl = siteConfig.url;
   const servicesUrl = `${baseUrl}/services`;
 
   const servicesBreadcrumb = {

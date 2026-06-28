@@ -1,8 +1,13 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { notFound } from "next/navigation";
-import type { Metadata } from "next";
+import {
+  generateCanonicalUrl,
+  indexableRobots,
+  toAbsoluteUrl,
+} from "@/lib/seo";
 
 interface GuideContent {
   title: string;
@@ -1229,20 +1234,32 @@ export async function generateMetadata({
     return {};
   }
 
+  const pageUrl = generateCanonicalUrl(`/guides/${id}`);
+  const ogImage = guide.featuredImage
+    ? toAbsoluteUrl(guide.featuredImage)
+    : undefined;
+
   return {
     title: { default: guide.title },
     description: guide.description,
+    alternates: {
+      canonical: pageUrl,
+    },
     openGraph: {
       title: guide.title,
       description: guide.description,
+      url: pageUrl,
       type: "article",
-      images: guide.featuredImage ? [{ url: guide.featuredImage }] : undefined,
+      locale: "en_ZA",
+      images: ogImage ? [{ url: ogImage, alt: guide.title }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       title: guide.title,
       description: guide.description,
+      images: ogImage ? [ogImage] : undefined,
     },
+    robots: indexableRobots,
   };
 }
 
@@ -1367,7 +1384,7 @@ export default async function GuidePage({
             </p>
             <Link
               href="/contact"
-              className="inline-block px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors"
+              className="inline-block px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors"
             >
               Request a Quote
             </Link>

@@ -2,10 +2,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, Phone, Mail, MapPin, Clock, MessageSquare, Send } from "lucide-react";
 import Footer from "@/components/Footer";
+import {
+  capeTownGeoMeta,
+  generateCanonicalUrl,
+  generateMetaDescription,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { default: "Contact Us | Professional Cleaning Services Cape Town" },
-  description: "Get in touch with Bokkie Cleaning Services in Cape Town. Contact us via phone, email, or visit our office in Lansdowne. We're available 24/7 to help with your cleaning needs. Professional cleaners serving Sea Point, Camps Bay, Claremont & more.",
+  description: generateMetaDescription(
+    "Get in touch with Bokkie Cleaning Services in Cape Town. Contact us via phone, email, or visit our office in Lansdowne. We're available 24/7 to help with your cleaning needs. Professional cleaners serving Sea Point, Camps Bay, Claremont & more."
+  ),
   keywords: [
     "contact cleaning services Cape Town",
     "cleaning services contact Cape Town",
@@ -21,15 +32,10 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Contact Us | Bokkie Cleaning Services Cape Town",
     description: "Get in touch with Bokkie Cleaning Services. Available 24/7. Professional cleaning services in Cape Town. Call +27 72 416 2547 or email info@bokkiecleaning.co.za",
-    url: "https://www.bokkiecleaning.co.za/contact",
-    siteName: "Bokkie Cleaning Services",
+    url: generateCanonicalUrl("/contact"),
+    siteName: siteConfig.name,
     images: [
-      {
-        url: "https://www.bokkiecleaning.co.za/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Contact Bokkie Cleaning Services - Professional Cleaning Services in Cape Town",
-      },
+      getOgImageMetadata("Contact Bokkie Cleaning Services - Professional Cleaning Services in Cape Town"),
     ],
     locale: "en_ZA",
     type: "website",
@@ -38,35 +44,19 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Contact Us | Bokkie Cleaning Services Cape Town",
     description: "Get in touch with Bokkie Cleaning Services. Available 24/7. Call +27 72 416 2547 or email info@bokkiecleaning.co.za",
-    images: ["https://www.bokkiecleaning.co.za/og-image.jpg"],
+    images: [getOgImageUrl()],
     creator: "@bokkiecleaning",
     site: "@bokkiecleaning",
   },
   alternates: {
-    canonical: "https://www.bokkiecleaning.co.za/contact",
+    canonical: generateCanonicalUrl("/contact"),
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  other: {
-    "geo.region": "ZA-WC",
-    "geo.placename": "Cape Town",
-    "geo.position": "-33.9806;18.4653",
-    "ICBM": "-33.9806, 18.4653",
-  },
+  robots: indexableRobots,
+  other: capeTownGeoMeta,
 };
 
 export default function ContactPage() {
-  const baseUrl = "https://www.bokkiecleaning.co.za";
-  const contactUrl = `${baseUrl}/contact`;
+  const contactUrl = generateCanonicalUrl("/contact");
 
   // ContactPage structured data
   const contactPageStructuredData = {
@@ -78,14 +68,14 @@ export default function ContactPage() {
     description: "Contact Bokkie Cleaning Services for professional cleaning services in Cape Town. Available 24/7. Phone: +27 72 416 2547, Email: info@bokkiecleaning.co.za",
     inLanguage: "en-ZA",
     isPartOf: {
-      "@id": `${baseUrl}#website`,
+      "@id": `${siteConfig.url}#website`,
     },
     about: {
-      "@id": `${baseUrl}#organization`,
+      "@id": `${siteConfig.url}#organization`,
     },
     mainEntity: {
       "@type": "Organization",
-      "@id": `${baseUrl}#organization`,
+      "@id": `${siteConfig.url}#organization`,
       name: "Bokkie Cleaning Services",
       telephone: "+27724162547",
       email: "info@bokkiecleaning.co.za",
@@ -139,7 +129,7 @@ export default function ContactPage() {
         "@type": "ListItem",
         position: 1,
         name: "Home",
-        item: baseUrl,
+        item: siteConfig.url,
       },
       {
         "@type": "ListItem",
@@ -160,10 +150,10 @@ export default function ContactPage() {
     description: "Contact Bokkie Cleaning Services for professional cleaning services in Cape Town. Available 24/7.",
     inLanguage: "en-ZA",
     isPartOf: {
-      "@id": `${baseUrl}#website`,
+      "@id": `${siteConfig.url}#website`,
     },
     about: {
-      "@id": `${baseUrl}#organization`,
+      "@id": `${siteConfig.url}#organization`,
     },
     breadcrumb: {
       "@id": `${contactUrl}#breadcrumb`,
@@ -397,14 +387,14 @@ export default function ContactPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   href="/booking/quote"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0C53ED] hover:bg-[#0A3FC7] text-white font-semibold rounded-lg transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#0C53ED] hover:bg-[#0A3FC7] text-white font-semibold rounded-2xl transition-colors"
                 >
                   <Send className="w-5 h-5" />
                   Get Free Quote
                 </Link>
                 <a
                   href="tel:+27724162547"
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-lg transition-colors"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 font-semibold rounded-2xl transition-colors"
                 >
                   <Phone className="w-5 h-5" />
                   Call Now

@@ -407,7 +407,7 @@ export default function CheckServicesPage() {
           </div>
           <button
             onClick={fetchAllData}
-            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh

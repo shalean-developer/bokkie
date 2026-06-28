@@ -164,7 +164,7 @@ function SignupConfirmationForm() {
                 <button
                   onClick={handleResendEmail}
                   disabled={isResending}
-                  className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="w-full px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isResending ? (
                     <>
@@ -181,13 +181,13 @@ function SignupConfirmationForm() {
               )}
               <Link
                 href="/auth/login"
-                className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-center"
+                className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-2xl transition-colors text-center"
               >
                 Go to Login
               </Link>
               <Link
                 href="/"
-                className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors text-center"
+                className="block w-full px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-2xl transition-colors text-center"
               >
                 Back to Home
               </Link>

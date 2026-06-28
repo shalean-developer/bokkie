@@ -10,6 +10,61 @@ export interface DiscountCodeValidationResult {
   message: string;
 }
 
+export interface PublicDiscountCode {
+  code: string;
+  description: string | null;
+  discountType: "percentage" | "fixed";
+  discountValue: number;
+  minimumOrderAmount: number;
+  maximumDiscountAmount: number | null;
+  validUntil: string | null;
+}
+
+/**
+ * Fetch active discount codes for public display
+ */
+export async function getPublicDiscountCodes(): Promise<PublicDiscountCode[]> {
+  try {
+    const supabase = await createClient();
+    const now = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from("discount_codes")
+      .select(
+        "code, description, discount_type, discount_value, minimum_order_amount, maximum_discount_amount, valid_until, valid_from, usage_limit, usage_count"
+      )
+      .eq("is_active", true)
+      .lte("valid_from", now)
+      .or(`valid_until.is.null,valid_until.gte.${now}`)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching public discount codes:", error);
+      return [];
+    }
+
+    return (data || [])
+      .filter(
+        (code) =>
+          !code.usage_limit || (code.usage_count ?? 0) < code.usage_limit
+      )
+      .map((code) => ({
+        code: code.code,
+        description: code.description,
+        discountType: code.discount_type as "percentage" | "fixed",
+        discountValue: Number(code.discount_value),
+        minimumOrderAmount: Number(code.minimum_order_amount ?? 0),
+        maximumDiscountAmount: code.maximum_discount_amount
+          ? Number(code.maximum_discount_amount)
+          : null,
+        validUntil: code.valid_until,
+      }));
+  } catch (error) {
+    console.error("Error fetching public discount codes:", error);
+    return [];
+  }
+}
+
 /**
  * Validate a discount code
  */

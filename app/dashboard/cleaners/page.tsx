@@ -98,7 +98,7 @@ export default async function CleanersPage({ searchParams }: CleanersPageProps) 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center">
                   <a
                     href="/dashboard/cleaners?view=all"
-                    className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                    className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 text-white font-medium rounded-2xl hover:bg-blue-700 transition-colors"
                   >
                     <Users className="w-4 h-4 mr-2" />
                     View All Cleaners

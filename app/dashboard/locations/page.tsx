@@ -104,7 +104,7 @@ export default async function LocationsPage() {
               </p>
               <Link
                 href="/booking/service/standard/details"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-2xl transition-colors"
               >
                 <Calendar className="w-5 h-5" />
                 Book a Service

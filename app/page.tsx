@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
+import { getServiceCategoryPricing } from "@/lib/supabase/booking-data";
 import ServiceAreas from "@/components/ServiceAreas";
 import HowItWorks from "@/components/HowItWorks";
 import Testimonials from "@/components/Testimonials";
-import CleaningTeam from "@/components/CleaningTeam";
 import FeaturedCleaners from "@/components/FeaturedCleaners";
 import CleaningGuides from "@/components/CleaningGuides";
-import ReadyToStart from "@/components/ReadyToStart";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import FloatingContactButtons from "@/components/FloatingContactButtons";
+import {
+  capeTownGeoMeta,
+  generateCanonicalUrl,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: { default: "Professional Cleaning Services Cape Town" },
@@ -37,15 +44,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Professional Cleaning Services Cape Town | Bokkie Cleaning Services",
     description: "Book trusted professional cleaners in Cape Town. Same-day booking available for residential, commercial, deep cleaning, move-in/out, Airbnb, and office cleaning. Rated 5 stars with 150+ reviews.",
-    url: "https://bokkiecleaning.co.za",
-    siteName: "Bokkie Cleaning Services",
+    url: generateCanonicalUrl("/"),
+    siteName: siteConfig.name,
     images: [
-      {
-        url: "https://bokkiecleaning.co.za/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Bokkie Cleaning Services - Professional Cleaning Services in Cape Town",
-      },
+      getOgImageMetadata(
+        "Bokkie Cleaning Services - Professional Cleaning Services in Cape Town"
+      ),
     ],
     locale: "en_ZA",
     type: "website",
@@ -54,54 +58,46 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Professional Cleaning Services Cape Town | Bokkie Cleaning Services",
     description: "Book trusted professional cleaners in Cape Town. Same-day booking available. Rated 5 stars with 150+ reviews.",
-    images: ["https://bokkiecleaning.co.za/og-image.jpg"],
+    images: [getOgImageUrl()],
     creator: "@bokkiecleaning",
     site: "@bokkiecleaning",
   },
   alternates: {
-    canonical: "https://bokkiecleaning.co.za",
+    canonical: generateCanonicalUrl("/"),
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
-  other: {
-    "geo.region": "ZA-WC",
-    "geo.placename": "Cape Town",
-    "geo.position": "-33.9806;18.4653",
-    "ICBM": "-33.9806, 18.4653",
-  },
+  robots: indexableRobots,
+  other: capeTownGeoMeta,
 };
 
-export default function Home() {
+export default async function Home() {
+  const categoryPricing = await getServiceCategoryPricing();
+  const pricingByCategoryId = Object.fromEntries(
+    categoryPricing.map((pricing) => [pricing.category_id, pricing.display_price])
+  );
+
+  const homepageUrl = generateCanonicalUrl("/");
+
   // WebPage structured data for homepage SEO
   const webpageStructuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    "@id": "https://bokkiecleaning.co.za#webpage",
-    url: "https://bokkiecleaning.co.za",
+    "@id": `${homepageUrl}#webpage`,
+    url: homepageUrl,
     name: "Professional Cleaning Services Cape Town | Bokkie Cleaning Services",
     description: "Book trusted professional cleaners in Cape Town. Same-day booking available for residential, commercial, deep cleaning, move-in/out, Airbnb, and office cleaning.",
     inLanguage: "en-ZA",
     isPartOf: {
-      "@id": "https://bokkiecleaning.co.za#website",
+      "@id": `${siteConfig.url}#website`,
     },
     about: {
-      "@id": "https://bokkiecleaning.co.za#organization",
+      "@id": `${siteConfig.url}#organization`,
     },
     primaryImageOfPage: {
       "@type": "ImageObject",
-      url: "https://bokkiecleaning.co.za/og-image.jpg",
+      url: getOgImageUrl(),
     },
     breadcrumb: {
-      "@id": "https://bokkiecleaning.co.za#breadcrumb",
+      "@id": `${siteConfig.url}#breadcrumb`,
     },
   };
 
@@ -113,14 +109,12 @@ export default function Home() {
       />
       <main className="min-h-screen">
         <Hero />
-        <Services />
+        <Services pricingByCategoryId={pricingByCategoryId} />
         <HowItWorks />
         <FeaturedCleaners />
         <ServiceAreas />
-        <CleaningTeam />
-        <CleaningGuides />
         <Testimonials />
-        <ReadyToStart />
+        <CleaningGuides />
         <Contact />
         <Footer />
         <FloatingContactButtons />

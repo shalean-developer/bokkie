@@ -167,7 +167,7 @@ export default function CleanerNav({ onMobileMenuClose, variant }: CleanerNavPro
       {variant === "mobile" && (
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+          className="p-2 rounded-2xl text-gray-600 hover:bg-gray-100 transition-colors"
           aria-label="Toggle menu"
         >
           {isMobileMenuOpen ? (
@@ -239,7 +239,7 @@ export default function CleanerNav({ onMobileMenuClose, variant }: CleanerNavPro
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-gray-600 hover:text-red-600 hover:bg-red-50 mt-4 border-t border-gray-200 pt-4"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-gray-600 hover:text-red-600 hover:bg-red-50 mt-4 border-t border-gray-200 pt-4"
               >
                 <LogOut className="w-5 h-5" />
                 Logout
@@ -302,7 +302,7 @@ export default function CleanerNav({ onMobileMenuClose, variant }: CleanerNavPro
             <div className="flex flex-col space-y-1 px-4">
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 px-4 py-3 rounded-lg font-medium transition-all text-gray-600 hover:text-red-600 hover:bg-red-50"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl font-medium transition-all text-gray-600 hover:text-red-600 hover:bg-red-50"
               >
                 <LogOut className="w-5 h-5" />
                 Logout

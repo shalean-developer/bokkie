@@ -157,7 +157,7 @@ export default function CustomersPage() {
           <div className="flex items-center gap-3">
             <button
               onClick={fetchCustomers}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 active:bg-gray-100 transition-colors touch-manipulation"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Refresh</span>
@@ -309,7 +309,7 @@ export default function CustomersPage() {
                         </button>
                         <button
                           onClick={() => setDeleteConfirm(customer)}
-                          className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors flex items-center gap-1"
+                          className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 rounded-2xl hover:bg-red-100 transition-colors flex items-center gap-1"
                           title="Delete customer"
                         >
                           <Trash2 className="w-3 h-3" />
@@ -318,7 +318,7 @@ export default function CustomersPage() {
                         {customer.email && (
                           <a
                             href={`mailto:${customer.email}`}
-                            className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-2xl hover:bg-blue-100 transition-colors flex items-center gap-1"
                             title="Send email"
                           >
                             <Mail className="w-3 h-3" />
@@ -417,7 +417,7 @@ export default function CustomersPage() {
             <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
               <button
                 onClick={() => setEditingCustomer(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
                 disabled={saving}
               >
                 Cancel
@@ -425,7 +425,7 @@ export default function CustomersPage() {
               <button
                 onClick={handleSaveEdit}
                 disabled={saving || !editForm.firstName || !editForm.lastName}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-2xl hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {saving ? (
                   <>
@@ -463,7 +463,7 @@ export default function CustomersPage() {
             <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-2xl hover:bg-gray-200 transition-colors"
                 disabled={deleting}
               >
                 Cancel
