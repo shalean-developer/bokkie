@@ -5,16 +5,6 @@ const nextConfig = {
     // This is a known issue with Next.js 16 generating incorrect types for dynamic routes
     ignoreBuildErrors: true,
   },
-  async redirects() {
-    return [
-      {
-        source: "/:path*",
-        has: [{ type: "host", value: "bokkiecleaning.co.za" }],
-        destination: "https://www.bokkiecleaning.co.za/:path*",
-        permanent: true,
-      },
-    ];
-  },
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],

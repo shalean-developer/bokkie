@@ -58,7 +58,7 @@ export function generateBlogPostSchema(
   content?: string,
   readingTime?: number
 ): BlogPostSchema {
-  const baseUrl = 'https://www.bokkiecleaning.co.za';
+  const baseUrl = 'https://bokkiecleaning.co.za';
   
   const schema: BlogPostSchema = {
     '@context': 'https://schema.org',
@@ -135,7 +135,7 @@ export function generateArticleSchema(
   publishedDate: string,
   modifiedDate: string
 ): BlogPostSchema {
-  const baseUrl = 'https://www.bokkiecleaning.co.za';
+  const baseUrl = 'https://bokkiecleaning.co.za';
   
   return {
     '@context': 'https://schema.org',

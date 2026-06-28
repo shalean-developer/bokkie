@@ -17,7 +17,7 @@ const dancingScript = Dancing_Script({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.bokkiecleaning.co.za"),
+  metadataBase: new URL(siteConfig.url),
   title: {
     default: "Bokkie Cleaning Services | Professional Cleaning Services Cape Town",
     template: "%s | Bokkie Cleaning Services",
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_ZA",
-    url: "https://www.bokkiecleaning.co.za",
+    url: siteConfig.url,
     siteName: "Bokkie Cleaning Services",
     title: "Bokkie Cleaning Services | Professional Cleaning Services Cape Town",
     description: "Professional cleaning services in Cape Town. Expert cleaners offering residential, commercial, and specialized cleaning services. Book your clean today!",

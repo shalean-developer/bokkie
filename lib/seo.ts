@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 
 export const siteConfig = {
   name: "Bokkie Cleaning Services",
-  url: "https://www.bokkiecleaning.co.za",
+  url: "https://bokkiecleaning.co.za",
   description: "Professional cleaning services in Cape Town. Expert cleaners offering residential, commercial, and specialized cleaning services.",
   ogImage: "/og-image.jpg",
   links: {
@@ -74,7 +74,7 @@ export function generateCanonicalUrl(path: string = ""): string {
 }
 
 /**
- * Resolve a site path or absolute URL to a full https://www.bokkiecleaning.co.za URL.
+ * Resolve a site path or absolute URL to a full https://bokkiecleaning.co.za URL.
  */
 export function toAbsoluteUrl(pathOrUrl: string): string {
   const trimmed = pathOrUrl.trim();
