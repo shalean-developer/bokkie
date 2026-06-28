@@ -9,21 +9,22 @@ import { useUser } from "@/lib/hooks/useSupabase";
 
 const navLinks = [
   { href: "/", label: "Home" },
-  { href: "/how-it-works", label: "About Us" },
-  { href: "/#services", label: "Services" },
-  { href: "/how-it-works#faq", label: "FAQ" },
+  { href: "/about", label: "About Us" },
+  { href: "/how-it-works", label: "How It Works" },
+  { href: "/services", label: "Services" },
+  { href: "/faq", label: "FAQ" },
   { href: "/coupons", label: "Coupons" },
   { href: "/blog", label: "Blog" },
 ];
 
-function ContactButton({ className = "" }: { className?: string }) {
+function QuoteButton({ className = "" }: { className?: string }) {
   return (
     <Link
-      href="/contact"
+      href="/booking/quote"
       className={`inline-flex items-center rounded-2xl border-2 border-white bg-brand-primary p-1 pl-4 sm:pl-5 hover:opacity-95 transition-opacity ${className}`}
     >
       <span className="text-white text-sm font-semibold whitespace-nowrap pr-3 sm:pr-4">
-        Contact Us
+        Get Free Quote
       </span>
       <span className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white shrink-0">
         <ArrowRight className="w-4 h-4 text-brand-primary" strokeWidth={2.5} />
@@ -86,7 +87,7 @@ export default function Header() {
           </nav>
 
           <div className="hidden xl:flex items-center shrink-0">
-            <ContactButton />
+            <QuoteButton />
           </div>
 
           <button
@@ -132,7 +133,7 @@ export default function Header() {
                     Login
                   </Link>
                 )}
-                <ContactButton className="w-full justify-between" />
+                <QuoteButton className="w-full justify-between" />
               </div>
             </nav>
           </div>

@@ -2,6 +2,13 @@
 
 import { Sparkles, Linkedin, Instagram, Facebook, Mail } from "lucide-react";
 
+const defaultSocials = [
+  { icon: Linkedin, label: "LinkedIn" },
+  { icon: Instagram, label: "Instagram" },
+  { icon: Facebook, label: "Facebook" },
+  { icon: Mail, href: "mailto:info@bokkiecleaning.co.za", label: "Email" },
+] as const;
+
 const teamMembers = [
   {
     id: 1,
@@ -9,12 +16,7 @@ const teamMembers = [
     role: "Residential Care Lead",
     initial: "LP",
     accent: "bg-brand-primary",
-    socials: [
-      { icon: Linkedin, href: "#", label: "LinkedIn" },
-      { icon: Instagram, href: "#", label: "Instagram" },
-      { icon: Facebook, href: "#", label: "Facebook" },
-      { icon: Mail, href: "#", label: "Email" },
-    ],
+    socials: defaultSocials,
   },
   {
     id: 2,
@@ -22,12 +24,7 @@ const teamMembers = [
     role: "Residential Care Lead",
     initial: "NM",
     accent: "bg-brand-primary-light",
-    socials: [
-      { icon: Linkedin, href: "#", label: "LinkedIn" },
-      { icon: Instagram, href: "#", label: "Instagram" },
-      { icon: Facebook, href: "#", label: "Facebook" },
-      { icon: Mail, href: "#", label: "Email" },
-    ],
+    socials: defaultSocials,
   },
   {
     id: 3,
@@ -35,12 +32,7 @@ const teamMembers = [
     role: "Commercial Cleaning Manager",
     initial: "NM",
     accent: "bg-brand-primary-dark",
-    socials: [
-      { icon: Linkedin, href: "#", label: "LinkedIn" },
-      { icon: Instagram, href: "#", label: "Instagram" },
-      { icon: Facebook, href: "#", label: "Facebook" },
-      { icon: Mail, href: "#", label: "Email" },
-    ],
+    socials: defaultSocials,
   },
   {
     id: 4,
@@ -48,12 +40,7 @@ const teamMembers = [
     role: "Residential Care Lead",
     initial: "BC",
     accent: "bg-brand-accent",
-    socials: [
-      { icon: Linkedin, href: "#", label: "LinkedIn" },
-      { icon: Instagram, href: "#", label: "Instagram" },
-      { icon: Facebook, href: "#", label: "Facebook" },
-      { icon: Mail, href: "#", label: "Email" },
-    ],
+    socials: defaultSocials,
   },
 ];
 
@@ -77,19 +64,33 @@ function TeamMemberCard({
             <div className="flex items-center justify-center gap-2 mb-3">
               {socials.map((social, index) => {
                 const Icon = social.icon;
+                const className = `flex items-center justify-center w-9 h-9 rounded-full border transition-colors ${
+                  index === 0
+                    ? "bg-brand-primary border-brand-primary text-white"
+                    : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900"
+                }`;
+
+                if ("href" in social && social.href) {
+                  return (
+                    <a
+                      key={social.label}
+                      href={social.href}
+                      aria-label={social.label}
+                      className={className}
+                    >
+                      <Icon className="w-4 h-4" strokeWidth={1.75} />
+                    </a>
+                  );
+                }
+
                 return (
-                  <a
+                  <span
                     key={social.label}
-                    href={social.href}
                     aria-label={social.label}
-                    className={`flex items-center justify-center w-9 h-9 rounded-full border transition-colors ${
-                      index === 0
-                        ? "bg-brand-primary border-brand-primary text-white"
-                        : "bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:text-gray-900"
-                    }`}
+                    className={`${className} cursor-default`}
                   >
                     <Icon className="w-4 h-4" strokeWidth={1.75} />
-                  </a>
+                  </span>
                 );
               })}
             </div>

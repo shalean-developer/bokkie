@@ -6,13 +6,7 @@ import { notFound } from "next/navigation";
 import { capeTownAreas, formatLocationName, getLocationSlug } from "@/lib/constants/areas";
 import { generateLocationStructuredData } from "@/lib/structured-data";
 import { getLocationContent, getServiceLocations } from "@/lib/supabase/booking-data";
-import {
-  capeTownGeoMeta,
-  generateCanonicalUrl,
-  getOgImageMetadata,
-  getOgImageUrl,
-  indexableRobots,
-} from "@/lib/seo";
+import ScrollToButton from "@/components/ScrollToButton";
 
 // Helper function to get valid locations from database
 async function getValidLocations(): Promise<string[]> {
@@ -409,10 +403,13 @@ export default async function LocationPage({
                 </div>
                 <div className="flex items-center gap-2">
                   <span>© {new Date().getFullYear()} Bokkie Cleaning Services, all rights reserved</span>
-                  <Link href="#top" className="hover:text-white transition-colors flex items-center gap-1">
+                  <ScrollToButton
+                    targetId="top"
+                    className="hover:text-white transition-colors flex items-center gap-1"
+                  >
                     <span>To top</span>
                     <ArrowUp className="w-4 h-4" />
-                  </Link>
+                  </ScrollToButton>
                 </div>
               </div>
             </div>

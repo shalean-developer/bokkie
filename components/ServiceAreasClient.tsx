@@ -447,10 +447,14 @@ export default function ServiceAreasClient({
               </div>
               <div className="flex items-center gap-2">
                 <span>© {new Date().getFullYear()} Bokkie Cleaning Services, all rights reserved</span>
-                <Link href="#top" className="hover:text-white transition-colors flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })}
+                  className="hover:text-white transition-colors flex items-center gap-1"
+                >
                   <span>To top</span>
                   <ArrowUp className="w-4 h-4" />
-                </Link>
+                </button>
               </div>
             </div>
           </div>

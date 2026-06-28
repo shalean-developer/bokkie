@@ -6,6 +6,7 @@ import { truncateTitle, generateMetaDescription, generateCanonicalUrl, generateI
 import ServiceImage from "@/components/services/ServiceImage";
 import FAQItem from "@/components/services/FAQItem";
 import Footer from "@/components/Footer";
+import ScrollToButton from "@/components/ScrollToButton";
 import { Home, CheckCircle2, Shield, Clock, Leaf, ArrowRight, Sparkle, Star, Users, Award, Sparkles, Calendar, Gift, Layers, ChevronDown } from "lucide-react";
 import { getServiceCategoryPricingByCategoryId } from "@/lib/supabase/booking-data";
 import { formatPrice } from "@/lib/pricing";
@@ -494,13 +495,13 @@ export default async function ServicePage({
                       Book Now
                       <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                     </Link>
-                    <Link
-                      href="#features"
+                    <ScrollToButton
+                      targetId="features"
                       className="bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold border-2 border-white/30 hover:bg-white/20 transition-all text-base sm:text-lg flex items-center justify-center gap-2"
                     >
                       Learn More
                       <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </Link>
+                    </ScrollToButton>
                   </div>
                 </div>
                 

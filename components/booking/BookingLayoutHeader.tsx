@@ -49,7 +49,7 @@ export default function BookingLayoutHeader() {
           {/* Right Side Actions */}
           <div className="flex items-center gap-4">
             <Link
-              href="#"
+              href="/contact"
               className="hidden md:block px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-2xl transition-colors text-sm"
             >
               Become a Cleaner
