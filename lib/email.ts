@@ -1129,7 +1129,7 @@ function formatContactEmail(data: ContactEmailData): string {
           
           <div style="margin-top: 30px; padding-top: 20px; border-top: 2px solid #e0e0e0;">
             <p style="color: #666; font-size: 14px;">
-              This contact form submission was received from the Bokkie Cleaning Services dashboard.
+              This contact form submission was received from the Bokkie Cleaning Services website.
             </p>
           </div>
         </div>
@@ -1151,7 +1151,28 @@ Subject: ${data.subject}
 
 ${data.message}
 
-This contact form submission was received from the Bokkie Cleaning Services dashboard.`;
+This contact form submission was received from the Bokkie Cleaning Services website.`;
+}
+
+function formatContactConfirmationEmailText(data: ContactEmailData): string {
+  return `Thank You for Contacting Us!
+
+Dear ${data.name},
+
+Thank you for reaching out to Bokkie Cleaning Services. We have received your message and will get back to you as soon as possible.
+
+Your Message
+Subject: ${data.subject}
+
+${data.message}
+
+Our team typically responds within 24 hours. If your inquiry is urgent, please call us at +27 72 416 2547.
+
+Need Immediate Assistance?
+Call us at +27 72 416 2547 or email us at info@bokkiecleaning.co.za
+
+Best regards,
+The Bokkie Cleaning Services Team`;
 }
 
 function formatContactConfirmationEmail(data: ContactEmailData): string {
@@ -1204,15 +1225,12 @@ export async function sendContactEmail(data: ContactEmailData): Promise<void> {
 
   // Initialize Resend client with API key
   const resend = new Resend(process.env.RESEND_API_KEY);
-
-  // Use verified domain email - bookings@bokkiecleaning.co.za is the verified sender
-  const fromEmail = getFromEmail();
   
   // Always send business notifications to the configured business email
   const toEmail = process.env.RESEND_TO_EMAIL || "info@bokkiecleaning.co.za";
 
   console.log("Sending contact form notification email to business:", {
-    from: fromEmail,
+    from: getFormattedFromEmail(),
     to: toEmail,
     customerEmail: data.email,
     apiKeyPresent: !!process.env.RESEND_API_KEY,
@@ -1221,7 +1239,7 @@ export async function sendContactEmail(data: ContactEmailData): Promise<void> {
 
   try {
     const result = await resend.emails.send({
-      from: fromEmail,
+      from: getFormattedFromEmail(),
       to: toEmail,
       replyTo: data.email,
       subject: `Contact Form: ${data.subject}`,

@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, Phone, Mail, MapPin, Clock, MessageSquare, Send } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, MessageSquare, Send } from "lucide-react";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/marketing/PageHero";
+import { marketingHeroImages } from "@/lib/marketing-hero-images";
 import {
   capeTownGeoMeta,
   generateCanonicalUrl,
@@ -226,28 +228,20 @@ export default function ContactPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       <div className="min-h-screen bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20">
-          <Link
-            href="/"
-            className="text-blue-600 hover:text-blue-700 mb-6 inline-flex items-center gap-2"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Home
-          </Link>
+        <PageHero
+          eyebrow="Get in touch"
+          title="Contact Us"
+          description="We're here to help! Get in touch with Bokkie Cleaning Services for professional cleaning in Cape Town. Available 24/7 to assist with your cleaning needs."
+          imageSrc={marketingHeroImages.contact.src}
+          imageAlt={marketingHeroImages.contact.alt}
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Contact" },
+          ]}
+        />
 
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
           <div className="max-w-4xl mx-auto">
-            {/* Header Section */}
-            <div className="text-center mb-12">
-              <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-                Contact Us
-              </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-                We're here to help! Get in touch with Bokkie Cleaning Services for professional cleaning services in Cape Town. 
-                Available 24/7 to assist with your cleaning needs.
-              </p>
-            </div>
-
-            {/* Contact Methods Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
               <div className="bg-gray-50 p-8 rounded-lg hover:shadow-lg transition-shadow border border-gray-200 text-center">
                 <div className="bg-[#DBEAFE] w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto">

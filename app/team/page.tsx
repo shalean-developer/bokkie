@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import FeaturedCleaners from "@/components/FeaturedCleaners";
 import Footer from "@/components/Footer";
+import PageHero from "@/components/marketing/PageHero";
+import { marketingHeroImages } from "@/lib/marketing-hero-images";
 import {
   capeTownGeoMeta,
   generateCanonicalUrl,
@@ -42,6 +44,17 @@ export default function TeamPage() {
   return (
     <>
       <main className="min-h-screen bg-white">
+        <PageHero
+          eyebrow="Our people"
+          title="Meet the Bokkie cleaning team"
+          description="Behind every reliable service is a team that truly cares. Our trained specialists follow clear standards, respect your space, and take pride in doing things right."
+          imageSrc={marketingHeroImages.team.src}
+          imageAlt={marketingHeroImages.team.alt}
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Team" },
+          ]}
+        />
         <FeaturedCleaners />
       </main>
       <Footer />

@@ -12,6 +12,7 @@ export default function BottomNavigation() {
 
   // Hide bottom navigation on certain pages
   if (
+    pathname === "/" ||
     pathname === "/booking/quote" ||
     pathname === "/booking/quote/confirmation" ||
     pathname?.startsWith("/booking/service/") ||

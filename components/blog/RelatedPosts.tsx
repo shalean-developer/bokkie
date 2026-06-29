@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { BlogPost } from "@/app/actions/blog";
 import BlogPostCard from "./BlogPostCard";
 
@@ -12,22 +11,23 @@ export default function RelatedPosts({ posts }: RelatedPostsProps) {
   }
 
   return (
-    <div className="mt-12 pt-12 border-t border-gray-200">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Related Posts</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <aside className="mt-12 pt-12 border-t border-gray-200" aria-labelledby="related-posts-heading">
+      <h2 id="related-posts-heading" className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">
+        Related posts
+      </h2>
+      <div className="divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden">
         {posts.map((post) => (
           <BlogPostCard
             key={post.id}
             slug={post.slug}
             title={post.title}
             excerpt={post.excerpt}
-            featuredImageUrl={post.featured_image_url}
             publishedAt={post.published_at}
             readingTime={post.reading_time}
             category={post.category}
           />
         ))}
       </div>
-    </div>
+    </aside>
   );
 }

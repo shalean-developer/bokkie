@@ -51,29 +51,11 @@ export async function submitContact(
   }
 
   try {
-    // Log the submission for debugging
-    console.log("Contact Form Submission Received:", {
-      ...data,
-      submittedAt: new Date().toISOString(),
-    });
-
-    // Send notification email to business
-    await sendContactEmail(data);
-    console.log("Business notification email sent successfully");
-
-    // Send confirmation email to customer
-    try {
-      await sendContactConfirmationEmail(data);
-      console.log("Customer confirmation email sent successfully");
-    } catch (customerEmailError) {
-      // Log error but don't fail the entire submission if customer email fails
-      console.error("Failed to send customer confirmation email (non-critical):", customerEmailError);
-      // Still return success since the business was notified
-    }
+    await Promise.all([sendContactEmail(data), sendContactConfirmationEmail(data)]);
 
     return {
       success: true,
-      message: "Your message has been sent successfully! We'll get back to you soon.",
+      message: "Your message has been sent successfully! We've emailed you a confirmation and will get back to you soon.",
     };
   } catch (error) {
     console.error("Error submitting contact form:", error);

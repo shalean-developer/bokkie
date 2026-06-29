@@ -6,16 +6,13 @@ import {
   Search,
   MapPin,
   ChevronDown,
-  ChevronUp,
-  Globe,
   Building2,
   Waves,
   Mountain,
   Home,
   Navigation,
-  ArrowUp,
 } from "lucide-react";
-import { ServiceLocation } from "@/lib/supabase/booking-data";
+import type { ServiceLocation } from "@/lib/supabase/booking-data";
 
 interface ServiceAreasClientProps {
   locationsBySuburb: Record<string, ServiceLocation[]>;
@@ -24,7 +21,6 @@ interface ServiceAreasClientProps {
   totalSuburbs: number;
 }
 
-// Suburb icons mapping
 const suburbIcons: Record<string, typeof MapPin> = {
   "Atlantic Seaboard": Waves,
   "City Bowl": Building2,
@@ -36,58 +32,6 @@ const suburbIcons: Record<string, typeof MapPin> = {
   "Eastern Suburbs": Navigation,
 };
 
-// Suburb color schemes
-const suburbColors: Record<string, { bg: string; border: string; text: string; icon: string }> = {
-  "Atlantic Seaboard": {
-    bg: "bg-blue-50",
-    border: "border-blue-200",
-    text: "text-blue-700",
-    icon: "text-blue-600",
-  },
-  "City Bowl": {
-    bg: "bg-purple-50",
-    border: "border-purple-200",
-    text: "text-purple-700",
-    icon: "text-purple-600",
-  },
-  "Southern Suburbs": {
-    bg: "bg-green-50",
-    border: "border-green-200",
-    text: "text-green-700",
-    icon: "text-green-600",
-  },
-  "Northern Suburbs": {
-    bg: "bg-orange-50",
-    border: "border-orange-200",
-    text: "text-orange-700",
-    icon: "text-orange-600",
-  },
-  "West Coast": {
-    bg: "bg-cyan-50",
-    border: "border-cyan-200",
-    text: "text-cyan-700",
-    icon: "text-cyan-600",
-  },
-  "South Peninsula": {
-    bg: "bg-teal-50",
-    border: "border-teal-200",
-    text: "text-teal-700",
-    icon: "text-teal-600",
-  },
-  "Cape Flats": {
-    bg: "bg-gray-50",
-    border: "border-gray-200",
-    text: "text-gray-700",
-    icon: "text-gray-600",
-  },
-  "Eastern Suburbs": {
-    bg: "bg-indigo-50",
-    border: "border-indigo-200",
-    text: "text-indigo-700",
-    icon: "text-indigo-600",
-  },
-};
-
 export default function ServiceAreasClient({
   locationsBySuburb,
   allSuburbs,
@@ -95,10 +39,10 @@ export default function ServiceAreasClient({
   totalSuburbs,
 }: ServiceAreasClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [expandedSuburbs, setExpandedSuburbs] = useState<Set<string>>(new Set());
-  const [showAllLocations, setShowAllLocations] = useState(false);
+  const [expandedSuburb, setExpandedSuburb] = useState<string | null>(
+    allSuburbs[0] ?? null
+  );
 
-  // Filter suburbs and locations based on search
   const filteredData = useMemo(() => {
     if (!searchQuery.trim()) {
       return { suburbs: allSuburbs, locationsBySuburb };
@@ -125,342 +69,171 @@ export default function ServiceAreasClient({
     return { suburbs: matchingSuburbs, locationsBySuburb: filtered };
   }, [searchQuery, allSuburbs, locationsBySuburb]);
 
-  const toggleSuburb = (suburb: string) => {
-    setExpandedSuburbs((prev) => {
-      // If clicking the same suburb that's already open, close it
-      if (prev.has(suburb)) {
-        return new Set();
-      }
-      // Otherwise, close all others and open only this one
-      return new Set([suburb]);
-    });
-  };
-
-  const expandAll = () => {
-    setExpandedSuburbs(new Set(filteredData.suburbs));
-  };
-
-  const collapseAll = () => {
-    setExpandedSuburbs(new Set());
-  };
-
-  // Get all locations for the "All Locations" section
-  const allLocations = useMemo(() => {
-    return Object.values(locationsBySuburb)
-      .flat()
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }, [locationsBySuburb]);
+  const allLocationsAlphabetical = useMemo(
+    () =>
+      Object.values(locationsBySuburb)
+        .flat()
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [locationsBySuburb]
+  );
 
   const filteredAllLocations = useMemo(() => {
-    if (!searchQuery.trim()) return allLocations;
+    if (!searchQuery.trim()) return allLocationsAlphabetical;
     const query = searchQuery.toLowerCase().trim();
-    return allLocations.filter((location) =>
+    return allLocationsAlphabetical.filter((location) =>
       location.name.toLowerCase().includes(query)
     );
-  }, [searchQuery, allLocations]);
+  }, [searchQuery, allLocationsAlphabetical]);
 
   return (
-    <div id="top" className="min-h-screen bg-white">
-      {/* Breadcrumbs */}
-      <nav className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6" aria-label="Breadcrumb">
-        <ol className="flex items-center space-x-2 text-sm text-gray-600">
-          <li>
-            <a href="/" className="hover:text-[#007bff] transition-colors">
-              Home
-            </a>
-          </li>
-          <li>
-            <span className="mx-2">/</span>
-          </li>
-          <li className="text-gray-900 font-medium" aria-current="page">
-            Service Areas
-          </li>
-        </ol>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-50 via-white to-blue-50 py-16 md:py-24">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <Globe className="w-10 h-10 text-[#007bff]" />
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900">
-                Service Areas in Cape Town
-              </h1>
-            </div>
-            <p className="text-xl md:text-2xl text-gray-600 mb-4">
-              Professional cleaning services available throughout Cape Town and surrounding suburbs
-            </p>
-            <p className="text-base md:text-lg text-gray-500 max-w-3xl mx-auto mb-8">
-              Bokkie Cleaning Services provides trusted residential, commercial, and specialized cleaning services across {totalSuburbs} major suburbs in Cape Town, covering {totalLocations} locations. Whether you're in Atlantic Seaboard, City Bowl, Southern Suburbs, Northern Suburbs, West Coast, South Peninsula, Cape Flats, or Eastern Suburbs, we have professional cleaners ready to serve your area.
-            </p>
-
-            {/* Stats */}
-            <div className="flex flex-wrap items-center justify-center gap-6 mb-8">
-              <div className="bg-white rounded-lg px-6 py-3 shadow-md border border-gray-200">
-                <div className="text-3xl font-bold text-[#007bff]">{totalSuburbs}</div>
-                <div className="text-sm text-gray-600">Suburbs</div>
-              </div>
-              <div className="bg-white rounded-lg px-6 py-3 shadow-md border border-gray-200">
-                <div className="text-3xl font-bold text-[#007bff]">{totalLocations}</div>
-                <div className="text-sm text-gray-600">Locations</div>
-              </div>
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative max-w-2xl mx-auto">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search for a location or suburb..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 rounded-lg border-2 border-gray-200 focus:border-[#007bff] focus:outline-none text-lg shadow-sm transition-colors"
-                aria-label="Search service areas and locations"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
+    <div className="py-8 sm:py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+        <div className="flex flex-wrap items-center justify-center gap-4 mb-8 text-center">
+          <div className="px-5 py-3 bg-brand-surface border border-gray-200 rounded-xl">
+            <p className="text-2xl font-bold text-brand-primary">{totalSuburbs}</p>
+            <p className="text-xs text-gray-500">Regions</p>
+          </div>
+          <div className="px-5 py-3 bg-brand-surface border border-gray-200 rounded-xl">
+            <p className="text-2xl font-bold text-brand-primary">{totalLocations}</p>
+            <p className="text-xs text-gray-500">Locations</p>
           </div>
         </div>
-      </section>
 
-      {/* Suburb Cards Section */}
-      <section className="py-12 md:py-16 bg-gray-50">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              Browse by Suburb
+        <div className="relative mb-10">
+          <label htmlFor="area-search" className="sr-only">
+            Search service areas
+          </label>
+          <Search
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+            aria-hidden="true"
+          />
+          <input
+            id="area-search"
+            type="search"
+            placeholder="Search by suburb or location..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-brand-accent/50 focus:border-brand-accent"
+          />
+        </div>
+
+        {searchQuery.trim() && filteredAllLocations.length > 0 && (
+          <section className="mb-10" aria-labelledby="search-results-heading">
+            <h2 id="search-results-heading" className="text-lg font-bold text-gray-900 mb-4">
+              Search results ({filteredAllLocations.length})
             </h2>
-            <div className="flex gap-2">
-              <button
-                onClick={expandAll}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
-              >
-                Expand All
-              </button>
-              <button
-                onClick={collapseAll}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors"
-              >
-                Collapse All
-              </button>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {filteredAllLocations.map((location) => (
+                <Link
+                  key={location.id}
+                  href={`/areas/${location.slug}`}
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 bg-brand-surface border border-gray-200 rounded-lg hover:border-brand-primary/30 hover:text-brand-primary transition-colors"
+                >
+                  <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                  <span className="truncate">{location.name}</span>
+                </Link>
+              ))}
             </div>
-          </div>
+          </section>
+        )}
+
+        <section aria-labelledby="browse-suburbs-heading">
+          <h2 id="browse-suburbs-heading" className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">
+            Browse by region
+          </h2>
 
           {filteredData.suburbs.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-xl text-gray-600 mb-4">No locations found</p>
-              <p className="text-gray-500">Try a different search term</p>
-            </div>
+            <p className="text-center text-gray-600 py-8">
+              No locations found. Try a different search term.
+            </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+            <div className="space-y-3">
               {filteredData.suburbs.map((suburb) => {
                 const locations = filteredData.locationsBySuburb[suburb] || [];
-                const isExpanded = expandedSuburbs.has(suburb);
-                const colors = suburbColors[suburb] || suburbColors["Cape Flats"];
+                const isExpanded = expandedSuburb === suburb;
                 const Icon = suburbIcons[suburb] || MapPin;
+                const panelId = `suburb-panel-${suburb.replace(/\s+/g, "-").toLowerCase()}`;
 
                 return (
-                  <div
+                  <article
                     key={suburb}
-                    className={`bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border-2 ${colors.border} overflow-hidden`}
+                    className="border border-gray-200 rounded-xl overflow-hidden bg-white"
                   >
-                    {/* Suburb Header */}
                     <button
-                      onClick={() => toggleSuburb(suburb)}
-                      className={`w-full p-6 ${colors.bg} hover:opacity-90 transition-opacity flex items-center justify-between`}
+                      type="button"
                       aria-expanded={isExpanded}
-                      aria-controls={`suburb-${suburb.replace(/\s+/g, "-").toLowerCase()}`}
+                      aria-controls={panelId}
+                      onClick={() => setExpandedSuburb(isExpanded ? null : suburb)}
+                      className="w-full flex items-center justify-between gap-4 px-4 sm:px-5 py-4 text-left hover:bg-brand-surface/60 transition-colors"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`p-3 rounded-lg bg-white ${colors.icon}`}>
-                          <Icon className="w-6 h-6" />
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="p-2 rounded-lg bg-brand-surface shrink-0">
+                          <Icon className="w-4 h-4 text-brand-primary" aria-hidden="true" />
                         </div>
-                        <div className="text-left">
-                          <h3 className={`text-xl font-bold ${colors.text}`}>{suburb}</h3>
-                          <p className="text-sm text-gray-600">
+                        <div className="min-w-0">
+                          <h3 className="font-bold text-gray-900 truncate">{suburb}</h3>
+                          <p className="text-xs text-gray-500">
                             {locations.length} {locations.length === 1 ? "location" : "locations"}
                           </p>
                         </div>
                       </div>
-                      {isExpanded ? (
-                        <ChevronUp className={`w-6 h-6 ${colors.icon}`} />
-                      ) : (
-                        <ChevronDown className={`w-6 h-6 ${colors.icon}`} />
-                      )}
+                      <ChevronDown
+                        className={`w-5 h-5 text-gray-400 shrink-0 transition-transform ${
+                          isExpanded ? "rotate-180" : ""
+                        }`}
+                        aria-hidden="true"
+                      />
                     </button>
 
-                    {/* Locations List */}
                     {isExpanded && (
                       <div
-                        id={`suburb-${suburb.replace(/\s+/g, "-").toLowerCase()}`}
-                        className="p-6 pt-4"
-                        role="region"
-                        aria-label={`Locations in ${suburb}`}
+                        id={panelId}
+                        className="px-4 sm:px-5 pb-4 border-t border-gray-100"
                       >
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-4">
                           {locations.map((location) => (
                             <Link
                               key={location.id}
                               href={`/areas/${location.slug}`}
-                              className="flex items-center gap-2 p-3 rounded-lg hover:bg-gray-50 transition-colors group"
+                              className="flex items-center gap-1.5 px-2.5 py-2 text-sm text-gray-700 rounded-lg hover:bg-brand-surface hover:text-brand-primary transition-colors"
                             >
-                              <MapPin className="w-4 h-4 text-gray-400 group-hover:text-[#007bff] transition-colors" />
-                              <span className="text-gray-700 group-hover:text-[#007bff] transition-colors">
-                                {location.name}
-                              </span>
+                              <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" aria-hidden="true" />
+                              <span className="truncate">{location.name}</span>
                             </Link>
                           ))}
                         </div>
                       </div>
                     )}
-                  </div>
+                  </article>
                 );
               })}
             </div>
           )}
-        </div>
-      </section>
+        </section>
 
-      {/* All Locations Section */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-                All Locations
-              </h2>
-              <button
-                onClick={() => setShowAllLocations(!showAllLocations)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-2xl hover:bg-gray-200 transition-colors"
-              >
-                {showAllLocations ? "Hide" : "Show"} All
-              </button>
-            </div>
-
-            {showAllLocations && (
-              <div className="bg-gray-50 rounded-xl p-6 md:p-8">
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                  {filteredAllLocations.map((location) => (
-                    <Link
-                      key={location.id}
-                      href={`/areas/${location.slug}`}
-                      className="text-gray-700 hover:text-[#007bff] hover:underline transition-colors text-sm md:text-base py-2"
-                    >
-                      {location.name}
-                    </Link>
-                  ))}
-                </div>
-                {filteredAllLocations.length === 0 && (
-                  <p className="text-center text-gray-600 py-8">
-                    No locations found matching your search
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="py-12 md:py-16 bg-gradient-to-r from-[#007bff] to-blue-600">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Don't see your area?
+        {!searchQuery.trim() && (
+          <section className="mt-12" aria-labelledby="all-locations-heading">
+            <h2 id="all-locations-heading" className="text-xl sm:text-2xl font-bold text-gray-900 mb-5">
+              All locations A-Z
             </h2>
-            <p className="text-xl text-blue-100 mb-8">
-              We may still be able to help! Contact us to check availability in your area.
-            </p>
-            <Link
-              href="/booking/quote"
-              className="inline-block px-8 py-4 bg-white text-[#007bff] font-semibold rounded-2xl hover:bg-gray-100 transition-colors shadow-lg"
-            >
-              Request a Quote
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Signup */}
-      <section className="bg-gray-800 py-12">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="text-white">
-              <p className="text-lg font-semibold">Keep it tidy. Subscribe to get our latest news</p>
-            </div>
-            <form className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-              <input
-                type="email"
-                placeholder="your@email.com"
-                className="px-4 py-3 rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#2563eb] w-full md:w-64"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3 bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-semibold rounded-2xl transition-colors"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer Bottom */}
-      <footer className="bg-gray-900 text-gray-300 py-8">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-            <div className="flex flex-col md:flex-row gap-6 text-sm">
-              <Link href="/cleaner/apply" className="hover:text-white transition-colors">
-                APPLY TO BE A CLEANER
-              </Link>
-              <Link href="/how-it-works" className="hover:text-white transition-colors">
-                ABOUT
-              </Link>
-              <Link href="/guides" className="hover:text-white transition-colors">
-                BLOG
-              </Link>
-              <Link href="/contact" className="hover:text-white transition-colors">
-                CAREERS
-              </Link>
-            </div>
-            <div className="flex flex-col md:flex-row items-center gap-4 text-sm">
-              <div className="flex gap-4">
-                <Link href="/contact" className="hover:text-white transition-colors">
-                  Help
-                </Link>
-                <span>|</span>
-                <Link href="/privacy" className="hover:text-white transition-colors">
-                  Privacy
-                </Link>
-                <span>|</span>
-                <Link href="/terms" className="hover:text-white transition-colors">
-                  Terms
-                </Link>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>© {new Date().getFullYear()} Bokkie Cleaning Services, all rights reserved</span>
-                <button
-                  type="button"
-                  onClick={() => document.getElementById("top")?.scrollIntoView({ behavior: "smooth" })}
-                  className="hover:text-white transition-colors flex items-center gap-1"
+            <div className="columns-2 sm:columns-3 md:columns-4 gap-x-4">
+              {allLocationsAlphabetical.map((location) => (
+                <Link
+                  key={location.id}
+                  href={`/areas/${location.slug}`}
+                  className="block text-sm text-gray-600 hover:text-brand-primary py-1.5 break-inside-avoid"
                 >
-                  <span>To top</span>
-                  <ArrowUp className="w-4 h-4" />
-                </button>
-              </div>
+                  {location.name}
+                </Link>
+              ))}
             </div>
-          </div>
-        </div>
-      </footer>
+          </section>
+        )}
+
+        <p className="mt-10 text-xs text-gray-500 text-center">
+          {totalLocations} active locations across {totalSuburbs} regions in Cape Town.
+        </p>
+      </div>
     </div>
   );
 }
-

@@ -1,13 +1,11 @@
 import Link from "next/link";
-import Image from "next/image";
+import { ArrowRight, Calendar, Clock } from "lucide-react";
 import { formatReadingTime } from "@/lib/utils/reading-time";
-import { Calendar, Clock } from "lucide-react";
 
 interface BlogPostCardProps {
   slug: string;
   title: string;
   excerpt: string | null;
-  featuredImageUrl: string | null;
   publishedAt: string | null;
   readingTime: number;
   category: string | null;
@@ -17,48 +15,46 @@ export default function BlogPostCard({
   slug,
   title,
   excerpt,
-  featuredImageUrl,
   publishedAt,
   readingTime,
   category,
 }: BlogPostCardProps) {
   return (
-    <Link href={`/blog/${slug}`} className="group">
-      <article className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-shadow">
-        {featuredImageUrl && (
-          <div className="relative w-full h-48 bg-gray-200">
-            <Image
-              src={featuredImageUrl}
-              alt={title}
-              fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
-        )}
-        <div className="p-6">
+    <Link href={`/blog/${slug}`} className="group block">
+      <article className="p-5 sm:p-6 hover:bg-brand-surface/60 transition-colors">
+        <div className="flex flex-col gap-3">
           {category && (
-            <span className="inline-block px-3 py-1 mb-3 text-xs font-semibold text-blue-600 bg-blue-50 rounded-full">
+            <span className="inline-block w-fit px-2.5 py-0.5 text-xs font-semibold text-brand-primary bg-brand-surface rounded-md">
               {category}
             </span>
           )}
-          <h2 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 group-hover:text-brand-primary transition-colors leading-snug">
             {title}
           </h2>
           {excerpt && (
-            <p className="text-gray-600 mb-4 line-clamp-3">{excerpt}</p>
+            <p className="text-sm sm:text-base text-gray-600 line-clamp-2 leading-relaxed">
+              {excerpt}
+            </p>
           )}
-          <div className="flex items-center gap-4 text-sm text-gray-500">
+          <div className="flex flex-wrap items-center gap-4 text-xs sm:text-sm text-gray-500">
             {publishedAt && (
-              <div className="flex items-center gap-1">
-                <Calendar className="w-4 h-4" />
-                {new Date(publishedAt).toLocaleDateString()}
-              </div>
+              <time dateTime={publishedAt} className="flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5" aria-hidden="true" />
+                {new Date(publishedAt).toLocaleDateString("en-ZA", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </time>
             )}
-            <div className="flex items-center gap-1">
-              <Clock className="w-4 h-4" />
+            <span className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5" aria-hidden="true" />
               {formatReadingTime(readingTime)}
-            </div>
+            </span>
+            <span className="inline-flex items-center gap-1 text-brand-primary font-semibold ml-auto sm:ml-0">
+              Read article
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+            </span>
           </div>
         </div>
       </article>
