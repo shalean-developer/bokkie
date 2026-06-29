@@ -129,7 +129,22 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
   },
 };
 
-export const BOOK_SERVICE_SLUGS = Object.keys(BOOK_SERVICES) as BookServiceSlug[];
+/** Display order on /book landing: Regular → Deep → Move → Office → Airbnb → Carpets */
+export const BOOK_SERVICE_SLUGS: BookServiceSlug[] = [
+  "regular-cleaning",
+  "deep-cleaning",
+  "moving-cleaning",
+  "office-cleaning",
+  "airbnb-cleaning",
+  "carpet-cleaning",
+];
+
+/** Services whose optional extras are loaded from additional_services (by legacy service type). */
+export const DB_EXTRAS_SERVICES: BookServiceSlug[] = ["deep-cleaning", "moving-cleaning"];
+
+export function usesDbExtras(slug: BookServiceSlug): boolean {
+  return DB_EXTRAS_SERVICES.includes(slug);
+}
 
 export function isBookServiceSlug(value: string): value is BookServiceSlug {
   return value in BOOK_SERVICES;

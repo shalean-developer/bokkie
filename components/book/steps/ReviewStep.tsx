@@ -1,24 +1,71 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useBookForm } from "../BookFormProvider";
 import { PriceSummaryCard } from "../PriceSummaryCard";
 import { getServiceConfig, usesTeamSelection } from "@/lib/book/services";
 import { formatCurrency } from "@/lib/book/pricing";
 import { DEFAULT_TEAMS } from "@/lib/book/constants";
+import { getAdditionalServicesForServiceType } from "@/app/actions/booking-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ArrowRight, MapPin, Calendar, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Calendar, Sparkles, Loader2 } from "lucide-react";
+
+interface ExtraOption {
+  id: string;
+  label: string;
+  price: number;
+}
 
 export function ReviewStep() {
-  const { state, setExtras } = useBookForm();
+  const { state, setExtras, updateState, isHydrated } = useBookForm();
   const router = useRouter();
   const config = getServiceConfig(state.service);
   const isTeam = usesTeamSelection(state.service);
   const teamName = DEFAULT_TEAMS.find((t) => t.id === state.schedule.assignedTeamId)?.teamName;
+  const [extrasOptions, setExtrasOptions] = useState<ExtraOption[]>([]);
+  const [loadingExtras, setLoadingExtras] = useState(true);
+
+  useEffect(() => {
+    setLoadingExtras(true);
+    getAdditionalServicesForServiceType(config.legacyServiceType)
+      .then((services) => {
+        if (services.length > 0) {
+          const options = services.map((s) => ({
+            id: s.service_id,
+            label: s.name,
+            price: Number(s.price_modifier),
+          }));
+          setExtrasOptions(options);
+          const pricing = Object.fromEntries(options.map((o) => [o.id, o.price]));
+          updateState({ extrasPricing: pricing });
+          const validIds = new Set(options.map((o) => o.id));
+          const filtered = state.selectedExtras.filter((id) => validIds.has(id));
+          if (filtered.length !== state.selectedExtras.length) {
+            setExtras(filtered);
+          }
+        } else {
+          const options = config.extras.map((e) => ({
+            id: e.id,
+            label: e.label,
+            price: state.pricingConfig?.extrasPricing[e.id] ?? state.extrasPricing?.[e.id] ?? 0,
+          }));
+          setExtrasOptions(options);
+          const pricing = Object.fromEntries(
+            options.map((o) => [o.id, o.price]).filter(([, price]) => price > 0)
+          );
+          if (Object.keys(pricing).length > 0) {
+            updateState({ extrasPricing: { ...state.extrasPricing, ...pricing } });
+          }
+        }
+      })
+      .finally(() => setLoadingExtras(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.service, config.legacyServiceType, state.pricingConfig]);
 
   const toggleExtra = (id: string) => {
     const current = state.selectedExtras;
@@ -83,16 +130,30 @@ export function ReviewStep() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {config.extras.map((extra) => (
-              <div key={extra.id} className="flex items-center gap-3">
-                <Checkbox
-                  id={extra.id}
-                  checked={state.selectedExtras.includes(extra.id)}
-                  onCheckedChange={() => toggleExtra(extra.id)}
-                />
-                <Label htmlFor={extra.id} className="font-normal cursor-pointer">{extra.label}</Label>
+            {loadingExtras ? (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Loading extras...
               </div>
-            ))}
+            ) : extrasOptions.length === 0 ? (
+              <p className="text-sm text-gray-500">No optional extras for this service.</p>
+            ) : (
+              extrasOptions.map((extra) => (
+                <div key={extra.id} className="flex items-center gap-3">
+                  <Checkbox
+                    id={extra.id}
+                    checked={state.selectedExtras.includes(extra.id)}
+                    onCheckedChange={() => toggleExtra(extra.id)}
+                  />
+                  <Label htmlFor={extra.id} className="font-normal cursor-pointer flex-1">
+                    {extra.label}
+                    {extra.price > 0 && (
+                      <span className="text-gray-500 ml-1">(+{formatCurrency(extra.price)})</span>
+                    )}
+                  </Label>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
@@ -106,7 +167,7 @@ export function ReviewStep() {
         </div>
       </div>
       <div className="hidden lg:block">
-        <PriceSummaryCard pricing={state.pricingSummary} serviceTitle={config.title} />
+        <PriceSummaryCard pricing={state.pricingSummary} serviceTitle={config.title} isHydrated={isHydrated} />
       </div>
     </div>
   );

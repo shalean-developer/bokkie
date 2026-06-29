@@ -11,9 +11,16 @@ interface PriceSummaryCardProps {
   pricing: BookPricingSummary | null;
   serviceTitle: string;
   showTrustBadges?: boolean;
+  isHydrated?: boolean;
 }
 
-export function PriceSummaryCard({ pricing, serviceTitle, showTrustBadges = true }: PriceSummaryCardProps) {
+export function PriceSummaryCard({
+  pricing,
+  serviceTitle,
+  showTrustBadges = true,
+  isHydrated = true,
+}: PriceSummaryCardProps) {
+  const showPricing = isHydrated && pricing;
   return (
     <Card className="sticky top-24">
       <CardHeader className="pb-3">
@@ -24,7 +31,7 @@ export function PriceSummaryCard({ pricing, serviceTitle, showTrustBadges = true
         <Badge variant="secondary">{serviceTitle}</Badge>
       </CardHeader>
       <CardContent className="space-y-3">
-        {pricing ? (
+        {showPricing && pricing ? (
           <>
             {pricing.lineItems.map((item) => (
               <div key={item.label} className="flex justify-between text-sm">

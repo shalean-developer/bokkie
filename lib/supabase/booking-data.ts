@@ -30,6 +30,7 @@ export interface AdditionalService {
   price_modifier: number;
   display_order: number;
   is_active: boolean;
+  applicable_service_types?: string[] | null;
 }
 
 export interface TimeSlot {
@@ -181,6 +182,20 @@ export async function getAdditionalServices(): Promise<AdditionalService[]> {
     console.error('Error fetching additional services:', error);
     return [];
   }
+}
+
+/**
+ * Fetch active extras applicable to a main service type (e.g. "deep", "move-in-out").
+ */
+export async function getAdditionalServicesForServiceType(
+  serviceType: string
+): Promise<AdditionalService[]> {
+  const all = await getAdditionalServices();
+  return all.filter(
+    (service) =>
+      Array.isArray(service.applicable_service_types) &&
+      service.applicable_service_types.includes(serviceType)
+  );
 }
 
 /**

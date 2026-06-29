@@ -3,6 +3,7 @@
 import { 
   getTimeSlots as getTimeSlotsServer,
   getAdditionalServices as getAdditionalServicesServer,
+  getAdditionalServicesForServiceType as getAdditionalServicesForServiceTypeServer,
   getServiceLocations as getServiceLocationsServer,
   getCleaners as getCleanersServer,
   getFrequencyOptions as getFrequencyOptionsServer,
@@ -32,6 +33,12 @@ export async function getTimeSlots(): Promise<TimeSlot[]> {
 
 export async function getAdditionalServices(): Promise<AdditionalService[]> {
   return await getAdditionalServicesServer();
+}
+
+export async function getAdditionalServicesForServiceType(
+  serviceType: string
+): Promise<AdditionalService[]> {
+  return await getAdditionalServicesForServiceTypeServer(serviceType);
 }
 
 export async function getServiceLocations(): Promise<ServiceLocation[]> {
@@ -68,5 +75,10 @@ export async function getSystemSetting(key: string): Promise<string | null> {
 
 export async function getServiceTypePricing(): Promise<ServiceTypePricing[]> {
   return await getServiceTypePricingServer();
+}
+
+export async function getBookPricingConfig() {
+  const { fetchBookPricingConfig } = await import("@/lib/book/pricing-config-server");
+  return fetchBookPricingConfig();
 }
 

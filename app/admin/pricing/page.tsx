@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import { 
+import {
   getAllPricingData,
   updateServiceTypePricing,
   updateRoomPricing,
@@ -12,7 +12,9 @@ import {
   deleteServiceTypePricing,
   createAdditionalService,
   deleteAdditionalService,
+  updateServiceCategoryPricing,
 } from "@/app/actions/admin-pricing";
+import { TimeSlotsAdminSection } from "@/components/admin/TimeSlotsAdminSection";
 import {
   getAllPopularServices,
   addPopularService,
@@ -26,6 +28,7 @@ import type {
   FrequencyOption,
   RoomPricing,
   SystemSetting,
+  ServiceCategoryPricing,
 } from "@/lib/supabase/booking-data";
 import {
   RefreshCw,
@@ -55,11 +58,12 @@ export default function AdminPricingPage() {
   const [additionalServices, setAdditionalServices] = useState<AdditionalService[]>([]);
   const [frequencyOptions, setFrequencyOptions] = useState<FrequencyOption[]>([]);
   const [pricingSettings, setPricingSettings] = useState<SystemSetting[]>([]);
+  const [categoryPricing, setCategoryPricing] = useState<ServiceCategoryPricing[]>([]);
   const [popularServices, setPopularServices] = useState<PopularService[]>([]);
   
   // Edit state management
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingType, setEditingType] = useState<"service" | "room" | "additional" | "frequency" | "setting" | null>(null);
+  const [editingType, setEditingType] = useState<"service" | "room" | "additional" | "frequency" | "setting" | "category" | null>(null);
   const [editValue, setEditValue] = useState<string>("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,6 +120,7 @@ export default function AdminPricingPage() {
     price_modifier: "",
     description: "",
     icon_name: "",
+    applicable_service_types: "",
   });
 
   const fetchPricingData = async () => {
@@ -127,6 +132,7 @@ export default function AdminPricingPage() {
       setAdditionalServices(data.additionalServices);
       setFrequencyOptions(data.frequencyOptions);
       setPricingSettings(data.pricingSettings);
+      setCategoryPricing(data.categoryPricing);
       
       const popularData = await getAllPopularServices();
       setPopularServices(popularData || []);
@@ -333,7 +339,7 @@ export default function AdminPricingPage() {
 
   const handleEdit = (
     id: string,
-    type: "service" | "room" | "additional" | "frequency" | "setting",
+    type: "service" | "room" | "additional" | "frequency" | "setting" | "category",
     currentValue: number | string
   ) => {
     setEditingId(id);
@@ -448,6 +454,17 @@ export default function AdminPricingPage() {
               setFrequencyOptions((prev) =>
                 prev.map((item) =>
                   item.id === editingId ? { ...item, discount_percentage: numValue } : item
+                )
+              );
+            }
+            break;
+          }
+          case "category": {
+            result = await updateServiceCategoryPricing(editingId, { display_price: numValue });
+            if (result.success) {
+              setCategoryPricing((prev) =>
+                prev.map((item) =>
+                  item.id === editingId ? { ...item, display_price: numValue } : item
                 )
               );
             }
@@ -627,6 +644,7 @@ export default function AdminPricingPage() {
       price_modifier: String(service.price_modifier),
       description: service.description || "",
       icon_name: service.icon_name || "",
+      applicable_service_types: (service.applicable_service_types ?? []).join(", "),
     });
     setError(null);
   };
@@ -639,6 +657,7 @@ export default function AdminPricingPage() {
       price_modifier: "",
       description: "",
       icon_name: "",
+      applicable_service_types: "",
     });
     setError(null);
   };
@@ -668,12 +687,18 @@ export default function AdminPricingPage() {
     }
 
     try {
+      const applicableTypes = editAdditionalService.applicable_service_types
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       const result = await updateAdditionalService(editingAdditionalId, {
         service_id: editAdditionalService.service_id.trim(),
         name: editAdditionalService.name.trim(),
         price_modifier: priceModifier,
         description: editAdditionalService.description.trim() || undefined,
         icon_name: editAdditionalService.icon_name.trim() || undefined,
+        applicable_service_types: applicableTypes.length > 0 ? applicableTypes : null,
       });
 
       if (result.success) {
@@ -688,6 +713,7 @@ export default function AdminPricingPage() {
                   price_modifier: priceModifier,
                   description: editAdditionalService.description.trim() || undefined,
                   icon_name: editAdditionalService.icon_name.trim() || undefined,
+                  applicable_service_types: applicableTypes.length > 0 ? applicableTypes : null,
                 }
               : service
           )
@@ -901,6 +927,61 @@ export default function AdminPricingPage() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Service Category Display Prices (marketing pages) */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-4 md:mb-6">
+        <div className="flex items-center gap-2 mb-4">
+          <Home className="w-5 h-5 text-indigo-600" />
+          <h2 className="text-lg md:text-xl font-semibold text-gray-900">Service Page Display Prices</h2>
+        </div>
+        <p className="text-sm text-gray-500 mb-4">
+          &quot;Starting from&quot; prices shown on /services category pages. Booking prices use Service Base Prices below.
+        </p>
+        <div className="space-y-3">
+          {categoryPricing.map((category) => (
+            <div
+              key={category.id}
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border border-gray-200 rounded-lg"
+            >
+              <div>
+                <p className="font-medium text-gray-900">{category.category_name}</p>
+                <p className="text-xs text-gray-500">/{category.category_id}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {editingId === category.id && editingType === "category" ? (
+                  <>
+                    <input
+                      type="number"
+                      value={editValue}
+                      onChange={(e) => setEditValue(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      className="w-28 px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                      disabled={saving}
+                      autoFocus
+                    />
+                    <button onClick={handleSave} disabled={saving} className="p-1.5 text-green-600 hover:bg-green-50 rounded">
+                      <Save className="w-4 h-4" />
+                    </button>
+                    <button onClick={handleCancelEdit} className="p-1.5 text-gray-500 hover:bg-gray-50 rounded">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-semibold text-gray-900">{formatPrice(Number(category.display_price))}</span>
+                    <button
+                      onClick={() => handleEdit(category.id, "category", category.display_price)}
+                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Service Type Pricing */}
@@ -1228,6 +1309,8 @@ export default function AdminPricingPage() {
       </div>
 
       {/* Additional Services */}
+      <TimeSlotsAdminSection />
+
       <div className="bg-white rounded-lg border border-gray-200 p-4 md:p-6 mb-4 md:mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
@@ -1434,6 +1517,27 @@ export default function AdminPricingPage() {
                                 </div>
                                 <div className="md:col-span-2">
                                   <label className="block text-xs font-medium text-gray-700 mb-1">
+                                    Applicable service types (comma-separated)
+                                  </label>
+                                  <input
+                                    type="text"
+                                    value={editAdditionalService.applicable_service_types}
+                                    onChange={(e) =>
+                                      setEditAdditionalService({
+                                        ...editAdditionalService,
+                                        applicable_service_types: e.target.value,
+                                      })
+                                    }
+                                    placeholder="e.g. deep, move-in-out"
+                                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    disabled={saving}
+                                  />
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Main service types where this extra appears (deep, move-in-out, standard, airbnb, etc.)
+                                  </p>
+                                </div>
+                                <div className="md:col-span-2">
+                                  <label className="block text-xs font-medium text-gray-700 mb-1">
                                     Description (optional)
                                   </label>
                                   <input
@@ -1479,6 +1583,11 @@ export default function AdminPricingPage() {
                             <div className="text-sm text-gray-600 max-w-md">
                               {service.description || "-"}
                             </div>
+                            {service.applicable_service_types?.length ? (
+                              <div className="text-xs text-gray-500 mt-1">
+                                For: {service.applicable_service_types.join(", ")}
+                              </div>
+                            ) : null}
                           </td>
                           <td className="px-4 py-3 whitespace-nowrap">
                             {service.is_active ? (

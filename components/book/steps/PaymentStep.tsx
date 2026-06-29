@@ -39,7 +39,7 @@ import {
 import { DEFAULT_TEAMS } from "@/lib/book/constants";
 
 export function PaymentStep() {
-  const { state, setCustomer, updateState } = useBookForm();
+  const { state, setCustomer, updateState, isHydrated } = useBookForm();
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const config = getServiceConfig(state.service);
@@ -337,7 +337,7 @@ export function PaymentStep() {
         </Button>
       </div>
       <div className="hidden lg:block">
-        <PriceSummaryCard pricing={pricing} serviceTitle={config.title} showTrustBadges />
+        <PriceSummaryCard pricing={pricing} serviceTitle={config.title} showTrustBadges isHydrated={isHydrated} />
       </div>
     </div>
   );

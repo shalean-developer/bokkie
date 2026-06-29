@@ -44,10 +44,6 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
         bathrooms: 1,
         checkInTime: "14:00",
         checkOutTime: "10:00",
-        linenChangeRequired: false,
-        restockingRequired: false,
-        guestReadyInspection: true,
-        airbnbUnits: 1,
       };
     case "carpet-cleaning":
       return {
@@ -64,10 +60,6 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
         propertyType: "",
         bedrooms: 2,
         bathrooms: 1,
-        kitchenDeepClean: true,
-        ovenCleaning: false,
-        fridgeCleaning: false,
-        windowCleaning: false,
         propertyCondition: "",
       };
     case "moving-cleaning":
@@ -77,8 +69,6 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
         bedrooms: 2,
         bathrooms: 1,
         propertyEmpty: false,
-        applianceCleaning: false,
-        wallSpotCleaning: false,
         keysAccessInstructions: "",
       };
     case "office-cleaning":
@@ -86,10 +76,8 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
         officeSize: "",
         workstations: 5,
         bathrooms: 1,
-        kitchenBreakroomIncluded: true,
         cleaningFrequency: "",
         afterHoursRequired: false,
-        wasteRemovalRequired: false,
       };
     case "regular-cleaning":
       return {
@@ -99,7 +87,6 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
         cleaningFrequency: "",
         petsInHome: false,
         preferredCleanerNotes: "",
-        suppliesProvidedByCustomer: false,
       };
   }
 }

@@ -38,13 +38,6 @@ export const recurringSchema = z
         path: ["recurringDays"],
       });
     }
-    if (!data.recurringStartDate) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Recurring start date is required",
-        path: ["recurringStartDate"],
-      });
-    }
   });
 
 export const scheduleSchema = z
@@ -112,15 +105,13 @@ export const airbnbDetailsSchema = z.object({
   bathrooms: z.coerce.number().int().min(1),
   checkInTime: z.string().min(1, "Check-in time is required"),
   checkOutTime: z.string().min(1, "Check-out time is required"),
-  linenChangeRequired: z.boolean(),
-  restockingRequired: z.boolean(),
-  guestReadyInspection: z.boolean(),
-  airbnbUnits: z.coerce.number().int().min(1, "At least 1 unit required"),
 });
 
 export const carpetDetailsSchema = z.object({
   numberOfRooms: z.coerce.number().int().min(1),
-  carpetedAreaSize: z.string().min(1, "Carpeted area size is required"),
+  carpetedAreaSize: z.enum(["small", "medium", "large"], {
+    message: "Carpeted area size is required",
+  }),
   stainTreatmentNeeded: z.boolean(),
   petOdorTreatmentNeeded: z.boolean(),
   furnitureMovingRequired: z.boolean(),
@@ -132,10 +123,6 @@ export const deepDetailsSchema = z.object({
   ...sharedPropertyFields,
   bedrooms: z.coerce.number().int().min(0),
   bathrooms: z.coerce.number().int().min(1),
-  kitchenDeepClean: z.boolean(),
-  ovenCleaning: z.boolean(),
-  fridgeCleaning: z.boolean(),
-  windowCleaning: z.boolean(),
   propertyCondition: z.string().min(1, "Property condition is required"),
 });
 
@@ -145,8 +132,6 @@ export const movingDetailsSchema = z.object({
   bedrooms: z.coerce.number().int().min(0),
   bathrooms: z.coerce.number().int().min(1),
   propertyEmpty: z.boolean(),
-  applianceCleaning: z.boolean(),
-  wallSpotCleaning: z.boolean(),
   keysAccessInstructions: z.string().optional(),
 });
 
@@ -154,10 +139,8 @@ export const officeDetailsSchema = z.object({
   officeSize: z.string().min(1, "Office size is required"),
   workstations: z.coerce.number().int().min(1),
   bathrooms: z.coerce.number().int().min(0),
-  kitchenBreakroomIncluded: z.boolean(),
   cleaningFrequency: z.string().min(1, "Cleaning frequency is required"),
   afterHoursRequired: z.boolean(),
-  wasteRemovalRequired: z.boolean(),
 });
 
 export const regularDetailsSchema = z.object({
@@ -167,7 +150,6 @@ export const regularDetailsSchema = z.object({
   cleaningFrequency: z.string().min(1, "Cleaning frequency is required"),
   petsInHome: z.boolean(),
   preferredCleanerNotes: z.string().optional(),
-  suppliesProvidedByCustomer: z.boolean(),
 });
 
 export const SERVICE_DETAIL_SCHEMAS: Record<BookServiceSlug, z.ZodTypeAny> = {

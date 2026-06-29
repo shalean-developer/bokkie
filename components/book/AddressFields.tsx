@@ -4,15 +4,23 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { MapPin } from "lucide-react";
-import type { BookFormState } from "@/lib/book/types";
+import type { BookFormState, BookServiceSlug } from "@/lib/book/types";
+
+const SERVICES_WITHOUT_PARKING_SECURITY: BookServiceSlug[] = [
+  "regular-cleaning",
+  "airbnb-cleaning",
+  "office-cleaning",
+];
 
 interface AddressFieldsProps {
+  service: BookServiceSlug;
   address: BookFormState["address"];
   onChange: (field: keyof BookFormState["address"], value: string) => void;
   errors?: Record<string, string>;
 }
 
-export function AddressFields({ address, onChange, errors = {} }: AddressFieldsProps) {
+export function AddressFields({ service, address, onChange, errors = {} }: AddressFieldsProps) {
+  const showParkingAndSecurity = !SERVICES_WITHOUT_PARKING_SECURITY.includes(service);
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2 text-brand-primary font-medium">
@@ -45,14 +53,18 @@ export function AddressFields({ address, onChange, errors = {} }: AddressFieldsP
         <Label htmlFor="access">Property access instructions</Label>
         <Textarea id="access" className="mt-1.5" value={address.accessInstructions ?? ""} onChange={(e) => onChange("accessInstructions", e.target.value)} placeholder="How should cleaners access the property?" />
       </div>
-      <div>
-        <Label htmlFor="parking">Parking instructions</Label>
-        <Textarea id="parking" className="mt-1.5" value={address.parkingInstructions ?? ""} onChange={(e) => onChange("parkingInstructions", e.target.value)} placeholder="Visitor parking, street parking, etc." />
-      </div>
-      <div>
-        <Label htmlFor="security">Security / gate code</Label>
-        <Input id="security" className="mt-1.5 max-w-sm" value={address.securityCode ?? ""} onChange={(e) => onChange("securityCode", e.target.value)} placeholder="If applicable" />
-      </div>
+      {showParkingAndSecurity && (
+        <>
+          <div>
+            <Label htmlFor="parking">Parking instructions</Label>
+            <Textarea id="parking" className="mt-1.5" value={address.parkingInstructions ?? ""} onChange={(e) => onChange("parkingInstructions", e.target.value)} placeholder="Visitor parking, street parking, etc." />
+          </div>
+          <div>
+            <Label htmlFor="security">Security / gate code</Label>
+            <Input id="security" className="mt-1.5 max-w-sm" value={address.securityCode ?? ""} onChange={(e) => onChange("securityCode", e.target.value)} placeholder="If applicable" />
+          </div>
+        </>
+      )}
     </div>
   );
 }

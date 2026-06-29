@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { BOOK_SERVICES, BOOK_SERVICE_SLUGS } from "@/lib/book/services";
+import { getBasePriceForService } from "@/lib/book/pricing-config";
+import { fetchBookPricingConfig } from "@/lib/book/pricing-config-server";
+import { formatCurrency } from "@/lib/book/pricing";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
@@ -10,7 +13,11 @@ export const metadata: Metadata = {
   description: "Choose your cleaning service and book in 4 easy steps.",
 };
 
-export default function BookLandingPage() {
+export const dynamic = "force-dynamic";
+
+export default async function BookLandingPage() {
+  const pricingConfig = await fetchBookPricingConfig();
+
   return (
     <div className="min-h-screen bg-brand-surface">
       <header className="border-b border-gray-100 bg-white">
@@ -30,6 +37,8 @@ export default function BookLandingPage() {
           {BOOK_SERVICE_SLUGS.map((slug) => {
             const config = BOOK_SERVICES[slug];
             const Icon = config.icon;
+            const fromPrice = getBasePriceForService(slug, pricingConfig);
+
             return (
               <Card key={slug} className="hover:shadow-md transition-shadow">
                 <CardHeader>
@@ -38,6 +47,9 @@ export default function BookLandingPage() {
                   </div>
                   <CardTitle className="text-lg">{config.title}</CardTitle>
                   <CardDescription>{config.description}</CardDescription>
+                  <p className="text-sm font-semibold text-brand-primary pt-1">
+                    From {formatCurrency(fromPrice)}
+                  </p>
                 </CardHeader>
                 <CardContent>
                   <Button asChild className="w-full">

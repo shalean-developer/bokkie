@@ -2,13 +2,16 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import type { BookFormState, BookServiceSlug, BookStep } from "@/lib/book/types";
+import type { BookPricingConfig } from "@/lib/book/pricing-config";
 import {
+  createInitialBookState,
   loadBookState,
   saveBookState,
   captureUtmParams,
   detectDeviceType,
 } from "@/lib/book/storage";
 import { calculateBookPricing } from "@/lib/book/pricing";
+import { getBookPricingConfig } from "@/app/actions/booking-data";
 
 interface BookFormContextValue {
   state: BookFormState;
@@ -21,6 +24,7 @@ interface BookFormContextValue {
   setExtras: (extras: string[]) => void;
   refreshPricing: () => void;
   isHydrated: boolean;
+  pricingLoaded: boolean;
 }
 
 const BookFormContext = createContext<BookFormContextValue | null>(null);
@@ -34,15 +38,29 @@ export function BookFormProvider({
   children: React.ReactNode;
   initialStep?: BookStep;
 }) {
-  const [state, setState] = useState<BookFormState>(() => loadBookState(service));
+  const [state, setState] = useState<BookFormState>(() => createInitialBookState(service));
   const [isHydrated, setIsHydrated] = useState(false);
+  const [pricingLoaded, setPricingLoaded] = useState(false);
+  const [pricingConfig, setPricingConfig] = useState<BookPricingConfig | undefined>();
 
   useEffect(() => {
+    getBookPricingConfig()
+      .then((config) => {
+        setPricingConfig(config);
+        setPricingLoaded(true);
+      })
+      .catch(() => setPricingLoaded(true));
+  }, []);
+
+  useEffect(() => {
+    if (!pricingLoaded) return;
+
     const loaded = loadBookState(service);
     const utm = captureUtmParams();
-    setState((prev) => ({
+    const next: BookFormState = {
       ...loaded,
       step: initialStep ?? loaded.step,
+      pricingConfig: pricingConfig ?? loaded.pricingConfig,
       tracking: {
         ...loaded.tracking,
         ...utm,
@@ -50,9 +68,11 @@ export function BookFormProvider({
         servicePageRoute: `/book/${service}`,
         sourcePage: typeof document !== "undefined" ? document.referrer || "direct" : undefined,
       },
-    }));
+    };
+    next.pricingSummary = calculateBookPricing(next);
+    setState(next);
     setIsHydrated(true);
-  }, [service, initialStep]);
+  }, [service, initialStep, pricingLoaded, pricingConfig]);
 
   useEffect(() => {
     if (isHydrated) saveBookState(state);
@@ -125,6 +145,7 @@ export function BookFormProvider({
       setExtras,
       refreshPricing,
       isHydrated,
+      pricingLoaded,
     }),
     [
       state,
@@ -137,6 +158,7 @@ export function BookFormProvider({
       setExtras,
       refreshPricing,
       isHydrated,
+      pricingLoaded,
     ]
   );
 

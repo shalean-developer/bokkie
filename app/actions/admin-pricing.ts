@@ -7,6 +7,8 @@ import type {
   FrequencyOption,
   RoomPricing,
   SystemSetting,
+  TimeSlot,
+  ServiceCategoryPricing,
 } from "@/lib/supabase/booking-data";
 
 /**
@@ -118,6 +120,16 @@ export async function getPricingSettings(): Promise<SystemSetting[]> {
         "carpet_cleaning_price_per_fitted_room",
         "carpet_cleaning_price_per_loose_carpet",
         "carpet_cleaning_furniture_fee",
+        "extra_cleaner_price",
+        "team_booking_fee",
+        "book_carpet_price_per_room",
+        "book_carpet_area_small",
+        "book_carpet_area_medium",
+        "book_carpet_area_large",
+        "book_office_size_small",
+        "book_office_size_medium",
+        "book_office_size_large",
+        "book_workstation_price",
       ])
       .order("setting_key", { ascending: true });
 
@@ -138,14 +150,21 @@ export async function getPricingSettings(): Promise<SystemSetting[]> {
  */
 export async function getAllPricingData() {
   try {
-    const [servicePricing, roomPricing, additionalServices, frequencyOptions, pricingSettings] =
-      await Promise.all([
-        getServiceTypePricing(),
-        getRoomPricing(),
-        getAdditionalServices(),
-        getFrequencyOptions(),
-        getPricingSettings(),
-      ]);
+    const [
+      servicePricing,
+      roomPricing,
+      additionalServices,
+      frequencyOptions,
+      pricingSettings,
+      categoryPricing,
+    ] = await Promise.all([
+      getServiceTypePricing(),
+      getRoomPricing(),
+      getAdditionalServices(),
+      getFrequencyOptions(),
+      getPricingSettings(),
+      getServiceCategoryPricingAdmin(),
+    ]);
 
     return {
       servicePricing,
@@ -153,6 +172,7 @@ export async function getAllPricingData() {
       additionalServices,
       frequencyOptions,
       pricingSettings,
+      categoryPricing,
     };
   } catch (error) {
     console.error("Error fetching all pricing data:", error);
@@ -162,6 +182,7 @@ export async function getAllPricingData() {
       additionalServices: [],
       frequencyOptions: [],
       pricingSettings: [],
+      categoryPricing: [],
     };
   }
 }
@@ -223,7 +244,15 @@ export async function updateRoomPricing(
  */
 export async function updateAdditionalService(
   id: string,
-  updates: { price_modifier?: number; service_id?: string; name?: string; description?: string; icon_name?: string; is_active?: boolean }
+  updates: {
+    price_modifier?: number;
+    service_id?: string;
+    name?: string;
+    description?: string;
+    icon_name?: string;
+    is_active?: boolean;
+    applicable_service_types?: string[] | null;
+  }
 ): Promise<{ success: boolean; error?: string }> {
   try {
     const supabase = await createClient();
@@ -451,5 +480,147 @@ export async function deleteAdditionalService(
   } catch (error) {
     console.error("Error deleting additional service:", error);
     return { success: false, error: "Failed to delete additional service" };
+  }
+}
+
+/**
+ * Fetch all time slots (including inactive) for admin management
+ */
+export async function getAdminTimeSlots(): Promise<TimeSlot[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("time_slots")
+      .select("*")
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching time slots:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching time slots:", error);
+    return [];
+  }
+}
+
+export async function createTimeSlot(data: {
+  time_value: string;
+  display_label: string;
+  display_order?: number;
+  is_active?: boolean;
+}): Promise<{ success: boolean; error?: string; data?: TimeSlot }> {
+  try {
+    const supabase = await createClient();
+    let displayOrder = data.display_order;
+    if (displayOrder === undefined) {
+      const { data: existing } = await supabase
+        .from("time_slots")
+        .select("display_order")
+        .order("display_order", { ascending: false })
+        .limit(1);
+      displayOrder = existing?.length ? (existing[0].display_order || 0) + 1 : 1;
+    }
+
+    const { data: created, error } = await supabase
+      .from("time_slots")
+      .insert({
+        time_value: data.time_value,
+        display_label: data.display_label,
+        display_order: displayOrder,
+        is_active: data.is_active ?? true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true, data: created };
+  } catch {
+    return { success: false, error: "Failed to create time slot" };
+  }
+}
+
+export async function updateTimeSlot(
+  id: string,
+  updates: {
+    time_value?: string;
+    display_label?: string;
+    display_order?: number;
+    is_active?: boolean;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("time_slots").update(updates).eq("id", id);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to update time slot" };
+  }
+}
+
+export async function deleteTimeSlot(id: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.from("time_slots").delete().eq("id", id);
+    if (error) {
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to delete time slot" };
+  }
+}
+
+/**
+ * Fetch all service category display pricing (for marketing pages)
+ */
+export async function getServiceCategoryPricingAdmin(): Promise<ServiceCategoryPricing[]> {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase
+      .from("service_category_pricing")
+      .select("*")
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching service category pricing:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error fetching service category pricing:", error);
+    return [];
+  }
+}
+
+/**
+ * Update service category display pricing
+ */
+export async function updateServiceCategoryPricing(
+  id: string,
+  updates: { display_price?: number; category_name?: string; description?: string; is_active?: boolean }
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase
+      .from("service_category_pricing")
+      .update(updates)
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch {
+    return { success: false, error: "Failed to update service category pricing" };
   }
 }

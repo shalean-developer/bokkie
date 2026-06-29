@@ -99,6 +99,8 @@ export interface BookCustomer {
 /** Service-specific answers stored in service_details JSONB */
 export type BookServiceDetails = Record<string, string | number | boolean | string[] | null | undefined>;
 
+import type { BookPricingConfig } from "./pricing-config";
+
 export interface BookFormState {
   service: BookServiceSlug;
   step: BookStep;
@@ -107,6 +109,8 @@ export interface BookFormState {
   schedule: BookSchedule;
   recurring: BookRecurring;
   selectedExtras: string[];
+  extrasPricing?: Record<string, number>;
+  pricingConfig?: BookPricingConfig;
   pricingSummary: BookPricingSummary | null;
   customer: BookCustomer;
   tracking: BookTrackingMeta;

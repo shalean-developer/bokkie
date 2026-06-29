@@ -1,241 +1,42 @@
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
-import { truncateTitle, generateMetaDescription, generateCanonicalUrl, generateImageAlt, capeTownGeoMeta, getOgImageMetadata, getOgImageUrl, indexableRobots, siteConfig } from "@/lib/seo";
-import ServiceImage from "@/components/services/ServiceImage";
-import FAQItem from "@/components/services/FAQItem";
-import Footer from "@/components/Footer";
-import ScrollToButton from "@/components/ScrollToButton";
-import { Home, CheckCircle2, Shield, Clock, Leaf, ArrowRight, Sparkle, Star, Users, Award, Sparkles, Calendar, Gift, Layers, ChevronDown } from "lucide-react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  MapPin,
+  Shield,
+} from "lucide-react";
+import {
+  truncateTitle,
+  generateMetaDescription,
+  generateCanonicalUrl,
+  capeTownGeoMeta,
+  getOgImageMetadata,
+  getOgImageUrl,
+  indexableRobots,
+  siteConfig,
+} from "@/lib/seo";
+import { generateFaqPageSchema } from "@/lib/seo/faq-schema";
+import { generateBreadcrumbSchema } from "@/lib/seo/schema-generator";
+import {
+  getServiceCategory,
+  isServiceCategorySlug,
+  SERVICE_REDIRECTS,
+  type ServiceCategory,
+  type ServiceCategorySlug,
+} from "@/lib/data/service-categories";
 import { getServiceCategoryPricingByCategoryId } from "@/lib/supabase/booking-data";
+import { getServiceTypePricing } from "@/lib/supabase/booking-data";
 import { formatPrice } from "@/lib/pricing";
+import Footer from "@/components/Footer";
+import PageHero from "@/components/marketing/PageHero";
+import MarketingCta from "@/components/marketing/MarketingCta";
+import FaqAccordion from "@/components/marketing/FaqAccordion";
+import JsonLd from "@/components/marketing/JsonLd";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
-// Map old service IDs to new ones or redirect to services section
-const serviceRedirects: Record<string, string> = {
-  "holiday-cleaning": "residential-cleaning",
-  "office-cleaning": "commercial-cleaning",
-  "residential-cleaning": "residential-cleaning",
-  "move-in-cleaning": "specialized-cleaning",
-  "deep-cleaning": "specialized-cleaning",
-};
-
-const validServices = [
-  "residential-cleaning",
-  "commercial-cleaning",
-  "specialized-cleaning",
-];
-
-// Service-specific data
-const serviceData: Record<string, {
-  name: string;
-  shortName: string;
-  description: string;
-  longDescription: string;
-  icon: any;
-  image: string;
-  gradient: string;
-  bgGradient: string;
-  features: string[];
-  benefits: Array<{ title: string; description: string; icon: any }>;
-  popularAreas: string[];
-  faqs: Array<{ question: string; answer: string }>;
-}> = {
-  "residential-cleaning": {
-    name: "General Residential Cleaning Services",
-    shortName: "Residential Cleaning",
-    description: "Regular maintenance cleaning for homes and private properties",
-    longDescription: "Keep your home fresh, organized, and hygienic with our comprehensive residential cleaning services. Our professional cleaners are trained to provide thorough, consistent cleaning that maintains the comfort and cleanliness of your living space.",
-    icon: Home,
-    image: "/services/residential-cleaning.jpg",
-    gradient: "from-blue-500 to-blue-600",
-    bgGradient: "from-blue-50 to-blue-100/50",
-    features: [
-      "Regular maintenance cleaning",
-      "Kitchen and bathroom deep sanitization",
-      "Dusting and vacuuming",
-      "Floor mopping and polishing",
-      "Trash removal",
-      "Eco-friendly cleaning products available",
-      "Window cleaning (interior)",
-      "Appliance cleaning",
-    ],
-    benefits: [
-      {
-        title: "Consistent Quality",
-        description: "Our trained professionals ensure every clean meets our high standards",
-        icon: Star,
-      },
-      {
-        title: "Flexible Scheduling",
-        description: "Book weekly, bi-weekly, or monthly - we work around your schedule",
-        icon: Calendar,
-      },
-      {
-        title: "Eco-Friendly Options",
-        description: "Choose eco-friendly cleaning products that are safe for your family and pets",
-        icon: Leaf,
-      },
-      {
-        title: "Fully Insured",
-        description: "All cleaners are insured and bonded for your peace of mind",
-        icon: Shield,
-      },
-    ],
-    popularAreas: ["Claremont", "Sea Point", "Camps Bay", "Constantia", "Green Point", "Newlands"],
-    faqs: [
-      {
-        question: "What is included in residential cleaning?",
-        answer: "Our residential cleaning service includes dusting all surfaces, vacuuming and mopping floors, cleaning and sanitizing bathrooms and kitchens, wiping down appliances, taking out trash, and general tidying. We can customize the service based on your specific needs.",
-      },
-      {
-        question: "How often should I book residential cleaning?",
-        answer: "Most customers book weekly or bi-weekly cleaning to maintain a consistently clean home. However, you can schedule cleaning as frequently or infrequently as needed - we offer one-time, weekly, bi-weekly, and monthly options.",
-      },
-      {
-        question: "Do I need to provide cleaning supplies?",
-        answer: "For standard residential cleaning, you can choose to provide your own supplies or request that our cleaners bring supplies at an additional cost. All our cleaners use high-quality, eco-friendly cleaning products when supplies are provided.",
-      },
-      {
-        question: "Can I request specific areas to focus on?",
-        answer: "Absolutely! When booking, you can specify which areas need extra attention. Our cleaners will prioritize your requests while ensuring all standard cleaning tasks are completed.",
-      },
-      {
-        question: "What if I'm not satisfied with the cleaning?",
-        answer: "We offer a 100% satisfaction guarantee. If you're not completely satisfied, contact us within 24 hours and we'll send a cleaner back to address any issues at no additional cost.",
-      },
-      {
-        question: "How long does a residential cleaning take?",
-        answer: "The duration depends on the size of your home and the level of cleaning required. Typically, a 2-bedroom, 1-bathroom home takes 2-3 hours, while larger homes may take 4-6 hours. We'll provide an estimated time when you book.",
-      },
-    ],
-  },
-  "commercial-cleaning": {
-    name: "General Commercial Cleaning Services",
-    shortName: "Commercial Cleaning",
-    description: "Professional cleaning services for businesses, offices, and retail spaces",
-    longDescription: "Maintain a clean, professional workspace that impresses clients and creates a healthy environment for your team. Our commercial cleaning services are designed to keep your business looking its best.",
-    icon: Home,
-    image: "/services/commercial-cleaning.jpg",
-    gradient: "from-emerald-500 to-emerald-600",
-    bgGradient: "from-emerald-50 to-emerald-100/50",
-    features: [
-      "Office and workspace cleaning",
-      "Restroom sanitization",
-      "Kitchen and break room cleaning",
-      "Floor care and maintenance",
-      "Window cleaning",
-      "Waste management",
-      "Flexible scheduling",
-    ],
-    benefits: [
-      {
-        title: "Professional Standards",
-        description: "Maintain a professional appearance that impresses clients and employees",
-        icon: Award,
-      },
-      {
-        title: "Flexible Scheduling",
-        description: "Book same-day or schedule in advance - we work around your business hours",
-        icon: Clock,
-      },
-      {
-        title: "Eco-Friendly Products",
-        description: "We use environmentally safe cleaning products that are effective and gentle",
-        icon: Leaf,
-      },
-      {
-        title: "Fully Insured",
-        description: "All cleaners are insured and bonded for your peace of mind",
-        icon: Shield,
-      },
-    ],
-    popularAreas: ["Cape Town CBD", "V&A Waterfront", "Green Point", "Century City"],
-    faqs: [
-      {
-        question: "What areas do you clean in commercial spaces?",
-        answer: "We clean all areas of your commercial space including offices, restrooms, kitchens, break rooms, reception areas, conference rooms, and common areas. We can also provide specialized services like window cleaning and floor care.",
-      },
-      {
-        question: "Can you clean after business hours?",
-        answer: "Yes! We offer flexible scheduling including after-hours cleaning to minimize disruption to your business operations. Many of our commercial clients prefer evening or weekend cleaning.",
-      },
-      {
-        question: "Do you provide cleaning supplies?",
-        answer: "For standard commercial cleaning, supplies are available at an additional cost that you can request during booking. All our cleaners use high-quality, eco-friendly cleaning products.",
-      },
-      {
-        question: "How do I book regular commercial cleaning?",
-        answer: "You can book one-time cleaning or set up a recurring schedule. Contact us to discuss your needs and we'll create a customized cleaning plan for your business.",
-      },
-    ],
-  },
-  "specialized-cleaning": {
-    name: "Specialized Cleaning Services",
-    shortName: "Specialized Cleaning",
-    description: "Deep cleaning and specialized services for both residential and commercial properties",
-    longDescription: "Perfect for move-in/out, post-construction, seasonal deep cleans, and specialized cleaning needs. Our specialized cleaning services go beyond regular maintenance to address every corner and surface.",
-    icon: Sparkles,
-    image: "/services/specialized-cleaning.jpg",
-    gradient: "from-purple-500 to-purple-600",
-    bgGradient: "from-purple-50 to-purple-100/50",
-    features: [
-      "Deep cleaning services",
-      "Move-in/move-out cleaning",
-      "Post-construction cleaning",
-      "Carpet and upholstery cleaning",
-      "Window cleaning (interior & exterior)",
-      "High-pressure cleaning",
-      "Mattress cleaning",
-      "All supplies and equipment included",
-    ],
-    benefits: [
-      {
-        title: "Comprehensive Cleaning",
-        description: "Thorough cleaning that addresses every corner, surface, and hard-to-reach area",
-        icon: Sparkles,
-      },
-      {
-        title: "All Supplies Included",
-        description: "All cleaning supplies and equipment are included at no extra charge",
-        icon: Gift,
-      },
-      {
-        title: "Move-In/Out Ready",
-        description: "Perfect for property transitions - we ensure spaces are spotless for new occupants",
-        icon: Home,
-      },
-      {
-        title: "Specialized Equipment",
-        description: "We use professional-grade equipment for deep cleaning, carpet cleaning, and more",
-        icon: Layers,
-      },
-    ],
-    popularAreas: ["All Cape Town Areas", "Newlands", "Rondebosch", "Observatory"],
-    faqs: [
-      {
-        question: "What's the difference between regular cleaning and deep cleaning?",
-        answer: "Deep cleaning is more comprehensive than regular cleaning. It includes cleaning behind appliances, inside ovens and refrigerators, detailed scrubbing of bathrooms, cleaning baseboards and window sills, and addressing areas that aren't typically cleaned during regular maintenance.",
-      },
-      {
-        question: "How long does a deep cleaning take?",
-        answer: "Deep cleaning typically takes 4-8 hours depending on the size of your property and the level of detail required. We'll provide an estimated time when you book based on your specific needs.",
-      },
-      {
-        question: "Are cleaning supplies included?",
-        answer: "Yes! For deep cleaning, move-in/out, and carpet cleaning services, all supplies and equipment are included at no extra charge. Our cleaners bring everything needed for a thorough clean.",
-      },
-      {
-        question: "When should I book move-in/out cleaning?",
-        answer: "It's best to book move-in/out cleaning 1-2 weeks in advance to ensure availability. However, we also offer same-day booking when possible. For move-out cleaning, schedule it for the day after you've moved all belongings out.",
-      },
-    ],
-  },
-};
-
-// Generate metadata for each service
 export async function generateMetadata({
   params,
 }: {
@@ -243,139 +44,96 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { slug } = await params;
+    const resolved = SERVICE_REDIRECTS[slug];
 
-    // If it's an old service ID, redirect to the new one
-    if (serviceRedirects[slug] && serviceRedirects[slug] !== slug) {
+    if (resolved && resolved !== slug) {
       return {};
     }
 
-    // If it's not a valid service, return empty metadata (will redirect)
-    if (!validServices.includes(slug)) {
+    if (!isServiceCategorySlug(slug)) {
       return {};
     }
 
-    const service = serviceData[slug];
-    if (!service) {
+    const category = getServiceCategory(slug);
+    if (!category) {
       return {};
     }
 
-  const title = truncateTitle(`${service.shortName} in Cape Town`);
-  const description = `${service.description}. Professional ${service.shortName.toLowerCase()} services throughout Cape Town. Trusted by thousands of residents.`;
+    const title = truncateTitle(`${category.shortName} in Cape Town`);
+    const description = `${category.description}. Professional ${category.shortName.toLowerCase()} throughout Cape Town. Book online with vetted, insured cleaners.`;
 
-  return {
-    title: { default: title },
-    description: generateMetaDescription(description),
-    keywords: [
-      `${service.shortName.toLowerCase()} Cape Town`,
-      `professional ${service.shortName.toLowerCase()} Cape Town`,
-      `cleaning services Cape Town`,
-      `house cleaning Cape Town`,
-      `residential cleaning Cape Town`,
-      `commercial cleaning Cape Town`,
-      `best cleaning service Cape Town`,
-      `affordable cleaners Cape Town`,
-    ],
-    alternates: {
-      canonical: generateCanonicalUrl(`/services/${slug}`),
-    },
-    openGraph: {
-      title: `${service.shortName} in Cape Town | Bokkie Cleaning Services`,
-      description: description,
-      url: generateCanonicalUrl(`/services/${slug}`),
-      siteName: "Bokkie Cleaning Services",
-      images: [getOgImageMetadata(generateImageAlt(service.shortName, "Cape Town"))],
-      locale: "en_ZA",
-      type: "website",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${service.shortName} in Cape Town | Bokkie Cleaning Services`,
-      description: description,
-      images: [getOgImageUrl()],
-      creator: "@bokkiecleaning",
-      site: "@bokkiecleaning",
-    },
-    robots: indexableRobots,
-    other: capeTownGeoMeta,
-  };
+    return {
+      title: { default: title },
+      description: generateMetaDescription(description),
+      keywords: [
+        `${category.shortName.toLowerCase()} Cape Town`,
+        `professional ${category.shortName.toLowerCase()} Cape Town`,
+        "cleaning services Cape Town",
+        "book cleaning online Cape Town",
+        "vetted cleaners Cape Town",
+      ],
+      alternates: {
+        canonical: generateCanonicalUrl(`/services/${slug}`),
+      },
+      openGraph: {
+        title: `${category.shortName} in Cape Town | Bokkie Cleaning Services`,
+        description,
+        url: generateCanonicalUrl(`/services/${slug}`),
+        siteName: siteConfig.name,
+        images: [getOgImageMetadata(`${category.shortName} in Cape Town`)],
+        locale: "en_ZA",
+        type: "website",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${category.shortName} in Cape Town | Bokkie Cleaning Services`,
+        description,
+        images: [getOgImageUrl()],
+      },
+      robots: indexableRobots,
+      other: capeTownGeoMeta,
+    };
   } catch (error) {
     console.error("Error generating metadata for service page:", error);
     return {
-      title: "Service Page",
-      description: "Cleaning services in Cape Town",
+      title: { default: "Cleaning Services Cape Town" },
+      description: "Professional cleaning services in Cape Town",
     };
   }
 }
 
-// Generate structured data for service page
-function generateServiceStructuredData(slug: string, service: typeof serviceData[string], price: number) {
-  const baseUrl = siteConfig.url;
-  const serviceUrl = `${baseUrl}/services/${slug}`;
+function generateServiceStructuredData(
+  slug: ServiceCategorySlug,
+  category: ServiceCategory,
+  displayPrice: number
+) {
+  const pageUrl = generateCanonicalUrl(`/services/${slug}`);
 
   return {
     "@context": "https://schema.org",
     "@graph": [
-      {
-        "@type": "BreadcrumbList",
-        itemListElement: [
-          {
-            "@type": "ListItem",
-            position: 1,
-            name: "Home",
-            item: baseUrl,
-          },
-          {
-            "@type": "ListItem",
-            position: 2,
-            name: "Services",
-            item: `${baseUrl}/services`,
-          },
-          {
-            "@type": "ListItem",
-            position: 3,
-            name: service.shortName,
-            item: serviceUrl,
-          },
-        ],
-      },
+      generateBreadcrumbSchema([
+        { name: "Home", url: siteConfig.url },
+        { name: "Services", url: generateCanonicalUrl("/services") },
+        { name: category.shortName, url: pageUrl },
+      ]),
       {
         "@type": "WebPage",
-        url: serviceUrl,
-        name: `${service.shortName} in Cape Town`,
-        description: service.description,
+        "@id": `${pageUrl}#webpage`,
+        url: pageUrl,
+        name: `${category.shortName} in Cape Town`,
+        description: category.longDescription,
         inLanguage: "en-ZA",
-        breadcrumb: {
-          "@type": "BreadcrumbList",
-          itemListElement: [
-            {
-              "@type": "ListItem",
-              position: 1,
-              name: "Home",
-              item: baseUrl,
-            },
-            {
-              "@type": "ListItem",
-              position: 2,
-              name: "Services",
-              item: `${baseUrl}/services`,
-            },
-            {
-              "@type": "ListItem",
-              position: 3,
-              name: service.shortName,
-              item: serviceUrl,
-            },
-          ],
-        },
+        isPartOf: { "@id": `${siteConfig.url}#website` },
       },
       {
         "@type": "Service",
-        name: service.name,
-        description: service.longDescription,
+        name: category.name,
+        description: category.longDescription,
         provider: {
           "@type": "Organization",
-          name: "Bokkie Cleaning Services",
-          url: baseUrl,
+          name: siteConfig.name,
+          url: siteConfig.url,
         },
         areaServed: {
           "@type": "City",
@@ -383,341 +141,317 @@ function generateServiceStructuredData(slug: string, service: typeof serviceData
         },
         offers: {
           "@type": "Offer",
-          price: price.toString(),
+          price: displayPrice.toString(),
           priceCurrency: "ZAR",
-          description: `Starting from ${formatPrice(price)}`,
+          description: `Starting from ${formatPrice(displayPrice)}`,
+        },
+        hasOfferCatalog: {
+          "@type": "OfferCatalog",
+          name: category.shortName,
+          itemListElement: category.subServices.map((sub) => ({
+            "@type": "Offer",
+            itemOffered: {
+              "@type": "Service",
+              name: sub.name,
+              description: sub.description,
+            },
+          })),
         },
       },
-      {
-        "@type": "FAQPage",
-        mainEntity: service.faqs.map((faq) => ({
-          "@type": "Question",
-          name: faq.question,
-          acceptedAnswer: {
-            "@type": "Answer",
-            text: faq.answer,
-          },
-        })),
-      },
+      generateFaqPageSchema(category.faqs),
     ],
   };
 }
 
-export default async function ServicePage({
+export default async function ServiceCategoryPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
 
-  // If it's an old service ID, redirect to the new one
-  if (serviceRedirects[slug] && serviceRedirects[slug] !== slug) {
-    redirect(`/services/${serviceRedirects[slug]}`);
+  const redirectTarget = SERVICE_REDIRECTS[slug];
+  if (redirectTarget && redirectTarget !== slug) {
+    redirect(`/services/${redirectTarget}`);
   }
 
-  // If it's not a valid service, redirect to services section
-  if (!validServices.includes(slug)) {
+  if (!isServiceCategorySlug(slug)) {
     redirect("/services");
   }
 
-  const service = serviceData[slug];
-  if (!service) {
+  const category = getServiceCategory(slug);
+  if (!category) {
     redirect("/services");
   }
 
-  // Fetch pricing with error handling
   let displayPrice = 500;
+  const subServicePrices = new Map<string, number>();
+
   try {
-    const pricing = await getServiceCategoryPricingByCategoryId(slug);
-    displayPrice = pricing?.display_price || 500;
+    const [categoryPricing, typePricing] = await Promise.all([
+      getServiceCategoryPricingByCategoryId(slug),
+      getServiceTypePricing(),
+    ]);
+
+    displayPrice = categoryPricing?.display_price || 500;
+
+    for (const pricing of typePricing) {
+      subServicePrices.set(pricing.service_type, Number(pricing.base_price));
+    }
   } catch (error) {
     console.error(`Error fetching pricing for ${slug}:`, error);
-    // Use default price if fetch fails
   }
-  
-  const Icon = service.icon;
 
-  // Generate structured data
-  const structuredData = generateServiceStructuredData(slug, service, displayPrice);
+  const structuredData = generateServiceStructuredData(slug, category, displayPrice);
+  const CategoryIcon = category.icon;
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
-      />
+      <JsonLd data={structuredData} />
+
       <main className="min-h-screen bg-white">
-        {/* Hero Section */}
-        <section className={`relative bg-gradient-to-br ${service.gradient} pt-4 pb-16 sm:pb-20 md:pb-28 overflow-hidden`}>
-          {/* Background Image */}
-          <div className="absolute inset-0 z-0">
-            <ServiceImage
-              src={service.image}
-              alt={`${service.shortName} in Cape Town`}
-              className="object-cover opacity-20"
-              priority
-            />
-            <div className={`absolute inset-0 bg-gradient-to-br ${service.gradient} opacity-90`}></div>
+        <PageHero
+          eyebrow={category.shortName}
+          title={`${category.shortName} in Cape Town`}
+          description={category.longDescription}
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Services", href: "/services" },
+            { label: category.shortName },
+          ]}
+        >
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-600 mb-5">
+            <span className="flex items-center gap-1.5">
+              <Shield className="w-4 h-4 text-brand-accent" aria-hidden="true" />
+              Vetted and insured cleaners
+            </span>
+            <span>
+              From <strong className="text-gray-800">{formatPrice(displayPrice)}</strong>
+            </span>
           </div>
-          
-          {/* Decorative elements */}
-          <div className="absolute inset-0 overflow-hidden z-[1]">
-            <div className="absolute -top-40 -right-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Link
+              href={`/book/${category.subServices[0]?.id ?? "regular-cleaning"}`}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 bg-brand-primary hover:bg-brand-primary-dark text-white font-semibold rounded-button transition-colors"
+            >
+              Book online
+              <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
+            <Link
+              href="/how-it-works"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-gray-300 text-gray-900 font-semibold rounded-button hover:bg-gray-50 transition-colors"
+            >
+              How it works
+            </Link>
           </div>
-          
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center">
-                {/* Content Section */}
-                <div className="text-center lg:text-left">
-                  <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs sm:text-sm font-semibold mb-4 sm:mb-6">
-                    <Icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                    <span>{service.shortName}</span>
-                  </div>
-                  
-                  <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
-                    {service.shortName}
-                    <span className="block mt-1 sm:mt-2 bg-gradient-to-r from-yellow-200 to-yellow-300 bg-clip-text text-transparent">
-                      in Cape Town
-                    </span>
-                  </h1>
-                  
-                  <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-6 sm:mb-8 md:mb-10 max-w-3xl mx-auto lg:mx-0 leading-relaxed px-2 sm:px-0">
-                    {service.longDescription}
-                  </p>
-                  
-                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start px-2 sm:px-0">
-                    <Link
-                      href="/booking/quote"
-                      className="group bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-2"
-                    >
-                      Book Now
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                    </Link>
-                    <ScrollToButton
-                      targetId="features"
-                      className="bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold border-2 border-white/30 hover:bg-white/20 transition-all text-base sm:text-lg flex items-center justify-center gap-2"
-                    >
-                      Learn More
-                      <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </ScrollToButton>
-                  </div>
-                </div>
-                
-                {/* Image Section */}
-                <div className="relative hidden lg:block">
-                  <div className="relative w-full h-[500px] rounded-2xl overflow-hidden shadow-2xl border-4 border-white/20">
-                    <ServiceImage
-                      src={service.image}
-                      alt={`${service.shortName} services in Cape Town`}
-                      className="object-cover"
-                      priority
-                    />
-                    <div className={`absolute inset-0 bg-gradient-to-t ${service.gradient} opacity-30`}></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        </PageHero>
 
-        {/* Features Section */}
-        <section id="features" className="py-12 sm:py-16 md:py-20 lg:py-24 bg-gradient-to-b from-white to-gray-50">
+        <section className="py-10 sm:py-14" aria-labelledby="bookable-services-heading">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-10 sm:mb-12 md:mb-16">
-                <div className={`inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r ${service.bgGradient} rounded-full text-blue-600 text-xs sm:text-sm font-semibold mb-3 sm:mb-4`}>
-                  <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-blue-600" />
-                  <span>What's Included</span>
-                </div>
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2 sm:px-0">
-                  Comprehensive {service.shortName} Services
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-3xl mx-auto px-4 sm:px-0">
-                  Our professional cleaners provide thorough, consistent cleaning tailored to your needs.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-10 md:mb-12">
-                {service.features.map((feature, idx) => (
-                  <div key={idx} className="bg-white p-4 sm:p-5 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
-                    <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 mb-2 sm:mb-3" />
-                    <p className="text-sm sm:text-base text-gray-700 font-medium">{feature}</p>
-                  </div>
-                ))}
-              </div>
-
-              {/* Benefits Section */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-                {service.benefits.map((benefit, idx) => {
-                  const BenefitIcon = benefit.icon;
-                  // Determine icon color based on service gradient
-                  const iconColor = slug === "residential-cleaning" 
-                    ? "text-blue-600" 
-                    : slug === "commercial-cleaning" 
-                    ? "text-emerald-600" 
-                    : "text-purple-600";
-                  return (
-                    <div key={idx} className="text-center group">
-                      <div className={`w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 ${service.bgGradient} rounded-2xl flex items-center justify-center mx-auto mb-4 sm:mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
-                        <BenefitIcon className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 ${iconColor}`} />
-                      </div>
-                      <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2 sm:mb-3">{benefit.title}</h3>
-                      <p className="text-sm sm:text-base text-gray-600 leading-relaxed px-2 sm:px-0">{benefit.description}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Pricing Section */}
-        <section className="py-12 sm:py-16 md:py-20 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-8 sm:mb-10 md:mb-12">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2 sm:px-0">
-                  Transparent Pricing
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4 sm:px-0">
-                  No hidden fees. Get an instant quote based on your property size and needs.
-                </p>
-              </div>
-
-              <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-6 sm:p-8 md:p-12 shadow-xl border border-gray-200">
-                <div className="text-center mb-6 sm:mb-8">
-                  <span className="text-xs sm:text-sm text-gray-500 font-medium">Starting from</span>
-                  <p className={`text-3xl sm:text-4xl md:text-5xl font-bold bg-gradient-to-r ${service.gradient} bg-clip-text text-transparent mt-2`}>
-                    {formatPrice(displayPrice)}
-                  </p>
-                  <p className="text-sm sm:text-base text-gray-600 mt-3 sm:mt-4 px-2 sm:px-0">
-                    Final price depends on property size, frequency, and additional services
-                  </p>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                  <Link
-                    href="/booking/quote"
-                    className={`group px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r ${service.gradient} text-white rounded-xl font-semibold hover:shadow-lg transition-all text-sm sm:text-base flex items-center justify-center gap-2 hover:scale-105`}
-                  >
-                    Get Instant Quote
-                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                  </Link>
-                  <Link
-                    href="/how-it-works"
-                    className="px-6 sm:px-8 py-3 sm:py-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-all text-sm sm:text-base flex items-center justify-center gap-2"
-                  >
-                    How It Works
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Popular Areas Section */}
-        <section className="py-12 sm:py-16 md:py-20 bg-gradient-to-b from-gray-50 to-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-7xl mx-auto">
-              <div className="text-center mb-8 sm:mb-10 md:mb-12">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2 sm:px-0">
-                  Serving All of Cape Town
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4 sm:px-0">
-                  We provide {service.shortName.toLowerCase()} services throughout Cape Town and surrounding areas
-                </p>
-              </div>
-
-              <div className="bg-white rounded-2xl p-6 sm:p-8 md:p-12 shadow-lg border border-gray-200">
-                <div className="flex flex-wrap gap-2 sm:gap-3 justify-center">
-                  {service.popularAreas.map((area) => (
-                    <Link
-                      key={area}
-                      href={`/areas/${area.toLowerCase().replace(/\s+/g, "-")}`}
-                      className="px-4 sm:px-6 py-2 sm:py-3 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs sm:text-sm font-medium rounded-lg shadow-sm border border-gray-200 hover:border-gray-300 transition-all"
-                    >
-                      {area}
-                    </Link>
-                  ))}
-                </div>
-                <div className="text-center mt-6 sm:mt-8">
-                  <Link
-                    href="/service-areas"
-                    className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-2 text-sm sm:text-base"
-                  >
-                    View All Service Areas
-                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4" />
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* FAQ Section */}
-        <section className="py-12 sm:py-16 md:py-20 bg-white">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-10 sm:mb-12 md:mb-16">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-3 sm:mb-4 px-2 sm:px-0">
-                  Frequently Asked Questions
-                </h2>
-                <p className="text-base sm:text-lg md:text-xl text-gray-600 px-4 sm:px-0">
-                  Everything you need to know about our {service.shortName.toLowerCase()} services
-                </p>
-              </div>
-
-              <div className="space-y-3 sm:space-y-4">
-                {service.faqs.map((faq, idx) => (
-                  <FAQItem key={idx} question={faq.question} answer={faq.answer} />
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className={`relative py-12 sm:py-16 md:py-20 bg-gradient-to-br ${service.gradient} overflow-hidden`}>
-          {/* Decorative elements */}
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute top-20 right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-20 left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          </div>
-          
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div className="max-w-4xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-xs sm:text-sm font-medium mb-4 sm:mb-6">
-                <Sparkle className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span>Same-day booking available</span>
-              </div>
-              
-              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 px-2 sm:px-0">
-                Ready to Book Your {service.shortName}?
+            <div className="max-w-3xl mx-auto mb-8 sm:mb-10 text-center">
+              <h2
+                id="bookable-services-heading"
+                className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3"
+              >
+                Book {category.shortName.toLowerCase()} online
               </h2>
-              <p className="text-base sm:text-lg md:text-xl text-white/90 mb-6 sm:mb-8 md:mb-10 max-w-2xl mx-auto px-4 sm:px-0">
-                Get an instant quote and book your preferred cleaner today. Same-day booking available!
+              <p className="text-gray-600 text-sm sm:text-base">
+                Choose the service type that matches your needs. Each option links directly to
+                booking.
               </p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-2 sm:px-0">
-                <Link
-                  href="/booking/quote"
-                  className="group bg-white text-blue-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-gray-50 transition-all text-sm sm:text-base md:text-lg shadow-xl hover:shadow-2xl hover:scale-105 flex items-center justify-center gap-2"
+            </div>
+
+            <div className="max-w-3xl mx-auto space-y-4">
+              {category.subServices.map((sub) => {
+                const SubIcon = sub.icon;
+                const price = subServicePrices.get(sub.pricingKey);
+
+                return (
+                  <article
+                    key={sub.id}
+                    className="border border-gray-200 rounded-xl overflow-hidden bg-white"
+                  >
+                    <div className="p-5 sm:p-6">
+                      <div className="flex items-start gap-4">
+                        <div className={`p-2.5 rounded-lg ${category.iconBg} shrink-0`}>
+                          <SubIcon className={`w-5 h-5 ${category.accent}`} aria-hidden="true" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                            <h3 className="text-lg font-bold text-gray-900">{sub.name}</h3>
+                            {price !== undefined && (
+                              <p className="text-sm font-semibold text-brand-primary whitespace-nowrap">
+                                From {formatPrice(price)}
+                              </p>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600 mb-3 leading-relaxed">
+                            {sub.description}
+                          </p>
+                          <ul className="space-y-1.5 mb-4">
+                            {sub.features.map((feature) => (
+                              <li
+                                key={feature}
+                                className="flex items-start gap-2 text-sm text-gray-700"
+                              >
+                                <CheckCircle2
+                                  className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5"
+                                  aria-hidden="true"
+                                />
+                                {feature}
+                              </li>
+                            ))}
+                          </ul>
+                          {sub.suppliesIncluded && (
+                            <p className="text-xs font-medium text-emerald-700 bg-emerald-50 inline-block px-2.5 py-1 rounded-md mb-4">
+                              Supplies and equipment included
+                            </p>
+                          )}
+                          <Link
+                            href={sub.bookHref}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-brand-primary hover:bg-brand-primary-dark text-white text-sm font-semibold rounded-button transition-colors"
+                          >
+                            Book {sub.name.toLowerCase()}
+                            <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <p className="max-w-3xl mx-auto mt-6 text-center text-sm text-gray-500">
+              Looking for a different type of clean?{" "}
+              {category.otherCategoryLinks.map((link, i) => (
+                <span key={link.slug}>
+                  {i > 0 && " or "}
+                  <Link
+                    href={`/services/${link.slug}`}
+                    className="text-brand-primary font-semibold hover:underline"
+                  >
+                    {link.label}
+                  </Link>
+                </span>
+              ))}
+              .
+            </p>
+          </div>
+        </section>
+
+        <section className="py-10 sm:py-14 bg-brand-surface" aria-labelledby="included-heading">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto mb-8 text-center">
+              <h2 id="included-heading" className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                What is included
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Every {category.shortName.toLowerCase()} booking is tailored to your property, with
+                these tasks as standard.
+              </p>
+            </div>
+            <ul className="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {category.features.map((feature) => (
+                <li
+                  key={feature}
+                  className="flex items-start gap-2.5 bg-white border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-700"
                 >
-                  Get Started Now
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-                </Link>
-                <Link
-                  href="/service-areas"
-                  className="bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold border-2 border-white/30 hover:bg-white/20 transition-all text-sm sm:text-base md:text-lg flex items-center justify-center gap-2"
+                  <CheckCircle2
+                    className="w-4 h-4 text-brand-accent shrink-0 mt-0.5"
+                    aria-hidden="true"
+                  />
+                  {feature}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="py-10 sm:py-14" aria-labelledby="benefits-heading">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto mb-8 text-center">
+              <h2 id="benefits-heading" className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                Why choose Bokkie
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
+              {category.benefits.map((benefit) => (
+                <article
+                  key={benefit.title}
+                  className="p-5 border border-gray-200 rounded-xl bg-white"
                 >
-                  View Service Areas
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                </Link>
-              </div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className={`p-2 rounded-lg ${category.iconBg}`}>
+                      <CategoryIcon className={`w-4 h-4 ${category.accent}`} aria-hidden="true" />
+                    </div>
+                    <h3 className="font-bold text-gray-900">{benefit.title}</h3>
+                  </div>
+                  <p className="text-sm text-gray-600 leading-relaxed">{benefit.description}</p>
+                </article>
+              ))}
             </div>
           </div>
         </section>
+
+        <section className="py-10 sm:py-14 bg-brand-surface" aria-labelledby="areas-heading">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-3xl mx-auto mb-6 text-center">
+              <h2 id="areas-heading" className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+                Service areas
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                {category.shortName} available across Cape Town and surrounding suburbs.
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto flex flex-wrap justify-center gap-2 mb-6">
+              {category.popularAreas.map((area) => (
+                <span
+                  key={area}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-sm text-gray-700"
+                >
+                  <MapPin className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" />
+                  {area}
+                </span>
+              ))}
+            </div>
+            <p className="text-center">
+              <Link
+                href="/service-areas"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-primary hover:text-brand-primary-dark transition-colors"
+              >
+                View all service areas
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
+            </p>
+          </div>
+        </section>
+
+        <section className="py-10 sm:py-14" aria-labelledby="category-faq-heading">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl mx-auto mb-8 text-center">
+              <h2
+                id="category-faq-heading"
+                className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3"
+              >
+                Frequently asked questions
+              </h2>
+              <p className="text-gray-600 text-sm sm:text-base">
+                Common questions about {category.shortName.toLowerCase()} in Cape Town.
+              </p>
+            </div>
+            <div className="max-w-2xl mx-auto">
+              <FaqAccordion items={category.faqs} />
+            </div>
+          </div>
+        </section>
+
+        <MarketingCta
+          title={`Ready to book ${category.shortName.toLowerCase()}?`}
+          description="Get an instant quote and book a vetted cleaner in Cape Town. Same-day booking may be available."
+          secondaryHref="/services"
+          secondaryLabel="All services"
+        />
       </main>
       <Footer />
     </>

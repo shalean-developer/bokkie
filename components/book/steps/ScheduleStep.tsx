@@ -7,6 +7,8 @@ import { PriceSummaryCard } from "../PriceSummaryCard";
 import { getServiceConfig, usesTeamSelection } from "@/lib/book/services";
 import { scheduleSchema, recurringSchema } from "@/lib/book/schemas";
 import { TIME_SLOTS, WEEK_DAYS, MAX_CLEANERS } from "@/lib/book/constants";
+import { FALLBACK_TIME_SLOTS } from "@/lib/supabase/booking-data-fallbacks";
+import { getTimeSlots, getFrequencyOptions } from "@/app/actions/booking-data";
 import { checkTeamAvailability } from "@/app/actions/book-v2";
 import type { WeekDay } from "@/lib/book/types";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -22,14 +24,64 @@ import { ArrowLeft, ArrowRight, Calendar, Users, AlertCircle } from "lucide-reac
 import { cn } from "@/lib/utils";
 
 export function ScheduleStep() {
-  const { state, setSchedule, setRecurring } = useBookForm();
+  const { state, setSchedule, setRecurring, isHydrated } = useBookForm();
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [teamLoading, setTeamLoading] = useState(false);
   const [availableTeams, setAvailableTeams] = useState<{ id: string; teamName: string }[]>([]);
   const [noSlot, setNoSlot] = useState(false);
+  const [timeSlots, setTimeSlots] = useState<{ value: string; label: string }[]>(
+    TIME_SLOTS.map((t) => ({ value: t, label: t }))
+  );
+  const [frequencyOptions, setFrequencyOptions] = useState<
+    { id: string; label: string; discount?: string }[]
+  >([
+    { id: "weekly", label: "Weekly" },
+    { id: "bi-weekly", label: "Bi-weekly" },
+    { id: "monthly", label: "Monthly" },
+    { id: "custom", label: "Custom days" },
+  ]);
   const config = getServiceConfig(state.service);
   const isTeamService = usesTeamSelection(state.service);
+  const allowsRecurringBooking = state.service === "regular-cleaning";
+
+  useEffect(() => {
+    if (!allowsRecurringBooking) {
+      setSchedule({ bookingType: "once-off", alternativeDate: undefined, alternativeTime: undefined });
+      setRecurring({ isRecurring: false, recurringStartDate: undefined, recurringEndDate: undefined });
+    }
+  }, [allowsRecurringBooking, setSchedule, setRecurring]);
+
+  useEffect(() => {
+    getTimeSlots()
+      .then((slots) => {
+        if (slots.length > 0) {
+          setTimeSlots(
+            slots.map((s) => ({ value: s.time_value, label: s.display_label || s.time_value }))
+          );
+        } else {
+          setTimeSlots(FALLBACK_TIME_SLOTS.map((t) => ({ value: t, label: t })));
+        }
+      })
+      .catch(() => {
+        setTimeSlots(FALLBACK_TIME_SLOTS.map((t) => ({ value: t, label: t })));
+      });
+
+    getFrequencyOptions()
+      .then((options) => {
+        const recurring = options.filter((o) => o.frequency_id !== "one-time" && o.is_active);
+        if (recurring.length > 0) {
+          setFrequencyOptions(
+            recurring.map((o) => ({
+              id: o.frequency_id,
+              label: o.name,
+              discount: o.display_label ?? (o.discount_percentage > 0 ? `Save ${o.discount_percentage}%` : undefined),
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isTeamService || !state.schedule.serviceDate) {
@@ -61,9 +113,10 @@ export function ScheduleStep() {
 
   const handleNext = () => {
     const schedResult = scheduleSchema.safeParse(state.schedule);
-    const recResult = state.recurring.isRecurring
-      ? recurringSchema.safeParse(state.recurring)
-      : { success: true as const };
+    const recResult =
+      allowsRecurringBooking && state.recurring.isRecurring
+        ? recurringSchema.safeParse(state.recurring)
+        : { success: true as const };
 
     const fieldErrors: Record<string, string> = {};
     if (!schedResult.success) {
@@ -106,23 +159,25 @@ export function ScheduleStep() {
             <CardDescription>Choose when you&apos;d like your cleaning</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label>Booking type</Label>
-              <RadioGroup
-                className="mt-2 flex flex-wrap gap-4"
-                value={state.schedule.bookingType}
-                onValueChange={(v) => handleBookingTypeChange(v as "once-off" | "recurring")}
-              >
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="once-off" id="once-off" />
-                  <Label htmlFor="once-off" className="font-normal">Once-off</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <RadioGroupItem value="recurring" id="recurring" />
-                  <Label htmlFor="recurring" className="font-normal">Recurring</Label>
-                </div>
-              </RadioGroup>
-            </div>
+            {allowsRecurringBooking && (
+              <div>
+                <Label>Booking type</Label>
+                <RadioGroup
+                  className="mt-2 flex flex-wrap gap-4"
+                  value={state.schedule.bookingType}
+                  onValueChange={(v) => handleBookingTypeChange(v as "once-off" | "recurring")}
+                >
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="once-off" id="once-off" />
+                    <Label htmlFor="once-off" className="font-normal">Once-off</Label>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <RadioGroupItem value="recurring" id="recurring" />
+                    <Label htmlFor="recurring" className="font-normal">Recurring</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
@@ -135,27 +190,14 @@ export function ScheduleStep() {
                 <Select value={state.schedule.serviceTime} onValueChange={(v) => setSchedule({ serviceTime: v })}>
                   <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select time" /></SelectTrigger>
                   <SelectContent>
-                    {TIME_SLOTS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
+                    {timeSlots.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 {errors.serviceTime && <p className="text-xs text-red-600 mt-1">{errors.serviceTime}</p>}
               </div>
-              <div>
-                <Label>Alternative date (optional)</Label>
-                <Input type="date" className="mt-1.5" value={state.schedule.alternativeDate ?? ""} onChange={(e) => setSchedule({ alternativeDate: e.target.value })} />
-              </div>
-              <div>
-                <Label>Alternative time (optional)</Label>
-                <Select value={state.schedule.alternativeTime ?? ""} onValueChange={(v) => setSchedule({ alternativeTime: v })}>
-                  <SelectTrigger className="mt-1.5"><SelectValue placeholder="Optional" /></SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
-            {state.recurring.isRecurring && (
+            {allowsRecurringBooking && state.recurring.isRecurring && (
               <div className="rounded-xl border border-brand-accent/20 bg-brand-surface p-4 space-y-4">
                 <p className="text-sm font-medium text-brand-primary">Recurring schedule</p>
                 <div>
@@ -163,10 +205,12 @@ export function ScheduleStep() {
                   <Select value={state.recurring.frequency ?? ""} onValueChange={(v) => setRecurring({ frequency: v as typeof state.recurring.frequency })}>
                     <SelectTrigger className="mt-1.5"><SelectValue placeholder="Select frequency" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                      <SelectItem value="custom">Custom days</SelectItem>
+                      {frequencyOptions.map((f) => (
+                        <SelectItem key={f.id} value={f.id}>
+                          {f.label}
+                          {f.discount ? ` (${f.discount})` : ""}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -195,16 +239,6 @@ export function ScheduleStep() {
                     <p className="text-xs text-gray-500 mt-2">e.g. Monday, Wednesday & Friday every week</p>
                   </div>
                 )}
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div>
-                    <Label>Start date</Label>
-                    <Input type="date" className="mt-1.5" value={state.recurring.recurringStartDate ?? ""} onChange={(e) => setRecurring({ recurringStartDate: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>End date (optional)</Label>
-                    <Input type="date" className="mt-1.5" value={state.recurring.recurringEndDate ?? ""} onChange={(e) => setRecurring({ recurringEndDate: e.target.value })} />
-                  </div>
-                </div>
                 <div>
                   <Label>Schedule notes</Label>
                   <Textarea className="mt-1.5" value={state.recurring.recurringNotes ?? ""} onChange={(e) => setRecurring({ recurringNotes: e.target.value })} placeholder="Any notes about your recurring schedule" />
@@ -288,7 +322,7 @@ export function ScheduleStep() {
         </div>
       </div>
       <div className="hidden lg:block">
-        <PriceSummaryCard pricing={state.pricingSummary} serviceTitle={config.title} />
+        <PriceSummaryCard pricing={state.pricingSummary} serviceTitle={config.title} isHydrated={isHydrated} />
       </div>
     </div>
   );

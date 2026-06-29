@@ -10,10 +10,10 @@ import { getServiceConfig } from "@/lib/book/services";
 import { getDetailsSchema } from "@/lib/book/schemas";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Home } from "lucide-react";
+import { ArrowLeft, ArrowRight, Home } from "lucide-react";
 
 export function DetailsStep() {
-  const { state, setServiceDetails, setAddress } = useBookForm();
+  const { state, setServiceDetails, setAddress, isHydrated } = useBookForm();
   const router = useRouter();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const config = getServiceConfig(state.service);
@@ -63,6 +63,7 @@ export function DetailsStep() {
         <Card>
           <CardContent className="pt-6">
             <AddressFields
+              service={state.service}
               address={state.address}
               onChange={(field, value) => setAddress({ [field]: value })}
               errors={errors}
@@ -70,7 +71,10 @@ export function DetailsStep() {
           </CardContent>
         </Card>
 
-        <div className="flex justify-end">
+        <div className="flex justify-between gap-4">
+          <Button variant="outline" onClick={() => router.push("/book")}>
+            <ArrowLeft className="w-4 h-4" /> Back
+          </Button>
           <Button size="lg" onClick={handleNext}>
             Continue to Schedule
             <ArrowRight className="w-4 h-4" />
@@ -79,7 +83,11 @@ export function DetailsStep() {
       </div>
 
       <div className="hidden lg:block">
-        <PriceSummaryCard pricing={state.pricingSummary} serviceTitle={config.title} />
+        <PriceSummaryCard
+          pricing={state.pricingSummary}
+          serviceTitle={config.title}
+          isHydrated={isHydrated}
+        />
       </div>
     </div>
   );

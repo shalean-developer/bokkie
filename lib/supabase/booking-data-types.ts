@@ -21,6 +21,7 @@ export interface AdditionalService {
   price_modifier: number;
   display_order: number;
   is_active: boolean;
+  applicable_service_types?: string[] | null;
 }
 
 export interface TimeSlot {
