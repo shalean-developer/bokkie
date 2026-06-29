@@ -76,6 +76,12 @@ export interface BookSchedule {
   assignedCleanerIds?: string[];
 }
 
+export interface BookPricingLineItem {
+  label: string;
+  amount: number;
+  breakdown?: { label: string; amount: number }[];
+}
+
 export interface BookPricingSummary {
   basePrice: number;
   sizeAdjustment: number;
@@ -85,7 +91,7 @@ export interface BookPricingSummary {
   recurringDiscount: number;
   estimatedTotal: number;
   estimatedDuration: string;
-  lineItems: { label: string; amount: number }[];
+  lineItems: BookPricingLineItem[];
 }
 
 export interface BookCustomer {

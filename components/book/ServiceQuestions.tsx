@@ -98,11 +98,6 @@ export function ServiceQuestions({ service, details, onChange, errors = {} }: Se
           </div>
           <div className="sm:col-span-2"><PropertyTypeSelect value={String(details.propertyType ?? "")} onChange={(v) => onChange("propertyType", v)} error={errors.propertyType} /></div>
           <div className="sm:col-span-2"><Label>Carpet condition</Label><Input placeholder="Good / Fair / Heavy wear" className="mt-1.5" value={String(details.carpetCondition ?? "")} onChange={(e) => onChange("carpetCondition", e.target.value)} /><FieldError message={errors.carpetCondition} /></div>
-          <div className="sm:col-span-2 space-y-1">
-            <BoolField id="stain" label="Stain treatment needed?" checked={Boolean(details.stainTreatmentNeeded)} onChange={(v) => onChange("stainTreatmentNeeded", v)} />
-            <BoolField id="odor" label="Pet odor treatment needed?" checked={Boolean(details.petOdorTreatmentNeeded)} onChange={(v) => onChange("petOdorTreatmentNeeded", v)} />
-            <BoolField id="furniture" label="Furniture moving required?" checked={Boolean(details.furnitureMovingRequired)} onChange={(v) => onChange("furnitureMovingRequired", v)} />
-          </div>
         </div>
       );
 
@@ -185,8 +180,29 @@ export function ServiceQuestions({ service, details, onChange, errors = {} }: Se
             </Select>
             <FieldError message={errors.cleaningFrequency} />
           </div>
-          <div className="sm:col-span-2">
-            <BoolField id="pets" label="Pets in the home?" checked={Boolean(details.petsInHome)} onChange={(v) => onChange("petsInHome", v)} />
+          <div className="sm:col-span-2 space-y-3">
+            <BoolField
+              id="pets"
+              label="Pets in the home?"
+              checked={Boolean(details.petsInHome)}
+              onChange={(v) => {
+                onChange("petsInHome", v);
+                if (!v) onChange("petType", "");
+              }}
+            />
+            {Boolean(details.petsInHome) && (
+              <div>
+                <Label htmlFor="pet-type">Type of pet(s)</Label>
+                <Input
+                  id="pet-type"
+                  className="mt-1.5"
+                  placeholder="e.g. Dog, two cats"
+                  value={String(details.petType ?? "")}
+                  onChange={(e) => onChange("petType", e.target.value)}
+                />
+                <FieldError message={errors.petType} />
+              </div>
+            )}
           </div>
           <div className="sm:col-span-2"><Label>Preferred cleaner notes</Label><Textarea className="mt-1.5" placeholder="Optional preferences..." value={String(details.preferredCleanerNotes ?? "")} onChange={(e) => onChange("preferredCleanerNotes", e.target.value)} /></div>
         </div>

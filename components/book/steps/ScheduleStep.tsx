@@ -44,6 +44,11 @@ export function ScheduleStep() {
   const config = getServiceConfig(state.service);
   const isTeamService = usesTeamSelection(state.service);
   const allowsRecurringBooking = state.service === "regular-cleaning";
+  const [minBookingDate, setMinBookingDate] = useState<string>();
+
+  useEffect(() => {
+    setMinBookingDate(new Date().toISOString().split("T")[0]);
+  }, []);
 
   useEffect(() => {
     if (!allowsRecurringBooking) {
@@ -182,7 +187,7 @@ export function ScheduleStep() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <Label>Preferred date</Label>
-                <Input type="date" className="mt-1.5" min={new Date().toISOString().split("T")[0]} value={state.schedule.serviceDate} onChange={(e) => setSchedule({ serviceDate: e.target.value })} />
+                <Input type="date" className="mt-1.5" min={minBookingDate} value={state.schedule.serviceDate} onChange={(e) => setSchedule({ serviceDate: e.target.value })} />
                 {errors.serviceDate && <p className="text-xs text-red-600 mt-1">{errors.serviceDate}</p>}
               </div>
               <div>
@@ -224,6 +229,7 @@ export function ScheduleStep() {
                           <button
                             key={d.id}
                             type="button"
+                            suppressHydrationWarning
                             onClick={() => toggleRecurringDay(d.id)}
                             className={cn(
                               "px-3 py-1.5 rounded-lg text-sm font-medium border-2 transition-colors",
@@ -275,6 +281,7 @@ export function ScheduleStep() {
                   <button
                     key={team.id}
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => setSchedule({ assignedTeamId: team.id })}
                     className={cn(
                       "w-full p-4 rounded-xl border-2 text-left transition-colors",
@@ -295,6 +302,7 @@ export function ScheduleStep() {
                   <button
                     key={count}
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => setSchedule({ cleanerCount: count })}
                     className={cn(
                       "flex-1 p-4 rounded-xl border-2 text-center transition-colors",

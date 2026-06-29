@@ -49,9 +49,6 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
       return {
         numberOfRooms: 1,
         carpetedAreaSize: "",
-        stainTreatmentNeeded: false,
-        petOdorTreatmentNeeded: false,
-        furnitureMovingRequired: false,
         carpetCondition: "",
         propertyType: "",
       };
@@ -86,6 +83,7 @@ function getDefaultServiceDetails(service: BookServiceSlug): Record<string, unkn
         bathrooms: 1,
         cleaningFrequency: "",
         petsInHome: false,
+        petType: "",
         preferredCleanerNotes: "",
       };
   }

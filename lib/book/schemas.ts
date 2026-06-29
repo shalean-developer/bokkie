@@ -112,9 +112,6 @@ export const carpetDetailsSchema = z.object({
   carpetedAreaSize: z.enum(["small", "medium", "large"], {
     message: "Carpeted area size is required",
   }),
-  stainTreatmentNeeded: z.boolean(),
-  petOdorTreatmentNeeded: z.boolean(),
-  furnitureMovingRequired: z.boolean(),
   carpetCondition: z.string().min(1, "Carpet condition is required"),
   propertyType: z.string().min(1, "Property type is required"),
 });
@@ -143,14 +140,25 @@ export const officeDetailsSchema = z.object({
   afterHoursRequired: z.boolean(),
 });
 
-export const regularDetailsSchema = z.object({
-  propertyType: z.string().min(1, "Property type is required"),
-  bedrooms: z.coerce.number().int().min(0),
-  bathrooms: z.coerce.number().int().min(1),
-  cleaningFrequency: z.string().min(1, "Cleaning frequency is required"),
-  petsInHome: z.boolean(),
-  preferredCleanerNotes: z.string().optional(),
-});
+export const regularDetailsSchema = z
+  .object({
+    propertyType: z.string().min(1, "Property type is required"),
+    bedrooms: z.coerce.number().int().min(0),
+    bathrooms: z.coerce.number().int().min(1),
+    cleaningFrequency: z.string().min(1, "Cleaning frequency is required"),
+    petsInHome: z.boolean(),
+    petType: z.string().optional(),
+    preferredCleanerNotes: z.string().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.petsInHome && !data.petType?.trim()) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Please tell us what type of pet you have",
+        path: ["petType"],
+      });
+    }
+  });
 
 export const SERVICE_DETAIL_SCHEMAS: Record<BookServiceSlug, z.ZodTypeAny> = {
   "airbnb-cleaning": airbnbDetailsSchema,

@@ -221,7 +221,7 @@ export function PaymentStep() {
             <Button variant="outline" asChild><Link href={`/dashboard/bookings`}><ExternalLink className="w-4 h-4" /> View Booking</Link></Button>
             <Button variant="secondary" asChild>
               <a href="https://wa.me/27210000000" target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" /> WhatsApp Shalean
+                <MessageCircle className="w-4 h-4" /> WhatsApp Bokkie
               </a>
             </Button>
           </div>
