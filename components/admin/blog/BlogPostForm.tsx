@@ -5,6 +5,7 @@ import { calculateReadingTime, formatReadingTime } from "@/lib/utils/reading-tim
 import SEOAnalyzer from "./SEOAnalyzer";
 import SEOPreview from "./SEOPreview";
 import BlogFeaturedImageUpload from "./BlogFeaturedImageUpload";
+import RichTextEditor from "@/components/admin/cms/RichTextEditor";
 import { getBlogCategories } from "@/app/actions/blog";
 import type { BlogPostInput } from "@/app/actions/blog";
 
@@ -185,16 +186,16 @@ export default function BlogPostForm({
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Content * <span className="text-xs text-gray-500">({formatReadingTime(readingTime)})</span>
             </label>
-            <textarea
+            <RichTextEditor
               value={formData.content}
-              onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono text-sm"
-              rows={20}
-              placeholder="Write your blog post content (HTML/Markdown supported)"
-              required
+              onChange={(html) => setFormData({ ...formData, content: html })}
+              disabled={isSubmitting}
+              placeholder="Write your blog post content…"
+              uploadUrl="/api/admin/blog/upload"
+              minHeight={400}
             />
             <p className="mt-2 text-xs text-gray-500">
-              Tip: Use HTML tags or Markdown for formatting. Include images with &lt;img&gt; tags and alt attributes.
+              Use the toolbar for formatting, links, and images. Toggle HTML source for advanced edits.
             </p>
           </div>
 
