@@ -4,11 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { calculateReadingTime } from "@/lib/utils/reading-time";
 import { generateUniqueSlug } from "@/lib/utils/slug-generator";
-/** Load DOMPurify only for mutations — keeps read paths (e.g. /blog) lightweight. */
-async function sanitizeBlogContent(content: string): Promise<string> {
-  const { sanitizeBlogHtml } = await import("@/lib/utils/sanitize-blog-html");
-  return sanitizeBlogHtml(content);
-}
+import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
 
 function revalidateBlogCache(slug?: string): void {
   revalidatePath("/blog");
@@ -174,64 +170,73 @@ export async function getBlogPostById(id: string): Promise<BlogPost | null> {
  * Create a new blog post
  */
 export async function createBlogPost(input: BlogPostInput): Promise<{ success: boolean; id?: string; error?: string }> {
-  const supabase = await createClient();
-  
-  // Check authentication
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: 'Unauthorized' };
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: existingPosts } = await supabase
+      .from('blog_posts')
+      .select('slug');
+
+    const existingSlugs = existingPosts?.map(p => p.slug) || [];
+    const slug = generateUniqueSlug(input.title, existingSlugs);
+    if (!slug) {
+      return {
+        success: false,
+        error: 'Title must include at least one letter or number to generate a URL slug',
+      };
+    }
+
+    const sanitizedContent = sanitizeBlogHtml(input.content);
+    const readingTime = calculateReadingTime(sanitizedContent);
+    const publishedAt = input.status === 'published' ? new Date().toISOString() : null;
+
+    const { data, error } = await supabase
+      .from('blog_posts')
+      .insert({
+        slug,
+        title: input.title,
+        excerpt: input.excerpt || null,
+        content: sanitizedContent,
+        featured_image_url: input.featured_image_url || null,
+        author_id: user.id,
+        author_name: user.user_metadata?.name || 'Bokkie Cleaning Services',
+        status: input.status || 'draft',
+        published_at: publishedAt,
+        seo_title: input.seo_title || null,
+        seo_description: input.seo_description || null,
+        seo_keywords: input.seo_keywords || [],
+        focus_keyword: input.focus_keyword || null,
+        reading_time: readingTime,
+        category: input.category || null,
+        tags: input.tags || [],
+        canonical_url: input.canonical_url || null,
+        og_image_url: input.og_image_url || null,
+        internal_links: input.internal_links || [],
+        related_post_ids: input.related_post_ids || [],
+      })
+      .select('id, slug')
+      .single();
+
+    if (error) {
+      console.error('Error creating blog post:', error);
+      return { success: false, error: error.message };
+    }
+
+    revalidateBlogCache(data.slug);
+
+    return { success: true, id: data.id };
+  } catch (error) {
+    console.error('Unexpected error creating blog post:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create blog post',
+    };
   }
-
-  // Generate slug
-  const { data: existingPosts } = await supabase
-    .from('blog_posts')
-    .select('slug');
-  
-  const existingSlugs = existingPosts?.map(p => p.slug) || [];
-  const slug = generateUniqueSlug(input.title, existingSlugs);
-
-  // Calculate reading time
-  const sanitizedContent = await sanitizeBlogContent(input.content);
-  const readingTime = calculateReadingTime(sanitizedContent);
-
-  // Set published_at if status is published
-  const publishedAt = input.status === 'published' ? new Date().toISOString() : null;
-
-  const { data, error } = await supabase
-    .from('blog_posts')
-    .insert({
-      slug,
-      title: input.title,
-      excerpt: input.excerpt || null,
-      content: sanitizedContent,
-      featured_image_url: input.featured_image_url || null,
-      author_id: user.id,
-      author_name: user.user_metadata?.name || 'Bokkie Cleaning Services',
-      status: input.status || 'draft',
-      published_at: publishedAt,
-      seo_title: input.seo_title || null,
-      seo_description: input.seo_description || null,
-      seo_keywords: input.seo_keywords || [],
-      focus_keyword: input.focus_keyword || null,
-      reading_time: readingTime,
-      category: input.category || null,
-      tags: input.tags || [],
-      canonical_url: input.canonical_url || null,
-      og_image_url: input.og_image_url || null,
-      internal_links: input.internal_links || [],
-      related_post_ids: input.related_post_ids || [],
-    })
-    .select('id, slug')
-    .single();
-
-  if (error) {
-    console.error('Error creating blog post:', error);
-    return { success: false, error: error.message };
-  }
-
-  revalidateBlogCache(data.slug);
-
-  return { success: true, id: data.id };
 }
 
 /**
@@ -258,7 +263,7 @@ export async function updateBlogPost(
   // Preserve slug after creation so title edits do not break public URLs
   const slug = existingPost.slug;
 
-  const sanitizedContent = await sanitizeBlogContent(input.content);
+  const sanitizedContent = sanitizeBlogHtml(input.content);
   const readingTime = calculateReadingTime(sanitizedContent);
 
   // Set published_at if status changed to published

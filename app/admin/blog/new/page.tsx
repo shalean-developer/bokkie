@@ -19,7 +19,10 @@ export default function NewBlogPostPage() {
       return result;
     } catch (error) {
       console.error("Error creating blog post:", error);
-      return { success: false, error: "Failed to create blog post" };
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : "Failed to create blog post",
+      };
     } finally {
       setIsSubmitting(false);
     }

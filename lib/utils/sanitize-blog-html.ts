@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import sanitizeHtml from "sanitize-html";
 
 const ALLOWED_TAGS = [
   "p",
@@ -33,75 +33,69 @@ const ALLOWED_TAGS = [
   "span",
 ];
 
-const ALLOWED_ATTR = [
-  "href",
-  "src",
-  "alt",
-  "title",
-  "class",
-  "id",
-  "colspan",
-  "rowspan",
-  "target",
-  "rel",
-];
+const ALLOWED_ATTRIBUTES: sanitizeHtml.IOptions["allowedAttributes"] = {
+  a: ["href", "title", "target", "rel"],
+  img: ["src", "alt", "title", "class", "id"],
+  th: ["colspan", "rowspan", "class", "id"],
+  td: ["colspan", "rowspan", "class", "id"],
+  "*": ["class", "id"],
+};
 
-let hooksRegistered = false;
-
-function registerSanitizeHooks(): void {
-  if (hooksRegistered) {
-    return;
-  }
-
-  DOMPurify.addHook("afterSanitizeAttributes", (node) => {
-    if (node.tagName === "A") {
-      const href = node.getAttribute("href")?.trim() ?? "";
-      if (!href || href.toLowerCase().startsWith("javascript:")) {
-        node.removeAttribute("href");
-        return;
-      }
-
-      const isExternal =
-        href.startsWith("http://") ||
-        href.startsWith("https://") ||
-        href.startsWith("//");
-
-      if (isExternal) {
-        node.setAttribute("target", "_blank");
-        node.setAttribute("rel", "noopener noreferrer");
-      } else {
-        node.removeAttribute("target");
-        node.removeAttribute("rel");
-      }
-    }
-
-    if (node.tagName === "IMG") {
-      const src = node.getAttribute("src")?.trim() ?? "";
-      if (src.toLowerCase().startsWith("javascript:")) {
-        node.removeAttribute("src");
-      }
-    }
-  });
-
-  hooksRegistered = true;
+function isExternalHref(href: string): boolean {
+  return (
+    href.startsWith("http://") ||
+    href.startsWith("https://") ||
+    href.startsWith("//")
+  );
 }
 
 /**
  * Sanitize blog post HTML before storage or render.
- * Strips scripts, iframes, event handlers, javascript: URLs, and inline styles.
+ * Uses sanitize-html (no jsdom) so server actions work on Vercel.
  */
 export function sanitizeBlogHtml(html: string): string {
   if (!html || !html.trim()) {
     return "";
   }
 
-  registerSanitizeHooks();
+  return sanitizeHtml(html, {
+    allowedTags: ALLOWED_TAGS,
+    allowedAttributes: ALLOWED_ATTRIBUTES,
+    disallowedTagsMode: "discard",
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowedSchemesByTag: {
+      img: ["http", "https", "data"],
+    },
+    transformTags: {
+      a: (tagName, attribs) => {
+        const href = attribs.href?.trim() ?? "";
+        if (!href || href.toLowerCase().startsWith("javascript:")) {
+          const { href: _href, target: _target, rel: _rel, ...rest } = attribs;
+          return { tagName, attribs: rest };
+        }
 
-  return DOMPurify.sanitize(html, {
-    ALLOWED_TAGS,
-    ALLOWED_ATTR,
-    FORBID_TAGS: ["script", "iframe", "object", "embed", "form", "input", "style", "link", "meta"],
-    FORBID_ATTR: ["style", "onerror", "onclick", "onload", "onmouseover"],
-    ALLOW_DATA_ATTR: false,
+        if (isExternalHref(href)) {
+          return {
+            tagName,
+            attribs: {
+              ...attribs,
+              target: "_blank",
+              rel: "noopener noreferrer",
+            },
+          };
+        }
+
+        const { target: _target, rel: _rel, ...rest } = attribs;
+        return { tagName, attribs: rest };
+      },
+      img: (tagName, attribs) => {
+        const src = attribs.src?.trim() ?? "";
+        if (src.toLowerCase().startsWith("javascript:")) {
+          const { src: _src, ...rest } = attribs;
+          return { tagName, attribs: rest };
+        }
+        return { tagName, attribs };
+      },
+    },
   });
 }
