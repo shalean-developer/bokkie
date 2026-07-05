@@ -6,6 +6,14 @@ import { calculateReadingTime } from "@/lib/utils/reading-time";
 import { generateUniqueSlug } from "@/lib/utils/slug-generator";
 import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
 
+function normalizeSeoText(value: string | undefined): string | null {
+  if (!value || value === "undefined") {
+    return null;
+  }
+
+  return value;
+}
+
 function revalidateBlogCache(slug?: string): void {
   revalidatePath("/blog");
   revalidatePath("/sitemap.xml");
@@ -207,8 +215,8 @@ export async function createBlogPost(input: BlogPostInput): Promise<{ success: b
         author_name: user.user_metadata?.name || 'Bokkie Cleaning Services',
         status: input.status || 'draft',
         published_at: publishedAt,
-        seo_title: input.seo_title || null,
-        seo_description: input.seo_description || null,
+        seo_title: normalizeSeoText(input.seo_title),
+        seo_description: normalizeSeoText(input.seo_description),
         seo_keywords: input.seo_keywords || [],
         focus_keyword: input.focus_keyword || null,
         reading_time: readingTime,

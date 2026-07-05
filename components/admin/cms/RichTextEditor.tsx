@@ -74,7 +74,7 @@ export default function RichTextEditor({
 
   const emitChange = useCallback(
     (html: string) => {
-      const sanitized = sanitizeBlogHtml(html);
+      const sanitized = sanitizeBlogHtml(html ?? "");
       isInternalChange.current = true;
       onChange(sanitized);
     },

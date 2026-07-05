@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { calculateReadingTime, formatReadingTime } from "@/lib/utils/reading-time";
+import { hasMeaningfulHtmlContent, normalizeOptionalText } from "@/lib/utils/extract-html-meta";
 import SEOAnalyzer from "./SEOAnalyzer";
 import SEOPreview from "./SEOPreview";
 import BlogFeaturedImageUpload from "./BlogFeaturedImageUpload";
@@ -26,8 +27,8 @@ export default function BlogPostForm({
     content: initialData?.content || "",
     featured_image_url: initialData?.featured_image_url || "",
     status: initialData?.status || "draft",
-    seo_title: initialData?.seo_title || "",
-    seo_description: initialData?.seo_description || "",
+    seo_title: normalizeOptionalText(initialData?.seo_title),
+    seo_description: normalizeOptionalText(initialData?.seo_description),
     seo_keywords: initialData?.seo_keywords || [],
     focus_keyword: initialData?.focus_keyword || "",
     category: initialData?.category || "",
@@ -61,7 +62,7 @@ export default function BlogPostForm({
       return;
     }
 
-    if (!formData.content.trim()) {
+    if (!hasMeaningfulHtmlContent(formData.content)) {
       setError("Content is required");
       return;
     }
@@ -106,30 +107,33 @@ export default function BlogPostForm({
     });
   };
 
-  // Auto-generate SEO title and description if not set
   useEffect(() => {
-    if (!formData.seo_title && formData.title) {
-      const maxLength = 60;
-      const suffix = " | Bokkie Cleaning Services";
-      const availableLength = maxLength - suffix.length;
-      const seoTitle =
-        formData.title.length <= availableLength
-          ? `${formData.title}${suffix}`
-          : `${formData.title.substring(0, availableLength - 3)}...${suffix}`;
-      setFormData((prev) => ({ ...prev, seo_title: seoTitle }));
+    if (formData.seo_title || !formData.title) {
+      return;
     }
-  }, [formData.title]);
+
+    const maxLength = 60;
+    const suffix = " | Bokkie Cleaning Services";
+    const availableLength = maxLength - suffix.length;
+    const seoTitle =
+      formData.title.length <= availableLength
+        ? `${formData.title}${suffix}`
+        : `${formData.title.substring(0, availableLength - 3)}...${suffix}`;
+    setFormData((prev) => ({ ...prev, seo_title: seoTitle }));
+  }, [formData.title, formData.seo_title]);
 
   useEffect(() => {
-    if (!formData.seo_description && formData.excerpt) {
-      const maxLength = 155;
-      const seoDescription =
-        formData.excerpt.length <= maxLength
-          ? formData.excerpt
-          : `${formData.excerpt.substring(0, maxLength - 3)}...`;
-      setFormData((prev) => ({ ...prev, seo_description: seoDescription }));
+    if (formData.seo_description || !formData.excerpt) {
+      return;
     }
-  }, [formData.excerpt]);
+
+    const maxLength = 155;
+    const seoDescription =
+      formData.excerpt.length <= maxLength
+        ? formData.excerpt
+        : `${formData.excerpt.substring(0, maxLength - 3)}...`;
+    setFormData((prev) => ({ ...prev, seo_description: seoDescription }));
+  }, [formData.excerpt, formData.seo_description]);
 
   const readingTime = calculateReadingTime(formData.content);
   const blogUrl = initialData?.slug ? `/blog/${initialData.slug}` : "/blog/new-post";
@@ -188,7 +192,7 @@ export default function BlogPostForm({
             </label>
             <RichTextEditor
               value={formData.content}
-              onChange={(html) => setFormData({ ...formData, content: html })}
+              onChange={(html) => setFormData((prev) => ({ ...prev, content: html }))}
               disabled={isSubmitting}
               placeholder="Write your blog post content…"
               uploadUrl="/api/admin/blog/upload"

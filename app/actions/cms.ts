@@ -136,50 +136,70 @@ export async function getCMSContentById(id: string): Promise<CMSContent | null> 
   return data as CMSContent;
 }
 
+function normalizeSeoText(value: string | undefined): string | null {
+  if (!value || value === "undefined") {
+    return null;
+  }
+
+  return value;
+}
+
 /**
  * Create a new CMS content
  */
 export async function createCMSContent(input: CMSContentInput): Promise<{ success: boolean; id?: string; error?: string }> {
-  const supabase = await createClient();
-  
-  // Check authentication
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    return { success: false, error: 'Unauthorized' };
+  try {
+    const supabase = await createClient();
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return { success: false, error: 'Unauthorized' };
+    }
+
+    const { data: existingContent } = await supabase
+      .from('cms_content')
+      .select('slug');
+
+    const existingSlugs = existingContent?.map(c => c.slug) || [];
+    const slug = generateUniqueSlug(input.title, existingSlugs);
+    if (!slug) {
+      return {
+        success: false,
+        error: 'Title must include at least one letter or number to generate a URL slug',
+      };
+    }
+
+    const { data, error } = await supabase
+      .from('cms_content')
+      .insert({
+        slug,
+        title: input.title,
+        content: input.content ? sanitizeBlogHtml(input.content) : null,
+        content_type: input.content_type || 'page',
+        status: input.status || 'draft',
+        featured_image_url: input.featured_image_url || null,
+        focus_keyword: normalizeSeoText(input.focus_keyword),
+        seo_title: normalizeSeoText(input.seo_title),
+        seo_description: normalizeSeoText(input.seo_description),
+        seo_keywords: input.seo_keywords || [],
+        og_image_url: input.og_image_url || null,
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      console.error('Error creating CMS content:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, id: data.id };
+  } catch (error) {
+    console.error('Unexpected error creating CMS content:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create content',
+    };
   }
-
-  // Generate slug
-  const { data: existingContent } = await supabase
-    .from('cms_content')
-    .select('slug');
-  
-  const existingSlugs = existingContent?.map(c => c.slug) || [];
-  const slug = generateUniqueSlug(input.title, existingSlugs);
-
-  const { data, error } = await supabase
-    .from('cms_content')
-    .insert({
-      slug,
-      title: input.title,
-      content: input.content ? sanitizeBlogHtml(input.content) : null,
-      content_type: input.content_type || 'page',
-      status: input.status || 'draft',
-      featured_image_url: input.featured_image_url || null,
-      focus_keyword: input.focus_keyword || null,
-      seo_title: input.seo_title || null,
-      seo_description: input.seo_description || null,
-      seo_keywords: input.seo_keywords || [],
-      og_image_url: input.og_image_url || null,
-    })
-    .select('id')
-    .single();
-
-  if (error) {
-    console.error('Error creating CMS content:', error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true, id: data.id };
 }
 
 /**
@@ -234,10 +254,16 @@ export async function updateCMSContent(
           : existingContent.featured_image_url,
       focus_keyword:
         input.focus_keyword !== undefined
-          ? input.focus_keyword || null
+          ? normalizeSeoText(input.focus_keyword)
           : existingContent.focus_keyword,
-      seo_title: input.seo_title !== undefined ? input.seo_title : existingContent.seo_title,
-      seo_description: input.seo_description !== undefined ? input.seo_description : existingContent.seo_description,
+      seo_title:
+        input.seo_title !== undefined
+          ? normalizeSeoText(input.seo_title)
+          : existingContent.seo_title,
+      seo_description:
+        input.seo_description !== undefined
+          ? normalizeSeoText(input.seo_description)
+          : existingContent.seo_description,
       seo_keywords: input.seo_keywords !== undefined ? input.seo_keywords : existingContent.seo_keywords,
       og_image_url:
         input.og_image_url !== undefined

@@ -10,6 +10,8 @@ import RichTextEditor from "@/components/admin/cms/RichTextEditor";
 import {
   extractImagesFromHtml,
   extractLinksFromHtml,
+  hasMeaningfulHtmlContent,
+  normalizeOptionalText,
   stripHtmlToText,
 } from "@/lib/utils/extract-html-meta";
 import { calculateReadingTime, formatReadingTime } from "@/lib/utils/reading-time";
@@ -49,9 +51,9 @@ export default function CMSContentForm({
     content_type: initialData?.content_type || "page",
     status: initialData?.status || "draft",
     featured_image_url: initialData?.featured_image_url || "",
-    focus_keyword: initialData?.focus_keyword || "",
-    seo_title: initialData?.seo_title || "",
-    seo_description: initialData?.seo_description || "",
+    focus_keyword: normalizeOptionalText(initialData?.focus_keyword),
+    seo_title: normalizeOptionalText(initialData?.seo_title),
+    seo_description: normalizeOptionalText(initialData?.seo_description),
     seo_keywords: initialData?.seo_keywords || [],
     og_image_url: initialData?.og_image_url || "",
   });
@@ -60,30 +62,32 @@ export default function CMSContentForm({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!formData.seo_title && formData.title) {
-      const maxLength = 60;
-      const suffix = " | Bokkie Cleaning Services";
-      const availableLength = maxLength - suffix.length;
-      const seoTitle =
-        formData.title.length <= availableLength
-          ? `${formData.title}${suffix}`
-          : `${formData.title.substring(0, availableLength - 3)}...${suffix}`;
-      setFormData((prev) => ({ ...prev, seo_title: seoTitle }));
+    if (formData.seo_title || !formData.title) {
+      return;
     }
+
+    const maxLength = 60;
+    const suffix = " | Bokkie Cleaning Services";
+    const availableLength = maxLength - suffix.length;
+    const seoTitle =
+      formData.title.length <= availableLength
+        ? `${formData.title}${suffix}`
+        : `${formData.title.substring(0, availableLength - 3)}...${suffix}`;
+    setFormData((prev) => ({ ...prev, seo_title: seoTitle }));
   }, [formData.title, formData.seo_title]);
 
   useEffect(() => {
-    if (!formData.seo_description && formData.content) {
-      const plainText = stripHtmlToText(formData.content);
-      if (!plainText) return;
-
-      const maxLength = 155;
-      const seoDescription =
-        plainText.length <= maxLength
-          ? plainText
-          : `${plainText.substring(0, maxLength - 3)}...`;
-      setFormData((prev) => ({ ...prev, seo_description: seoDescription }));
+    if (formData.seo_description || !hasMeaningfulHtmlContent(formData.content)) {
+      return;
     }
+
+    const plainText = stripHtmlToText(formData.content || "");
+    const maxLength = 155;
+    const seoDescription =
+      plainText.length <= maxLength
+        ? plainText
+        : `${plainText.substring(0, maxLength - 3)}...`;
+    setFormData((prev) => ({ ...prev, seo_description: seoDescription }));
   }, [formData.content, formData.seo_description]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,7 +99,7 @@ export default function CMSContentForm({
       return;
     }
 
-    if (!formData.content?.trim()) {
+    if (!hasMeaningfulHtmlContent(formData.content)) {
       setError("Content is required");
       return;
     }
@@ -173,7 +177,7 @@ export default function CMSContentForm({
             </label>
             <RichTextEditor
               value={formData.content || ""}
-              onChange={(html) => setFormData({ ...formData, content: html })}
+              onChange={(html) => setFormData((prev) => ({ ...prev, content: html }))}
               disabled={isSubmitting}
               placeholder="Write your content…"
               uploadUrl="/api/admin/cms/upload"

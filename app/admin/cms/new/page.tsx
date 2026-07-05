@@ -21,7 +21,7 @@ export default function NewCMSPage() {
       return result;
     } catch (error) {
       console.error("Error creating CMS content:", error);
-      return { success: false, error: "Failed to create content" };
+      return { success: false, error: error instanceof Error ? error.message : "Failed to create content" };
     } finally {
       setIsSubmitting(false);
     }

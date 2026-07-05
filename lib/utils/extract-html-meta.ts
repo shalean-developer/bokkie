@@ -38,8 +38,24 @@ export function extractLinksFromHtml(html: string): {
 }
 
 export function stripHtmlToText(html: string): string {
+  if (typeof html !== "string") {
+    return "";
+  }
+
   return html
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+export function hasMeaningfulHtmlContent(html: string | undefined | null): boolean {
+  return stripHtmlToText(html ?? "").length > 0;
+}
+
+export function normalizeOptionalText(value: string | null | undefined): string {
+  if (!value || value === "undefined") {
+    return "";
+  }
+
+  return value;
 }
