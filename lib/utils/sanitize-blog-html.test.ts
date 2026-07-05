@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { sanitizeBlogHtml } from "./sanitize-blog-html";
+import { addHeadingIdsToHtml, sanitizeBlogHtml } from "./sanitize-blog-html";
 
 describe("sanitizeBlogHtml", () => {
   it("removes script tags", () => {
@@ -27,5 +27,15 @@ describe("sanitizeBlogHtml", () => {
     const result = sanitizeBlogHtml(html);
     assert.match(result, /<h2>Title<\/h2>/);
     assert.match(result, /<ul><li>One<\/li><\/ul>/);
+  });
+
+  it("adds id attributes to headings for anchors", () => {
+    const html =
+      '<h2><span>What Is the Average House Cleaning Cost in Cape Town?</span></h2>';
+    const result = addHeadingIdsToHtml(html);
+    assert.match(
+      result,
+      /<h2 id="what-is-the-average-house-cleaning-cost-in-cape-town">/
+    );
   });
 });

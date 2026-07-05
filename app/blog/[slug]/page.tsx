@@ -12,7 +12,7 @@ import { generateBlogSEOMetadata } from "@/lib/seo/blog-seo";
 import { generateBlogPostSchema, generateBreadcrumbSchema } from "@/lib/seo/schema-generator";
 import { siteConfig, toAbsoluteUrl } from "@/lib/seo";
 import { formatReadingTime } from "@/lib/utils/reading-time";
-import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
+import { addHeadingIdsToHtml, sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
 import { Calendar, Clock, ArrowLeft, Tag } from "lucide-react";
 
 export const revalidate = 300;
@@ -57,7 +57,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  const sanitizedContent = sanitizeBlogHtml(post.content);
+  const sanitizedContent = addHeadingIdsToHtml(sanitizeBlogHtml(post.content));
   const postUrl = `${siteConfig.url}/blog/${post.slug}`;
 
   // Increment views (fire and forget)
@@ -161,6 +161,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
                 fill
                 className="object-cover"
                 priority
+                unoptimized={post.featured_image_url.includes("supabase.co")}
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
               />
             </div>

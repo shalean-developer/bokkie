@@ -139,9 +139,9 @@ export default async function BlogPage({
           ]}
         />
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-          <div className="max-w-3xl mx-auto mb-8">
-            <form action="/blog" method="get" role="search" className="relative">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 max-w-7xl">
+          <div className="mb-8">
+            <form action="/blog" method="get" role="search" className="relative max-w-xl">
               <label htmlFor="blog-search" className="sr-only">
                 Search blog posts
               </label>
@@ -162,7 +162,7 @@ export default async function BlogPage({
           </div>
 
           {categories.length > 0 && (
-            <nav aria-label="Blog categories" className="max-w-3xl mx-auto mb-8">
+            <nav aria-label="Blog categories" className="mb-8">
               <div className="flex flex-wrap gap-2">
                 <Link
                   href={search ? `/blog?search=${encodeURIComponent(search)}` : "/blog"}
@@ -194,7 +194,7 @@ export default async function BlogPage({
           )}
 
           {(search || activeCategory) && (
-            <p className="max-w-3xl mx-auto mb-6 text-sm text-gray-600">
+            <p className="mb-6 text-sm text-gray-600">
               {search && activeCategory
                 ? `Showing results for "${search}" in ${activeCategory.name}`
                 : search
@@ -216,7 +216,7 @@ export default async function BlogPage({
               )}
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto divide-y divide-gray-200 border border-gray-200 rounded-xl overflow-hidden bg-white">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
               {posts.map((post) => (
                 <BlogPostCard
                   key={post.id}
@@ -226,12 +226,14 @@ export default async function BlogPage({
                   publishedAt={post.published_at}
                   readingTime={post.reading_time}
                   category={post.category}
+                  featuredImageUrl={post.featured_image_url}
+                  authorName={post.author_name}
                 />
               ))}
             </div>
           )}
 
-          <aside className="max-w-3xl mx-auto mt-10 sm:mt-12 p-5 sm:p-6 bg-brand-surface border border-gray-200 rounded-xl">
+          <aside className="mt-10 sm:mt-12 p-5 sm:p-6 bg-brand-surface border border-gray-200 rounded-xl">
             <h2 className="font-bold text-gray-900 mb-2">Need professional help?</h2>
             <p className="text-sm text-gray-600 mb-4">
               Book vetted cleaners in Cape Town for residential, commercial, and deep cleaning services.
