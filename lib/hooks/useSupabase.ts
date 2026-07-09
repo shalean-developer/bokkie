@@ -18,23 +18,33 @@ export function useUser() {
       return;
     }
 
-    const supabase = createClient();
+    let subscription: { unsubscribe: () => void } | null = null;
 
-    // Get initial user
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setUser(user);
+    try {
+      const supabase = createClient();
+
+      supabase.auth
+        .getUser()
+        .then(({ data: { user } }) => {
+          setUser(user);
+          setLoading(false);
+        })
+        .catch(() => {
+          setLoading(false);
+        });
+
+      const {
+        data: { subscription: authSubscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setUser(session?.user ?? null);
+      });
+      subscription = authSubscription;
+    } catch {
       setLoading(false);
-    });
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
+    }
 
     return () => {
-      subscription.unsubscribe();
+      subscription?.unsubscribe();
     };
   }, []);
 

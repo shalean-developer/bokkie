@@ -1,37 +1,24 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSupabasePublicConfig } from "@/lib/supabase/config";
 
 /**
  * Create a Supabase client for middleware use
  * This ensures auth sessions are refreshed on each request
  */
 export async function updateSession(request: NextRequest) {
-  // Check for required environment variables
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const config = getSupabasePublicConfig();
 
-  // If environment variables are missing, return next response without auth
-  if (!supabaseUrl || !supabaseAnonKey) {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Middleware] Missing Supabase environment variables - auth checks disabled');
+  // If environment variables are missing or invalid, continue without auth
+  if (!config) {
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "[Middleware] Missing or invalid Supabase environment variables - auth checks disabled"
+      );
     }
-    return NextResponse.next({
-      request,
-    });
-  }
-
-  // Validate Supabase URL format
-  try {
-    const url = new URL(supabaseUrl);
-    if (!url.hostname.includes('supabase.co') && !url.hostname.includes('supabase')) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('[Middleware] Supabase URL does not appear to be a valid Supabase URL:', supabaseUrl);
-      }
-    }
-  } catch {
-    if (process.env.NODE_ENV === 'development') {
-      console.warn('[Middleware] Invalid Supabase URL format:', supabaseUrl);
-    }
+    const response = NextResponse.next({ request });
+    response.headers.set("x-pathname", request.nextUrl.pathname);
+    return response;
   }
 
   let supabaseResponse = NextResponse.next({
@@ -39,10 +26,7 @@ export async function updateSession(request: NextRequest) {
   });
 
   try {
-    const supabase = createServerClient(
-      supabaseUrl,
-      supabaseAnonKey,
-      {
+    const supabase = createServerClient(config.url, config.anonKey, {
         cookies: {
           getAll() {
             return request.cookies.getAll();

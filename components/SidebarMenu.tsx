@@ -319,6 +319,12 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
                     </button>
                     <button
                       onClick={async () => {
+                        if (!isSupabaseConfigured()) {
+                          router.push("/cleaner/login");
+                          onClose();
+                          return;
+                        }
+
                         const supabase = createClient();
                         await supabase.auth.signOut();
                         router.push("/cleaner/login");
