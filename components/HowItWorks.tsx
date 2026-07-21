@@ -1,72 +1,61 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Sparkles, ShieldCheck, Home, Leaf, CalendarCheck } from "lucide-react";
+import { Sparkles, Clock, Star, Smile } from "lucide-react";
 
 const features = [
   {
     icon: Sparkles,
-    title: "Room-by-room excellence",
+    title: "Attention to Every Detail",
     description:
-      "From kitchens and bathrooms to bedrooms and living areas, we follow a thorough checklist so every corner of your home is cleaned properly.",
+      "We don't just clean the obvious areas. We focus on the small details that leave your space looking fresh, spotless, and well cared for.",
     align: "right" as const,
   },
   {
-    icon: ShieldCheck,
-    title: "Vetted, insured cleaners",
+    icon: Smile,
+    title: "Customer-Focused Cleaning Service",
     description:
-      "Every cleaner is background-checked, insured, and trained before entering your home. You get peace of mind, not just a clean house.",
+      "Your satisfaction is at the heart of everything we do. We listen to your needs and strive to exceed your expectations with every visit.",
     align: "right" as const,
   },
   {
-    icon: Home,
-    title: "Safe for your household",
+    icon: Clock,
+    title: "Reliable & Punctual Service",
     description:
-      "We use effective, family-friendly products that tackle grime and germs while being gentle on surfaces, children, and pets.",
+      "We value your time by arriving on schedule, communicating clearly, and completing every cleaning efficiently and professionally.",
     align: "left" as const,
-    secondaryIcon: Leaf,
   },
   {
-    icon: CalendarCheck,
-    title: "Fits your schedule",
+    icon: Star,
+    title: "Experienced House Cleaning Professionals",
     description:
-      "Need a once-off deep clean or regular weekly visits? Book one-time, weekly, bi-weekly, or monthly house cleans across Cape Town.",
+      "Our trained and experienced cleaners deliver consistent, high-quality results with care, professionalism, and attention to detail.",
     align: "left" as const,
   },
 ];
 function FeatureBlock({
   icon: Icon,
-  secondaryIcon: SecondaryIcon,
   title,
   description,
   align,
 }: {
   icon: (typeof features)[number]["icon"];
-  secondaryIcon?: (typeof features)[number]["secondaryIcon"];
   title: string;
   description: string;
   align: "left" | "right";
 }) {
   return (
-    <div className={align === "right" ? "lg:text-right" : "lg:text-left"}>
-      <div
-        className={`mb-3 ${
-          align === "right" ? "lg:flex lg:justify-end" : "lg:flex lg:justify-start"
-        }`}
-      >
-        <span className="relative inline-flex items-center justify-center w-12 h-12">
-          <Icon className="w-10 h-10 text-brand-primary" strokeWidth={1.25} />
-          {SecondaryIcon && (
-            <SecondaryIcon
-              className="absolute bottom-0 right-0 w-4 h-4 text-brand-primary"
-              strokeWidth={1.5}
-            />
-          )}
-        </span>
-      </div>
-      <h3 className="text-sm sm:text-base font-bold text-gray-900 uppercase tracking-wide mb-2">
+    <div
+      className={`flex flex-col gap-3 max-w-[280px] mx-auto ${
+        align === "right" ? "lg:ml-auto lg:mr-0 lg:items-end lg:text-right" : "lg:mr-auto lg:ml-0 lg:items-start lg:text-left"
+      } items-center text-center`}
+    >
+      <span className="inline-flex items-center justify-center w-12 h-12 shrink-0">
+        <Icon className="w-10 h-10 text-brand-primary" strokeWidth={1.25} />
+      </span>
+      <h3 className="text-sm sm:text-base font-bold text-gray-900 uppercase tracking-wide">
         {title}
       </h3>
-      <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto lg:mx-0 lg:max-w-[240px]">
+      <p className="text-gray-500 text-sm leading-relaxed">
         {description}
       </p>
     </div>
@@ -78,8 +67,8 @@ export default function HowItWorks() {
   const rightFeatures = features.filter((f) => f.align === "left");
 
   return (
-    <section id="how-it-works" className="py-16 sm:py-20 lg:py-24 bg-brand-surface">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section id="how-it-works" className="bg-brand-surface">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
         <div className="text-center mb-12 lg:mb-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 uppercase tracking-wide mb-3">
             Why Choose Us
@@ -90,7 +79,8 @@ export default function HowItWorks() {
             renters enjoy spotless homes without the stress.
             <br className="hidden sm:block" />
             Here&apos;s why families choose us for their regular and deep cleans.
-          </p>        </div>
+          </p>
+        </div>
 
         <div className="hidden lg:grid lg:grid-cols-[1fr_auto_1fr] lg:grid-rows-2 gap-x-10 xl:gap-x-16 gap-y-14 items-center mb-12">
           <div className="row-start-1 col-start-1 self-end">
@@ -104,7 +94,7 @@ export default function HowItWorks() {
             <div className="relative w-56 h-56 xl:w-64 xl:h-64 rounded-full overflow-hidden border-4 border-white shadow-xl ring-1 ring-gray-100">
               <Image
                 src="/image/why-choose-us-kitchen.png"
-                alt="Bright, modern kitchen after professional cleaning"
+                alt="Professional cleaner deep cleaning a washing machine with gloves and cleaning supplies"
                 fill
                 className="object-cover object-center"
                 sizes="(max-width: 1280px) 224px, 256px"
@@ -124,7 +114,7 @@ export default function HowItWorks() {
           <div className="relative w-56 h-56 sm:w-64 sm:h-64 mx-auto rounded-full overflow-hidden border-4 border-white shadow-xl ring-1 ring-gray-100">
             <Image
               src="/image/why-choose-us-kitchen.png"
-              alt="Bright, modern kitchen after professional cleaning"
+              alt="Professional cleaner deep cleaning a washing machine with gloves and cleaning supplies"
               fill
               className="object-cover object-center"
               sizes="(max-width: 640px) 224px, 256px"
@@ -144,6 +134,15 @@ export default function HowItWorks() {
           >
             Learn more about booking
           </Link>
+        </div>
+      </div>
+
+      <div className="bg-brand-primary">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="py-2.5 text-center text-sm text-white/90 leading-snug">
+            Our commitment to quality is built on more than great cleaning, it&apos;s built on
+            the values that shape our business every day.
+          </p>
         </div>
       </div>
     </section>

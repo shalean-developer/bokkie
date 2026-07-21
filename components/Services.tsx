@@ -27,7 +27,7 @@ const services = [
     fullDescription:
       "Deep cleaning goes beyond regular maintenance with intensive scrubbing of kitchens, bathrooms, appliances, and hard-to-reach areas. Perfect for seasonal refreshes, post-renovation tidy-ups, or when your home needs a full reset.",
     tags: ["deep clean", "spring clean", "thorough scrub", "appliances", "detailed", "top-to-bottom"],
-    image: "/image/blog-spotless-living-room.png",
+    image: "/image/service-deep-bedroom.png",
     bookingHref: "/book/deep-cleaning",
   },
   {
@@ -94,16 +94,20 @@ function BookNowButton({ href }: { href: string }) {
   );
 }
 
-interface ServicesProps {
-  pricingByCategoryId?: Record<string, number>;
+function formatFromPrice(amount: number): string {
+  return `From R${Math.round(amount)}`;
 }
 
-export default function Services(_props: ServicesProps) {
+interface ServicesProps {
+  pricingByServiceId?: Record<string, number>;
+}
+
+export default function Services({ pricingByServiceId = {} }: ServicesProps) {
   const [expandedId, setExpandedId] = useState<string | null>(services[0].id);
 
   return (
-    <section id="services" className="py-16 sm:py-20 lg:py-24 bg-brand-primary-dark">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section id="services" className="bg-brand-primary-dark">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 mb-12 lg:mb-16">
           <div>
             <p className="flex items-center gap-2 text-brand-accent text-sm font-semibold tracking-wide uppercase mb-4">
@@ -126,6 +130,9 @@ export default function Services(_props: ServicesProps) {
         <div className="space-y-3 sm:space-y-4">
           {services.map((service) => {
             const isExpanded = expandedId === service.id;
+            const fromPrice = pricingByServiceId[service.id];
+            const priceLabel =
+              typeof fromPrice === "number" ? formatFromPrice(fromPrice) : null;
 
             if (isExpanded) {
               return (
@@ -149,9 +156,16 @@ export default function Services(_props: ServicesProps) {
                       <span className="text-5xl sm:text-6xl font-light text-gray-300 leading-none">
                         {service.number}
                       </span>
-                      <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 mt-4 mb-4 capitalize">
-                        {service.title}
-                      </h3>
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1 mt-4 mb-4">
+                        <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 capitalize">
+                          {service.title}
+                        </h3>
+                        {priceLabel && (
+                          <span className="text-base sm:text-lg font-semibold text-brand-primary">
+                            {priceLabel}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-gray-600 leading-relaxed mb-6">
                         {service.fullDescription}
                       </p>
@@ -193,9 +207,16 @@ export default function Services(_props: ServicesProps) {
                   {service.number}
                 </span>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-lg sm:text-xl font-bold text-white capitalize mb-1">
-                    {service.title}
-                  </h3>
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 mb-1">
+                    <h3 className="text-lg sm:text-xl font-bold text-white capitalize">
+                      {service.title}
+                    </h3>
+                    {priceLabel && (
+                      <span className="text-sm sm:text-base font-semibold text-brand-accent">
+                        {priceLabel}
+                      </span>
+                    )}
+                  </div>
                   <p className="text-white/50 text-sm sm:text-base line-clamp-2">
                     {service.shortDescription}
                   </p>
@@ -207,7 +228,37 @@ export default function Services(_props: ServicesProps) {
             );
           })}
         </div>
+
+        <div className="h-2.5" aria-hidden="true" />
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 rounded-2xl bg-white/[0.06] border border-white/10 px-5 sm:px-8 py-5 sm:py-6">
+          <div className="min-w-0">
+            <p className="text-lg sm:text-xl font-bold text-white mb-1">
+              Not sure which service is right for you?
+            </p>
+            <p className="text-white/70 text-sm sm:text-base leading-relaxed">
+              Our friendly team is happy to help you choose the best cleaning solution
+            </p>
+          </div>
+          <Link
+            href="/booking/quote"
+            className="inline-flex items-center justify-center gap-2 self-start sm:self-auto shrink-0 rounded-2xl bg-white hover:bg-white/95 text-brand-primary font-semibold px-5 py-3 transition-colors"
+          >
+            Get a quote
+            <ArrowRight className="w-4 h-4" strokeWidth={2.5} />
+          </Link>
+        </div>
+      </div>
+
+      <div className="bg-brand-primary">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="py-2.5 text-center text-sm text-white/90 leading-snug">
+            A great cleaning service isn&apos;t just described, it&apos;s demonstrated. See the
+            transformations our team delivers every day.
+          </p>
+        </div>
       </div>
     </section>
   );
 }
+

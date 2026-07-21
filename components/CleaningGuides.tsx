@@ -140,8 +140,8 @@ export default async function CleaningGuides() {
   }
 
   return (
-    <section id="blog" className="py-16 sm:py-20 lg:py-24 bg-brand-surface">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section id="blog" className="bg-brand-surface">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
         {/* Header */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start mb-10 lg:mb-12 pb-8 border-b border-gray-200">
           <h2 className="text-3xl sm:text-4xl lg:text-[2.75rem] font-bold text-gray-900 leading-tight">
@@ -161,6 +161,15 @@ export default async function CleaningGuides() {
           {posts.map((post, index) => (
             <BlogCard key={post.slug} {...post} highlighted={index === 1} />
           ))}
+        </div>
+      </div>
+
+      <div className="bg-brand-primary">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="py-2.5 text-center text-sm text-white/90 leading-snug">
+            Don&apos;t just take our word for it, see what our customers have to say about their
+            experience with Bokkie Cleaning Services.
+          </p>
         </div>
       </div>
     </section>

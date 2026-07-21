@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
 import Hero from "@/components/Hero";
+import TrustBar from "@/components/TrustBar";
 import Services from "@/components/Services";
-import { getServiceCategoryPricing } from "@/lib/supabase/booking-data";
+import { getServiceTypePricing } from "@/lib/supabase/booking-data";
+import { FALLBACK_PRICING_CONFIG } from "@/lib/pricing";
 import ServiceAreas from "@/components/ServiceAreas";
 import HowItWorks from "@/components/HowItWorks";
+import AboutUs from "@/components/AboutUs";
+import BeforeAfter from "@/components/BeforeAfter";
 import Testimonials from "@/components/Testimonials";
+import HomeFaq from "@/components/HomeFaq";
 import FeaturedCleaners from "@/components/FeaturedCleaners";
 import CleaningGuides from "@/components/CleaningGuides";
 import Contact from "@/components/Contact";
@@ -70,10 +75,13 @@ export const metadata: Metadata = {
 };
 
 export default async function Home() {
-  const categoryPricing = await getServiceCategoryPricing();
-  const pricingByCategoryId = Object.fromEntries(
-    categoryPricing.map((pricing) => [pricing.category_id, pricing.display_price])
-  );
+  const serviceTypePricing = await getServiceTypePricing();
+  const pricingByServiceId: Record<string, number> = {
+    ...FALLBACK_PRICING_CONFIG.basePrices,
+    ...Object.fromEntries(
+      serviceTypePricing.map((pricing) => [pricing.service_type, Number(pricing.base_price)])
+    ),
+  };
 
   const homepageUrl = generateCanonicalUrl("/");
 
@@ -109,12 +117,16 @@ export default async function Home() {
       />
       <main className="min-h-screen">
         <Hero />
-        <Services pricingByCategoryId={pricingByCategoryId} />
-        <HowItWorks />
+        <TrustBar />
+        <Services pricingByServiceId={pricingByServiceId} />
+        <BeforeAfter />
         <FeaturedCleaners />
+        <HowItWorks />
+        <AboutUs />
         <ServiceAreas />
-        <Testimonials />
         <CleaningGuides />
+        <Testimonials />
+        <HomeFaq />
         <Contact />
         <Footer />
         <FloatingContactButtons />

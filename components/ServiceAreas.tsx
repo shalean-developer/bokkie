@@ -68,8 +68,8 @@ const areaRegions = [
 
 export default function ServiceAreas() {
   return (
-    <section id="service-areas" className="py-16 sm:py-20 lg:py-24 bg-brand-surface">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section id="service-areas" className="bg-brand-surface">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
         <div className="text-center max-w-3xl mx-auto mb-10 lg:mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gray-200 bg-gray-50/80 text-sm text-gray-600 mb-6">
             <MapPinned className="w-3.5 h-3.5 text-brand-primary" />
@@ -149,6 +149,15 @@ export default function ServiceAreas() {
               <ArrowRight className="w-4 h-4 text-brand-primary" strokeWidth={2.5} />
             </span>
           </Link>
+        </div>
+      </div>
+
+      <div className="bg-brand-primary">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="py-2.5 text-center text-sm text-white/90 leading-snug">
+            Looking for expert cleaning advice and practical home care tips? Explore our
+            latest articles below.
+          </p>
         </div>
       </div>
     </section>

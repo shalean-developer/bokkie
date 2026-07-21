@@ -41,8 +41,8 @@ export default function Testimonials() {
   }
 
   return (
-    <section id="testimonials" className="py-16 sm:py-20 lg:py-24 bg-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+    <section id="testimonials" className="bg-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center">
           {/* Left */}
           <div>
@@ -132,6 +132,15 @@ export default function Testimonials() {
               <meta itemProp="bestRating" content="5" />
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="bg-brand-primary">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <p className="py-2.5 text-center text-sm text-white/90 leading-snug">
+            Still have a few questions? We&apos;ve answered some of the most common questions to
+            help you book with confidence.
+          </p>
         </div>
       </div>
     </section>
