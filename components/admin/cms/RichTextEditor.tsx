@@ -18,7 +18,6 @@ import {
   Underline,
   Undo2,
 } from "lucide-react";
-import { sanitizeBlogHtml } from "@/lib/utils/sanitize-blog-html";
 import {
   prepareBlogImageForUpload,
   BlogImageValidationError,
@@ -50,33 +49,44 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
-  const isInternalChange = useRef(false);
+  // Tracks HTML we last pushed to the parent so external value sync
+  // does not fight live typing (and SEO can update on every keystroke).
+  const lastEmittedHtml = useRef<string | null>(null);
   const [showSource, setShowSource] = useState(false);
   const [sourceValue, setSourceValue] = useState(value);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [pendingImage, setPendingImage] = useState<{
+    url: string;
+    alt: string;
+  } | null>(null);
 
   useEffect(() => {
-    if (isInternalChange.current) {
-      isInternalChange.current = false;
-      return;
-    }
-
     if (showSource) {
       setSourceValue(value);
       return;
     }
 
-    if (editorRef.current && editorRef.current.innerHTML !== value) {
+    if (!editorRef.current) return;
+
+    // Skip overwriting the editable surface when the incoming value is
+    // the same HTML we just emitted from typing/toolbar actions.
+    if (lastEmittedHtml.current === value) {
+      return;
+    }
+
+    if (editorRef.current.innerHTML !== (value || "")) {
       editorRef.current.innerHTML = value || "";
     }
   }, [value, showSource]);
 
   const emitChange = useCallback(
     (html: string) => {
-      const sanitized = sanitizeBlogHtml(html ?? "");
-      isInternalChange.current = true;
-      onChange(sanitized);
+      // Emit live editor HTML immediately so SEO score / word counts update
+      // while typing. Sanitization still happens on save in server actions.
+      const next = html ?? "";
+      lastEmittedHtml.current = next;
+      onChange(next);
     },
     [onChange]
   );
@@ -141,16 +151,7 @@ export default function RichTextEditor({
         throw new Error(data.error || "Upload failed");
       }
 
-      const alt =
-        window.prompt("Alt text for accessibility (recommended):", "") || "";
-
-      focusEditor();
-      const imgHtml = `<img src="${data.url}" alt="${alt.replace(/"/g, "&quot;")}" />`;
-      document.execCommand("insertHTML", false, imgHtml);
-
-      if (editorRef.current) {
-        emitChange(editorRef.current.innerHTML);
-      }
+      setPendingImage({ url: data.url, alt: "" });
     } catch (err) {
       if (err instanceof BlogImageValidationError) {
         setUploadError(err.message);
@@ -165,6 +166,20 @@ export default function RichTextEditor({
         imageInputRef.current.value = "";
       }
     }
+  };
+
+  const insertPendingImage = () => {
+    if (!pendingImage || disabled || showSource) return;
+
+    const alt = pendingImage.alt.replace(/"/g, "&quot;");
+    focusEditor();
+    const imgHtml = `<img src="${pendingImage.url}" alt="${alt}" />`;
+    document.execCommand("insertHTML", false, imgHtml);
+
+    if (editorRef.current) {
+      emitChange(editorRef.current.innerHTML);
+    }
+    setPendingImage(null);
   };
 
   const handleImageFiles = (files: FileList | null) => {
@@ -247,10 +262,67 @@ export default function RichTextEditor({
         onChange={(e) => handleImageFiles(e.target.files)}
       />
 
+      {pendingImage && (
+        <div className="flex flex-col sm:flex-row sm:items-end gap-3 p-3 border-b border-gray-200 bg-blue-50">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={pendingImage.url}
+            alt=""
+            className="w-16 h-16 rounded object-cover border border-gray-200 bg-white flex-shrink-0"
+          />
+          <div className="flex-1 min-w-0">
+            <label className="block text-xs font-medium text-gray-700 mb-1">
+              Image alt attributes
+            </label>
+            <input
+              type="text"
+              value={pendingImage.alt}
+              onChange={(e) =>
+                setPendingImage((prev) =>
+                  prev ? { ...prev, alt: e.target.value } : prev
+                )
+              }
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  insertPendingImage();
+                }
+              }}
+              disabled={disabled}
+              autoFocus
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm bg-white"
+              placeholder="Describe this image for SEO & accessibility…"
+            />
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => setPendingImage(null)}
+              disabled={disabled}
+              className="px-3 py-2 text-sm border border-gray-300 rounded-lg text-gray-700 hover:bg-white"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={insertPendingImage}
+              disabled={disabled}
+              className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+            >
+              Insert image
+            </button>
+          </div>
+        </div>
+      )}
+
       {showSource ? (
         <textarea
           value={sourceValue}
-          onChange={(e) => setSourceValue(e.target.value)}
+          onChange={(e) => {
+            const next = e.target.value;
+            setSourceValue(next);
+            emitChange(next);
+          }}
           onBlur={handleSourceBlur}
           disabled={disabled}
           rows={16}

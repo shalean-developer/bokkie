@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import type { CMSContentInput } from "@/app/actions/cms";
 import BlogFeaturedImageUpload from "@/components/admin/blog/BlogFeaturedImageUpload";
 import SEOAnalyzer from "@/components/admin/blog/SEOAnalyzer";
 import SEOPreview from "@/components/admin/blog/SEOPreview";
 import RichTextEditor from "@/components/admin/cms/RichTextEditor";
 import {
-  extractImagesFromHtml,
-  extractLinksFromHtml,
   hasMeaningfulHtmlContent,
   normalizeOptionalText,
   stripHtmlToText,
@@ -129,16 +127,6 @@ export default function CMSContentForm({
 
   const readingTime = calculateReadingTime(formData.content || "");
   const previewUrl = getPreviewUrl(initialData?.slug, formData.content_type);
-
-  const { internal: internalLinks, external: externalLinks } = useMemo(
-    () => extractLinksFromHtml(formData.content || ""),
-    [formData.content]
-  );
-
-  const contentImages = useMemo(
-    () => extractImagesFromHtml(formData.content || ""),
-    [formData.content]
-  );
 
   const seoDescriptionSource =
     formData.seo_description || stripHtmlToText(formData.content || "").slice(0, 155);
@@ -261,10 +249,11 @@ export default function CMSContentForm({
               focusKeyword={formData.focus_keyword || ""}
               seoTitle={formData.seo_title}
               seoDescription={formData.seo_description}
-              images={contentImages}
-              internalLinks={internalLinks}
-              externalLinks={externalLinks}
+              featuredImageUrl={formData.featured_image_url || formData.og_image_url}
               hasSchema
+              onContentChange={(html) =>
+                setFormData((prev) => ({ ...prev, content: html }))
+              }
             />
           </div>
 

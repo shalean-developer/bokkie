@@ -2,7 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { calculateReadingTime, formatReadingTime } from "@/lib/utils/reading-time";
-import { hasMeaningfulHtmlContent, normalizeOptionalText } from "@/lib/utils/extract-html-meta";
+import {
+  hasMeaningfulHtmlContent,
+  normalizeOptionalText,
+} from "@/lib/utils/extract-html-meta";
 import SEOAnalyzer from "./SEOAnalyzer";
 import SEOPreview from "./SEOPreview";
 import BlogFeaturedImageUpload from "./BlogFeaturedImageUpload";
@@ -137,13 +140,6 @@ export default function BlogPostForm({
 
   const readingTime = calculateReadingTime(formData.content);
   const blogUrl = initialData?.slug ? `/blog/${initialData.slug}` : "/blog/new-post";
-
-  // Extract images from content (simple regex)
-  const imageMatches = formData.content.match(/<img[^>]+alt=["']([^"']+)["']/gi) || [];
-  const images = imageMatches.map((match) => {
-    const altMatch = match.match(/alt=["']([^"']+)["']/i);
-    return { alt: altMatch ? altMatch[1] : undefined };
-  });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -312,15 +308,17 @@ export default function BlogPostForm({
             <h3 className="font-semibold text-gray-900 mb-4">SEO Analysis</h3>
             <SEOAnalyzer
               title={formData.title}
-              description={formData.excerpt || ""}
-              content={formData.content}
+              description={formData.excerpt || formData.seo_description || ""}
+              content={formData.content || ""}
               focusKeyword={formData.focus_keyword || ""}
               seoTitle={formData.seo_title}
               seoDescription={formData.seo_description}
-              images={images}
-              internalLinks={formData.internal_links || []}
-              externalLinks={[]}
-              hasSchema={true}
+              featuredImageUrl={formData.featured_image_url || formData.og_image_url}
+              extraInternalLinks={formData.internal_links || []}
+              hasSchema
+              onContentChange={(html) =>
+                setFormData((prev) => ({ ...prev, content: html }))
+              }
             />
           </div>
 
