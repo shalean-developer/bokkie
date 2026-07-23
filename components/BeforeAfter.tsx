@@ -75,7 +75,7 @@ export default function BeforeAfter() {
 
         <div className="mt-10 lg:mt-12 text-center">
           <p className="text-xs text-gray-400 mb-5">
-            Drag any slider yourself to pause the auto-play and compare in detail
+            Drag the white handle left or right to compare — scroll the page normally on mobile
           </p>
           <Link
             href="/booking/service/deep/details"

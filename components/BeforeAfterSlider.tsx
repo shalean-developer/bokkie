@@ -12,6 +12,17 @@ type BeforeAfterSliderProps = {
   description: string;
 };
 
+/** Pixels of movement before we decide horizontal vs vertical intent */
+const AXIS_LOCK_THRESHOLD_PX = 8;
+
+type DragSession = {
+  pointerId: number;
+  startX: number;
+  startY: number;
+  /** null = undecided, true = horizontal slider drag, false = vertical scroll (ignore) */
+  axis: boolean | null;
+};
+
 export default function BeforeAfterSlider({
   beforeSrc,
   afterSrc,
@@ -21,6 +32,9 @@ export default function BeforeAfterSlider({
   description,
 }: BeforeAfterSliderProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const handleRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef<DragSession | null>(null);
+
   const [position, setPosition] = useState(100);
   const [dragging, setDragging] = useState(false);
   const [userControlled, setUserControlled] = useState(false);
@@ -50,7 +64,6 @@ export default function BeforeAfterSlider({
         }
       } else if (phase === "slide-to-after") {
         const t = Math.min(1, elapsed / SLIDE_MS);
-        // Ease in-out
         const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
         setPosition(100 - eased * 100);
         if (t >= 1) {
@@ -93,40 +106,100 @@ export default function BeforeAfterSlider({
     setPosition(Math.min(100, Math.max(0, next)));
   }, []);
 
-  const onPointerDown = (event: React.PointerEvent) => {
-    event.preventDefault();
-    setDragging(true);
-    setUserControlled(true);
-    updatePosition(event.clientX);
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-  };
-
-  const onPointerMove = (event: React.PointerEvent) => {
-    if (!dragging) return;
-    updatePosition(event.clientX);
-  };
-
-  const onPointerUp = (event: React.PointerEvent) => {
+  const endDrag = useCallback((target: HTMLElement, pointerId: number) => {
+    dragRef.current = null;
     setDragging(false);
     try {
-      (event.currentTarget as HTMLElement).releasePointerCapture(event.pointerId);
+      if (target.hasPointerCapture(pointerId)) {
+        target.releasePointerCapture(pointerId);
+      }
     } catch {
       // capture may already be released
     }
+  }, []);
+
+  /**
+   * Pointer handlers live on the handle (and its wide hit area), not the full image.
+   * On touch we wait for a clear horizontal gesture before capturing / preventDefault,
+   * so vertical page scroll still works on iOS Safari and Android Chrome.
+   */
+  const onHandlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    // Mouse / pen: start drag immediately (desktop behaviour unchanged)
+    const isCoarsePointer = event.pointerType === "touch";
+
+    dragRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      axis: isCoarsePointer ? null : true,
+    };
+
+    if (!isCoarsePointer) {
+      event.preventDefault();
+      setDragging(true);
+      setUserControlled(true);
+      updatePosition(event.clientX);
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    // Touch: do NOT preventDefault or capture yet — wait for axis lock in pointermove
+  };
+
+  const onHandlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    const session = dragRef.current;
+    if (!session || session.pointerId !== event.pointerId) return;
+
+    // Still deciding axis (touch only)
+    if (session.axis === null) {
+      const dx = event.clientX - session.startX;
+      const dy = event.clientY - session.startY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+
+      if (absX < AXIS_LOCK_THRESHOLD_PX && absY < AXIS_LOCK_THRESHOLD_PX) {
+        return;
+      }
+
+      if (absY > absX) {
+        // Mostly vertical → abandon slider; allow native page scroll
+        session.axis = false;
+        dragRef.current = null;
+        return;
+      }
+
+      // Mostly horizontal → take over the gesture
+      session.axis = true;
+      setDragging(true);
+      setUserControlled(true);
+      event.currentTarget.setPointerCapture(event.pointerId);
+      event.preventDefault();
+      updatePosition(event.clientX);
+      return;
+    }
+
+    if (session.axis === false) return;
+
+    // Confirmed horizontal drag
+    event.preventDefault();
+    updatePosition(event.clientX);
+  };
+
+  const onHandlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    const session = dragRef.current;
+    if (!session || session.pointerId !== event.pointerId) return;
+    endDrag(event.currentTarget, event.pointerId);
   };
 
   const showingBefore = position > 50;
+  const rangeId = `before-after-range-${title.replace(/\s+/g, "-").toLowerCase()}`;
 
   return (
     <div
       ref={containerRef}
-      className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl select-none touch-none bg-gray-100 shadow-lg ring-1 ring-black/5 cursor-ew-resize group"
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-      onPointerCancel={onPointerUp}
+      className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl select-none bg-gray-100 shadow-lg ring-1 ring-black/5 group"
+      // Allow vertical panning on the image area; only the handle uses touch-action: none when dragging
+      style={{ touchAction: "pan-y" }}
       role="img"
-      aria-label={`${title}. ${description}. Drag to compare before and after.`}
+      aria-label={`${title}. ${description}. Drag the handle to compare before and after.`}
     >
       {/* After (revealed as slider moves left) */}
       <Image
@@ -166,34 +239,53 @@ export default function BeforeAfterSlider({
         </p>
       </div>
 
-      {/* Divider + handle */}
+      {/* Divider + wide hit area (only this is interactive for dragging) */}
       <div
-        className="absolute inset-y-0 z-20 w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.35)]"
-        style={{ left: `${position}%`, transform: "translateX(-50%)" }}
+        ref={handleRef}
+        className="absolute inset-y-0 z-20 flex justify-center cursor-ew-resize"
+        style={{
+          left: `${position}%`,
+          transform: "translateX(-50%)",
+          // Wide enough to grab easily; still only the handle strip, not the full image
+          width: "44px",
+          // None while dragging horizontally; pan-y before axis lock so scroll can win
+          touchAction: dragging ? "none" : "pan-y",
+        }}
+        onPointerDown={onHandlePointerDown}
+        onPointerMove={onHandlePointerMove}
+        onPointerUp={onHandlePointerUp}
+        onPointerCancel={onHandlePointerUp}
       >
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-white text-gray-800 shadow-lg">
-          <svg
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
+        <div className="relative h-full w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.35)] pointer-events-none">
+          <div
+            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-full border-2 border-white bg-white text-gray-800 shadow-lg transition-transform ${
+              dragging ? "scale-110" : ""
+            }`}
           >
-            <path d="M8 12H4M4 12l3-3M4 12l3 3" />
-            <path d="M16 12h4M20 12l-3-3M20 12l-3 3" />
-          </svg>
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 12H4M4 12l3-3M4 12l3 3" />
+              <path d="M16 12h4M20 12l-3-3M20 12l-3 3" />
+            </svg>
+          </div>
         </div>
       </div>
 
-      <label className="sr-only" htmlFor={`before-after-range-${title}`}>
+      {/* Accessible control — not covering the image (avoids blocking scroll) */}
+      <label className="sr-only" htmlFor={rangeId}>
         Compare before and after for {title}
       </label>
       <input
-        id={`before-after-range-${title}`}
+        id={rangeId}
         type="range"
         min={0}
         max={100}
@@ -202,7 +294,7 @@ export default function BeforeAfterSlider({
           setUserControlled(true);
           setPosition(Number(e.target.value));
         }}
-        className="absolute inset-0 z-30 w-full h-full opacity-0 cursor-ew-resize"
+        className="sr-only"
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={Math.round(position)}
