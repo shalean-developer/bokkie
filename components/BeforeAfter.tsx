@@ -1,41 +1,27 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
-import BeforeAfterSlider from "@/components/BeforeAfterSlider";
+import { connection } from "next/server";
+import BeforeAfterGalleryGrid from "@/components/BeforeAfterGalleryGrid";
+import {
+  beforeAfterGallery,
+  HOMEPAGE_TRANSFORMATION_COUNT,
+  pickRandomTransformations,
+} from "@/lib/data/before-after-gallery";
 
-const comparisons = [
-  {
-    id: "stove",
-    title: "Stovetop deep clean",
-    description:
-      "Burnt-on grease and carbon lifted from gas burners and stainless trays — watch the surface go from grimy to gleaming.",
-    beforeSrc: "/image/before-after-stove-before.png",
-    afterSrc: "/image/before-after-stove-after.png",
-    beforeAlt: "Dirty gas stovetop burner covered in burnt grease before cleaning",
-    afterAlt: "Polished stainless gas stovetop burner after professional cleaning",
-  },
-  {
-    id: "oven",
-    title: "Oven deep clean",
-    description:
-      "Trays, racks, glass, and cavity scrubbed free of baked-on food and grime for a fresh, ready-to-cook oven.",
-    beforeSrc: "/image/before-after-oven-before.png",
-    afterSrc: "/image/before-after-oven-after.png",
-    beforeAlt: "Dirty oven interior with greasy tray and crumbs before cleaning",
-    afterAlt: "Spotless oven interior with clean racks and tray after professional deep cleaning",
-  },
-  {
-    id: "cabinets",
-    title: "Cabinet refresh",
-    description:
-      "Kitchen drawers and fronts wiped and degreased so every handle and panel looks renewed and spotless.",
-    beforeSrc: "/image/before-after-cabinets-after.png",
-    afterSrc: "/image/before-after-cabinets-before.png",
-    beforeAlt: "Kitchen cabinets before professional cleaning",
-    afterAlt: "Freshly cleaned white kitchen drawers after professional cleaning",
-  },
-];
+/**
+ * Homepage Before & After section.
+ * Picks 3 unique transformations per request so each page load can
+ * show a different set as the gallery grows.
+ */
+export default async function BeforeAfter() {
+  // Opt out of static caching so Math.random runs on every request
+  await connection();
 
-export default function BeforeAfter() {
+  const featured = pickRandomTransformations(
+    beforeAfterGallery,
+    HOMEPAGE_TRANSFORMATION_COUNT
+  );
+
   return (
     <section id="results" className="bg-[#FCFAF7]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
@@ -59,33 +45,29 @@ export default function BeforeAfter() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {comparisons.map((item) => (
-            <BeforeAfterSlider
-              key={item.id}
-              title={item.title}
-              description={item.description}
-              beforeSrc={item.beforeSrc}
-              afterSrc={item.afterSrc}
-              beforeAlt={item.beforeAlt}
-              afterAlt={item.afterAlt}
-            />
-          ))}
-        </div>
+        <BeforeAfterGalleryGrid items={featured} />
 
         <div className="mt-10 lg:mt-12 text-center">
           <p className="text-xs text-gray-400 mb-5">
             Drag the white handle left or right to compare — scroll the page normally on mobile
           </p>
-          <Link
-            href="/booking/service/deep/details"
-            className="inline-flex items-center gap-3 bg-brand-primary hover:bg-brand-primary-dark text-white font-semibold rounded-2xl pl-6 pr-1.5 py-1.5 transition-colors shadow-md"
-          >
-            Book a deep clean
-            <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/15 shrink-0">
-              <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
-            </span>
-          </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/before-after"
+              className="inline-flex items-center gap-3 bg-brand-primary hover:bg-brand-primary-dark text-white font-semibold rounded-2xl pl-6 pr-1.5 py-1.5 transition-colors shadow-md"
+            >
+              View More Transformations
+              <span className="flex items-center justify-center w-10 h-10 rounded-xl bg-white/15 shrink-0">
+                <ArrowRight className="w-5 h-5" strokeWidth={2.5} />
+              </span>
+            </Link>
+            <Link
+              href="/booking/service/deep/details"
+              className="inline-flex items-center justify-center px-6 py-3.5 text-sm font-semibold text-brand-primary hover:text-brand-primary-dark transition-colors"
+            >
+              Book a deep clean
+            </Link>
+          </div>
         </div>
       </div>
 

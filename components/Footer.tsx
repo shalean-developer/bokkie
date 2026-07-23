@@ -7,6 +7,7 @@ import { useState, FormEvent } from "react";
 const companyLinks = [
   { href: "/about", label: "About Us" },
   { href: "/services", label: "Services" },
+  { href: "/before-after", label: "Before & After" },
   { href: "/team", label: "Our Team" },
 ];
 
