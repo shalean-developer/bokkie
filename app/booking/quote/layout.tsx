@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import {
   generateCanonicalUrl,
   generateMetaDescription,
-  indexableRobots,
 } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -10,16 +9,17 @@ export const metadata: Metadata = {
   description: generateMetaDescription(
     "Request a free personalized quote for professional cleaning services in Cape Town. Select your service, home details, and additional services."
   ),
-  keywords: [
-    "cleaning quote Cape Town",
-    "free cleaning quote",
-    "cleaning services quote",
-    "professional cleaning quote",
-  ],
   alternates: {
     canonical: generateCanonicalUrl("/booking/quote"),
   },
-  robots: indexableRobots,
+  robots: {
+    index: false,
+    follow: true,
+    googleBot: {
+      index: false,
+      follow: true,
+    },
+  },
 };
 
 export default function QuoteLayout({
@@ -29,27 +29,3 @@ export default function QuoteLayout({
 }) {
   return <>{children}</>;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
