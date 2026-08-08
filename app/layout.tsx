@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Dancing_Script } from "next/font/google";
 import "./globals.css";
-import { generateStructuredData } from "@/lib/structured-data";
+import { generateGlobalStructuredData } from "@/lib/seo/global-schema";
 import Header from "@/components/Header";
 import BottomNavigation from "@/components/BottomNavigation";
 import { indexableRobots, siteConfig } from "@/lib/seo";
@@ -115,7 +115,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const structuredData = generateStructuredData();
+  const structuredData = generateGlobalStructuredData();
 
   return (
     <html lang="en-ZA">
