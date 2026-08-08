@@ -1,13 +1,25 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 
+const CANONICAL_HOST = "bokkiecleaning.co.za";
+const LEGACY_WWW_HOST = "www.bokkiecleaning.co.za";
+
 export async function middleware(request: NextRequest) {
+  const host = request.headers.get("host")?.split(":")[0]?.toLowerCase();
+
+  if (host === LEGACY_WWW_HOST) {
+    const canonicalUrl = request.nextUrl.clone();
+    canonicalUrl.protocol = "https";
+    canonicalUrl.host = CANONICAL_HOST;
+    canonicalUrl.port = "";
+
+    return NextResponse.redirect(canonicalUrl, 308);
+  }
+
   try {
     return await updateSession(request);
   } catch (error) {
-    // Catch any unexpected errors and return a valid response
-    console.error('Middleware invocation error:', error);
-    // Return a next response to prevent 500 errors
+    console.error("Middleware invocation error:", error);
     return NextResponse.next({
       request,
     });
@@ -16,18 +28,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (images, etc.)
-     */
     "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
-
-
-
-
