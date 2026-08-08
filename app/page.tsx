@@ -26,7 +26,7 @@ import {
 
 export const metadata: Metadata = {
   title: { default: "Professional Cleaning Services Cape Town" },
-  description: "Book trusted professional cleaners in Cape Town. Same-day booking available for residential, commercial, deep cleaning, move-in/out, Airbnb, and office cleaning. Rated 5 stars with 150+ reviews. Serving Sea Point, Camps Bay, Claremont & more.",
+  description: "Book trusted professional cleaners in Cape Town. Same-day booking available for residential, commercial, deep cleaning, move-in/out, Airbnb, and office cleaning. Serving Sea Point, Camps Bay, Claremont & more.",
   keywords: [
     "cleaning services Cape Town",
     "professional cleaners Cape Town",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     title: "Professional Cleaning Services Cape Town | Bokkie Cleaning Services",
-    description: "Book trusted professional cleaners in Cape Town. Same-day booking available for residential, commercial, deep cleaning, move-in/out, Airbnb, and office cleaning. Rated 5 stars with 150+ reviews.",
+    description: "Book trusted professional cleaners in Cape Town. Same-day booking available for residential, commercial, deep cleaning, move-in/out, Airbnb, and office cleaning.",
     url: generateCanonicalUrl("/"),
     siteName: siteConfig.name,
     images: [
@@ -62,7 +62,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Professional Cleaning Services Cape Town | Bokkie Cleaning Services",
-    description: "Book trusted professional cleaners in Cape Town. Same-day booking available. Rated 5 stars with 150+ reviews.",
+    description: "Book trusted professional cleaners in Cape Town with same-day booking available.",
     images: [getOgImageUrl()],
     creator: "@bokkiecleaning",
     site: "@bokkiecleaning",
@@ -85,7 +85,6 @@ export default async function Home() {
 
   const homepageUrl = generateCanonicalUrl("/");
 
-  // WebPage structured data for homepage SEO
   const webpageStructuredData = {
     "@context": "https://schema.org",
     "@type": "WebPage",
@@ -103,9 +102,6 @@ export default async function Home() {
     primaryImageOfPage: {
       "@type": "ImageObject",
       url: getOgImageUrl(),
-    },
-    breadcrumb: {
-      "@id": `${siteConfig.url}#breadcrumb`,
     },
   };
 

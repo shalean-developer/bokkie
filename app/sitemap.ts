@@ -2,187 +2,122 @@ import { MetadataRoute } from "next";
 import { getBlogPosts } from "@/app/actions/blog";
 import { capeTownAreas, getLocationSlug } from "@/lib/constants/areas";
 import { siteConfig } from "@/lib/seo";
+import { getServiceLocations } from "@/lib/supabase/booking-data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
 
-  // Helper function to safely construct URLs
   const makeUrl = (path: string): string => {
     try {
-      const url = new URL(path, baseUrl);
-      return url.toString();
+      return new URL(path, baseUrl).toString();
     } catch {
-      // Fallback to string concatenation if URL constructor fails
       return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
     }
   };
 
-  // Static routes
-  const routes = [
-    {
-      url: makeUrl("/"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 1,
-    },
-    {
-      url: makeUrl("/services"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.9,
-    },
-    {
-      url: makeUrl("/service-areas"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.9,
-    },
-    {
-      url: makeUrl("/guides"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: makeUrl("/blog"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.8,
-    },
-    {
-      url: makeUrl("/terms"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    },
-    {
-      url: makeUrl("/privacy"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.5,
-    },
-    {
-      url: makeUrl("/book"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.95,
-    },
-    {
-      url: makeUrl("/booking/quote"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.9,
-    },
-    {
-      url: makeUrl("/how-it-works"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.9,
-    },
-    {
-      url: makeUrl("/about"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: makeUrl("/faq"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.7,
-    },
-    {
-      url: makeUrl("/team"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    },
-    {
-      url: makeUrl("/contact"),
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.8,
-    },
-    {
-      url: makeUrl("/coupons"),
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
-    },
+  // Do not emit synthetic lastModified timestamps for static pages. A fresh
+  // timestamp on every sitemap request can incorrectly signal that unchanged
+  // pages were just updated.
+  const routes: MetadataRoute.Sitemap = [
+    { url: makeUrl("/"), changeFrequency: "weekly", priority: 1 },
+    { url: makeUrl("/services"), changeFrequency: "weekly", priority: 0.9 },
+    { url: makeUrl("/service-areas"), changeFrequency: "monthly", priority: 0.9 },
+    { url: makeUrl("/guides"), changeFrequency: "weekly", priority: 0.8 },
+    { url: makeUrl("/blog"), changeFrequency: "weekly", priority: 0.8 },
+    { url: makeUrl("/before-after"), changeFrequency: "monthly", priority: 0.8 },
+    { url: makeUrl("/terms"), changeFrequency: "monthly", priority: 0.5 },
+    { url: makeUrl("/privacy"), changeFrequency: "monthly", priority: 0.5 },
+    { url: makeUrl("/book"), changeFrequency: "weekly", priority: 0.95 },
+    { url: makeUrl("/booking/quote"), changeFrequency: "weekly", priority: 0.9 },
+    { url: makeUrl("/how-it-works"), changeFrequency: "monthly", priority: 0.9 },
+    { url: makeUrl("/about"), changeFrequency: "monthly", priority: 0.7 },
+    { url: makeUrl("/faq"), changeFrequency: "monthly", priority: 0.7 },
+    { url: makeUrl("/team"), changeFrequency: "monthly", priority: 0.6 },
+    { url: makeUrl("/contact"), changeFrequency: "monthly", priority: 0.8 },
+    { url: makeUrl("/coupons"), changeFrequency: "weekly", priority: 0.7 },
   ];
 
-  // Service pages - only valid services that exist
   const services = [
     "residential-cleaning",
     "commercial-cleaning",
     "specialized-cleaning",
   ];
 
-  const serviceRoutes = services.map((service) => ({
+  const serviceRoutes: MetadataRoute.Sitemap = services.map((service) => ({
     url: makeUrl(`/services/${service}`),
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
+    changeFrequency: "monthly",
     priority: 0.7,
   }));
 
-  // Location pages - use shared constants for consistency
-  const locationRoutes = capeTownAreas.map((area) => ({
-    url: makeUrl(`/areas/${getLocationSlug(area)}`),
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.8,
-  }));
+  // Use the same active service-location source as the actual /areas/[location]
+  // route. Fall back to the shared constants only when the database is not
+  // reachable so the sitemap remains useful during transient outages.
+  let locationRoutes: MetadataRoute.Sitemap = [];
+  try {
+    const locations = await getServiceLocations();
+    locationRoutes = locations
+      .filter((location) => location.is_active && location.slug?.trim())
+      .map((location) => ({
+        url: makeUrl(`/areas/${location.slug}`),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      }));
+  } catch (error) {
+    console.error("Error fetching service locations for sitemap, using fallback:", error);
+    locationRoutes = capeTownAreas.map((area) => ({
+      url: makeUrl(`/areas/${getLocationSlug(area)}`),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }));
+  }
 
-  // Guide pages
   const guides = [
     "maintain-spotless-home",
     "move-in-cleaning",
     "office-cleaning-best-practices",
   ];
 
-  const guideRoutes = guides.map((guide) => ({
+  const guideRoutes: MetadataRoute.Sitemap = guides.map((guide) => ({
     url: makeUrl(`/guides/${guide}`),
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
+    changeFrequency: "monthly",
     priority: 0.6,
   }));
 
-  // Blog posts - fetch from database
   let blogRoutes: MetadataRoute.Sitemap = [];
   try {
     const { posts } = await getBlogPosts({
       status: "published",
-      limit: 1000, // Get all published posts
+      limit: 1000,
     });
 
     blogRoutes = posts
-      .filter((post) => post.slug && post.slug.trim().length > 0) // Ensure slug exists and is valid
+      .filter((post) => post.slug && post.slug.trim().length > 0)
       .map((post) => {
-        // Calculate priority based on views and recency
         let priority = 0.7;
         if (post.views > 100) priority = 0.8;
         if (post.views > 500) priority = 0.9;
 
-        // Recent posts get higher priority
         if (post.published_at) {
-          const daysSincePublished = Math.floor(
-            (Date.now() - new Date(post.published_at).getTime()) / (1000 * 60 * 60 * 24)
-          );
-          if (daysSincePublished < 30) priority = Math.min(priority + 0.1, 1.0);
-        }
-
-        // Ensure valid date for lastModified
-        let lastModified = new Date();
-        if (post.updated_at) {
-          const date = new Date(post.updated_at);
-          if (!isNaN(date.getTime())) {
-            lastModified = date;
+          const publishedAt = new Date(post.published_at);
+          if (!Number.isNaN(publishedAt.getTime())) {
+            const daysSincePublished = Math.floor(
+              (Date.now() - publishedAt.getTime()) / (1000 * 60 * 60 * 24)
+            );
+            if (daysSincePublished < 30) {
+              priority = Math.min(priority + 0.1, 1.0);
+            }
           }
         }
 
+        const dateCandidates = [post.updated_at, post.published_at, post.created_at];
+        const validDate = dateCandidates
+          .filter(Boolean)
+          .map((value) => new Date(value as string))
+          .find((date) => !Number.isNaN(date.getTime()));
+
         return {
           url: makeUrl(`/blog/${post.slug}`),
-          lastModified,
+          ...(validDate ? { lastModified: validDate } : {}),
           changeFrequency: "weekly" as const,
           priority,
         };
