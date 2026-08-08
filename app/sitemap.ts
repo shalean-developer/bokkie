@@ -4,6 +4,10 @@ import { capeTownAreas, getLocationSlug } from "@/lib/constants/areas";
 import { siteConfig } from "@/lib/seo";
 import { getServiceLocations } from "@/lib/supabase/booking-data";
 
+function toSeoLocationSlug(slug: string): string {
+  return slug.replace(/[’']/g, "");
+}
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
   const makeUrl = (path: string): string => {
@@ -21,7 +25,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: makeUrl("/terms"), changeFrequency: "monthly", priority: 0.5 },
     { url: makeUrl("/privacy"), changeFrequency: "monthly", priority: 0.5 },
     { url: makeUrl("/book"), changeFrequency: "weekly", priority: 0.95 },
-    { url: makeUrl("/booking/quote"), changeFrequency: "weekly", priority: 0.9 },
     { url: makeUrl("/how-it-works"), changeFrequency: "monthly", priority: 0.9 },
     { url: makeUrl("/about"), changeFrequency: "monthly", priority: 0.7 },
     { url: makeUrl("/faq"), changeFrequency: "monthly", priority: 0.7 },
@@ -46,10 +49,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let locationRoutes: MetadataRoute.Sitemap = [];
   try {
     const locations = await getServiceLocations();
-    locationRoutes = locations.filter((location) => location.is_active && location.slug?.trim()).map((location) => ({ url: makeUrl(`/areas/${location.slug}`), changeFrequency: "monthly" as const, priority: 0.8 }));
+    locationRoutes = locations
+      .filter((location) => location.is_active && location.slug?.trim())
+      .map((location) => ({
+        url: makeUrl(`/areas/${toSeoLocationSlug(location.slug)}`),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+      }));
   } catch (error) {
     console.error("Error fetching service locations for sitemap, using fallback:", error);
-    locationRoutes = capeTownAreas.map((area) => ({ url: makeUrl(`/areas/${getLocationSlug(area)}`), changeFrequency: "monthly" as const, priority: 0.8 }));
+    locationRoutes = capeTownAreas.map((area) => ({
+      url: makeUrl(`/areas/${toSeoLocationSlug(getLocationSlug(area))}`),
+      changeFrequency: "monthly" as const,
+      priority: 0.8,
+    }));
   }
 
   const guides = ["maintain-spotless-home", "move-in-cleaning", "office-cleaning-best-practices"];

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import {
   ArrowRight,
   Building2,
@@ -18,7 +18,6 @@ import {
   indexableRobots,
   siteConfig,
 } from "@/lib/seo";
-import { formatLocationName } from "@/lib/constants/areas";
 import { getNearbyLocations, normalizeSuburb } from "@/lib/data/location-pages";
 import { generateLocationStructuredData } from "@/lib/structured-data";
 import { getLocationContent, getServiceLocations } from "@/lib/supabase/booking-data";
@@ -26,6 +25,10 @@ import Footer from "@/components/Footer";
 import PageHero from "@/components/marketing/PageHero";
 import MarketingCta from "@/components/marketing/MarketingCta";
 import JsonLd from "@/components/marketing/JsonLd";
+
+function toSeoLocationSlug(slug: string): string {
+  return slug.replace(/[’']/g, "");
+}
 
 async function getValidLocations() {
   try {
@@ -39,7 +42,11 @@ async function getValidLocations() {
 
 async function getLocationBySlug(slug: string) {
   const locations = await getValidLocations();
-  return locations.find((loc) => loc.slug === slug) ?? null;
+  return (
+    locations.find(
+      (loc) => loc.slug === slug || toSeoLocationSlug(loc.slug) === slug
+    ) ?? null
+  );
 }
 
 export async function generateMetadata({
@@ -55,7 +62,8 @@ export async function generateMetadata({
   }
 
   const locationName = record.name;
-  const locationContent = await getLocationContent(location);
+  const seoSlug = toSeoLocationSlug(record.slug);
+  const locationContent = await getLocationContent(record.slug);
 
   const description = locationContent?.intro_paragraph
     ? generateMetaDescription(locationContent.intro_paragraph)
@@ -77,7 +85,7 @@ export async function generateMetadata({
         ];
 
   const title = `Cleaning Services in ${locationName}, Cape Town`;
-  const pageUrl = generateCanonicalUrl(`/areas/${location}`);
+  const pageUrl = generateCanonicalUrl(`/areas/${seoSlug}`);
 
   return {
     title: { default: title },
@@ -151,11 +159,16 @@ export default async function LocationPage({
     notFound();
   }
 
+  const seoSlug = toSeoLocationSlug(record.slug);
+  if (location !== seoSlug) {
+    permanentRedirect(`/areas/${seoSlug}`);
+  }
+
   const locationName = record.name;
   const suburb = normalizeSuburb(record.suburb);
   const allLocations = await getValidLocations();
-  const nearbyLocations = getNearbyLocations(allLocations, location);
-  const locationContent = await getLocationContent(location);
+  const nearbyLocations = getNearbyLocations(allLocations, record.slug);
+  const locationContent = await getLocationContent(record.slug);
 
   const defaultIntro = `Bokkie provides professional residential, commercial, and specialized cleaning in ${locationName}, Cape Town. Book vetted cleaners online for regular home cleaning, deep cleans, office cleaning, Airbnb turnovers, and more.`;
   const defaultMain = `Our service is booked online with secure payment. Cleaners arrive on time, fully equipped, and ready to deliver results that meet our quality standards.`;
@@ -164,7 +177,7 @@ export default async function LocationPage({
   const mainContent = locationContent?.main_content || defaultMain;
   const closingParagraph = locationContent?.closing_paragraph;
 
-  const structuredData = generateLocationStructuredData(locationName, location);
+  const structuredData = generateLocationStructuredData(locationName, seoSlug);
 
   return (
     <>
@@ -191,7 +204,7 @@ export default async function LocationPage({
             </Link>
             <Link
               href="/service-areas"
-              className="inline-flex items-center justify-center gap-2 px-6 py-3.5 border border-gray-300 text-gray-900 font-semibold rounded-button hover:bg-gray-50 transition-colors"
+              className="inline-flex items-center justify-center px-6 py-3.5 border border-gray-300 text-gray-900 font-semibold rounded-button hover:bg-gray-50 transition-colors"
             >
               All service areas
             </Link>
@@ -291,7 +304,7 @@ export default async function LocationPage({
                 {nearbyLocations.map((nearby) => (
                   <Link
                     key={nearby.id}
-                    href={`/areas/${nearby.slug}`}
+                    href={`/areas/${toSeoLocationSlug(nearby.slug)}`}
                     className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm text-gray-700 hover:border-brand-primary/30 hover:text-brand-primary transition-colors"
                   >
                     <MapPin className="w-3.5 h-3.5 text-gray-400" aria-hidden="true" />
