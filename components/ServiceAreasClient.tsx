@@ -32,6 +32,10 @@ const suburbIcons: Record<string, typeof MapPin> = {
   "Eastern Suburbs": Navigation,
 };
 
+function toSeoLocationSlug(slug: string): string {
+  return slug.replace(/[’']/g, "");
+}
+
 export default function ServiceAreasClient({
   locationsBySuburb,
   allSuburbs,
@@ -126,7 +130,7 @@ export default function ServiceAreasClient({
               {filteredAllLocations.map((location) => (
                 <Link
                   key={location.id}
-                  href={`/areas/${location.slug}`}
+                  href={`/areas/${toSeoLocationSlug(location.slug)}`}
                   className="flex items-center gap-1.5 px-3 py-2 text-sm text-gray-700 bg-brand-surface border border-gray-200 rounded-lg hover:border-brand-primary/30 hover:text-brand-primary transition-colors"
                 >
                   <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" aria-hidden="true" />
@@ -194,7 +198,7 @@ export default function ServiceAreasClient({
                           {locations.map((location) => (
                             <Link
                               key={location.id}
-                              href={`/areas/${location.slug}`}
+                              href={`/areas/${toSeoLocationSlug(location.slug)}`}
                               className="flex items-center gap-1.5 px-2.5 py-2 text-sm text-gray-700 rounded-lg hover:bg-brand-surface hover:text-brand-primary transition-colors"
                             >
                               <MapPin className="w-3.5 h-3.5 shrink-0 text-gray-400" aria-hidden="true" />
@@ -220,7 +224,7 @@ export default function ServiceAreasClient({
               {allLocationsAlphabetical.map((location) => (
                 <Link
                   key={location.id}
-                  href={`/areas/${location.slug}`}
+                  href={`/areas/${toSeoLocationSlug(location.slug)}`}
                   className="block text-sm text-gray-600 hover:text-brand-primary py-1.5 break-inside-avoid"
                 >
                   {location.name}
