@@ -48,6 +48,12 @@ const FALLBACK_EXTRAS: Record<string, number> = {
   "meeting-room-reset": 120,
   "wall-spot-clean": 150,
   "appliance-cleaning": 100,
+  "balcony-cleaning": 50,
+  "carpet-cleaning": 350,
+  "ceiling-cleaning": 100,
+  "garage-cleaning": 100,
+  "mattress-cleaning": 250,
+  "outside-windows": 350,
 };
 
 export const FALLBACK_BOOK_PRICING_CONFIG: BookPricingConfig = {
