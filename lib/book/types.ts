@@ -114,7 +114,10 @@ export interface BookFormState {
   address: BookAddress;
   schedule: BookSchedule;
   recurring: BookRecurring;
+  /** Backwards-compatible list of selected extra IDs. */
   selectedExtras: string[];
+  /** Quantity per selected extra ID. A quantity of 0 means not selected. */
+  extraQuantities: Record<string, number>;
   extrasPricing?: Record<string, number>;
   pricingConfig?: BookPricingConfig;
   pricingSummary: BookPricingSummary | null;
