@@ -23,6 +23,7 @@ export function createInitialBookState(service: BookServiceSlug): BookFormState 
     },
     recurring: { isRecurring: false },
     selectedExtras: [],
+    extraQuantities: {},
     pricingSummary: null,
     customer: {
       fullName: "",
@@ -94,8 +95,24 @@ export function loadBookState(service: BookServiceSlug): BookFormState {
   try {
     const raw = localStorage.getItem(BOOK_STORAGE_KEY);
     if (raw) {
-      const parsed = JSON.parse(raw) as BookFormState;
-      if (parsed.service === service) return { ...createInitialBookState(service), ...parsed };
+      const parsed = JSON.parse(raw) as Partial<BookFormState>;
+      if (parsed.service === service) {
+        const initial = createInitialBookState(service);
+        const selectedExtras = Array.isArray(parsed.selectedExtras) ? parsed.selectedExtras : [];
+        const parsedQuantities = parsed.extraQuantities ?? {};
+        const extraQuantities = Object.fromEntries(
+          selectedExtras.map((id) => {
+            const saved = Number(parsedQuantities[id]);
+            return [id, Number.isFinite(saved) && saved > 0 ? Math.floor(saved) : 1];
+          })
+        );
+        return {
+          ...initial,
+          ...parsed,
+          selectedExtras,
+          extraQuantities,
+        } as BookFormState;
+      }
     }
   } catch {
     /* ignore */
