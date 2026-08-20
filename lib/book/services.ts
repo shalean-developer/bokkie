@@ -18,7 +18,7 @@ export interface BookServiceConfig {
   legacyServiceType: string;
   cleanerMode: CleanerMode;
   defaultCity: string;
-  extras: { id: string; label: string }[];
+  extras: { id: string; label: string; price?: number }[];
 }
 
 export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
@@ -66,12 +66,12 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "team",
     defaultCity: "Cape Town",
     extras: [
-      { id: "inside-fridge", label: "Inside fridge cleaning" },
-      { id: "inside-oven", label: "Inside oven cleaning" },
-      { id: "interior-windows", label: "Interior window cleaning" },
-      { id: "inside-cabinets", label: "Inside Cabinets" },
-      { id: "interior-walls", label: "Interior Walls" },
-      { id: "balcony-patio", label: "Balcony/patio cleaning" },
+      { id: "balcony-cleaning", label: "Balcony cleaning", price: 50 },
+      { id: "carpet-cleaning", label: "Carpet cleaning", price: 350 },
+      { id: "ceiling-cleaning", label: "Ceiling cleaning", price: 100 },
+      { id: "garage-cleaning", label: "Garage cleaning", price: 100 },
+      { id: "mattress-cleaning", label: "Mattress cleaning", price: 250 },
+      { id: "outside-windows", label: "Outside windows", price: 350 },
     ],
   },
   "moving-cleaning": {
@@ -84,11 +84,12 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "team",
     defaultCity: "Cape Town",
     extras: [
-      { id: "inside-oven", label: "Inside oven cleaning" },
-      { id: "inside-fridge", label: "Inside fridge cleaning" },
-      { id: "interior-windows", label: "Interior window cleaning" },
-      { id: "wall-spot-clean", label: "Wall spot-cleaning" },
-      { id: "appliance-cleaning", label: "Appliance cleaning" },
+      { id: "balcony-cleaning", label: "Balcony cleaning", price: 50 },
+      { id: "carpet-cleaning", label: "Carpet cleaning", price: 350 },
+      { id: "ceiling-cleaning", label: "Ceiling cleaning", price: 100 },
+      { id: "garage-cleaning", label: "Garage cleaning", price: 100 },
+      { id: "mattress-cleaning", label: "Mattress cleaning", price: 250 },
+      { id: "outside-windows", label: "Outside windows", price: 350 },
     ],
   },
   "office-cleaning": {
@@ -139,7 +140,7 @@ export const BOOK_SERVICE_SLUGS: BookServiceSlug[] = [
   "carpet-cleaning",
 ];
 
-/** Services whose optional extras are loaded from additional_services (by legacy service type). */
+/** Services whose optional extras are loaded from pricing_extras. */
 export const DB_EXTRAS_SERVICES: BookServiceSlug[] = ["deep-cleaning", "moving-cleaning"];
 
 export function usesDbExtras(slug: BookServiceSlug): boolean {
