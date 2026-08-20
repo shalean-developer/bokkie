@@ -94,9 +94,14 @@ export function mapBookFormStateToBooking(
 
 export function getBookV2ExtensionPayload(state: BookFormState) {
   const pricing = state.pricingSummary ?? calculateBookPricing(state);
+  const extraQuantities = Object.fromEntries(
+    state.selectedExtras.map((id) => [id, Math.max(1, Math.floor(Number(state.extraQuantities[id] ?? 1)))])
+  );
+
   return {
     service_details: state.serviceDetails,
     selected_extras: state.selectedExtras,
+    extra_quantities: extraQuantities,
     pricing_summary: pricing,
     estimated_duration: pricing.estimatedDuration,
     estimated_total: pricing.estimatedTotal,
