@@ -27,6 +27,12 @@ function pushBreakdownLine(
   if (amount > 0) items.push({ label, amount });
 }
 
+function getExtraQuantity(state: Partial<BookFormState>, id: string): number {
+  const raw = Number(state.extraQuantities?.[id] ?? 1);
+  if (!Number.isFinite(raw) || raw <= 0) return 1;
+  return Math.max(1, Math.floor(raw));
+}
+
 export function calculateBookPricing(
   state: Partial<BookFormState>,
   config: BookPricingConfig = state.pricingConfig ?? FALLBACK_BOOK_PRICING_CONFIG
@@ -89,11 +95,15 @@ export function calculateBookPricing(
     pushBreakdownLine(sizeBreakdown, `Bathrooms (${bathrooms})`, bathroomAmount);
   }
 
-  const extrasTotal = extras.reduce(
-    (sum, id) =>
-      sum + (state.extrasPricing?.[id] ?? bookConfig.extrasPricing[id] ?? 50),
-    0
-  );
+  const extrasBreakdown = extras.map((id) => {
+    const unitPrice = state.extrasPricing?.[id] ?? bookConfig.extrasPricing[id] ?? 50;
+    const quantity = getExtraQuantity(state, id);
+    return {
+      label: quantity > 1 ? `${id} (${quantity} × ${formatCurrency(unitPrice)})` : id,
+      amount: unitPrice * quantity,
+    };
+  });
+  const extrasTotal = extrasBreakdown.reduce((sum, item) => sum + item.amount, 0);
   const extraCleanersTotal = isTeam
     ? 0
     : Math.max(0, cleanerCount - 1) * bookConfig.extraCleanerPrice;
@@ -117,7 +127,13 @@ export function calculateBookPricing(
       breakdown: sizeBreakdown.length > 0 ? sizeBreakdown : undefined,
     });
   }
-  if (extrasTotal > 0) lineItems.push({ label: "Extras", amount: extrasTotal });
+  if (extrasTotal > 0) {
+    lineItems.push({
+      label: "Extras",
+      amount: extrasTotal,
+      breakdown: extrasBreakdown,
+    });
+  }
   if (extraCleanersTotal > 0) {
     lineItems.push({
       label: `Extra cleaners (${cleanerCount - 1})`,
@@ -152,4 +168,3 @@ export function formatCurrency(amount: number): string {
     maximumFractionDigits: 0,
   }).format(amount);
 }
-

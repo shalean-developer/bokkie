@@ -7,13 +7,12 @@ import { PriceSummaryCard } from "../PriceSummaryCard";
 import { getServiceConfig, usesTeamSelection } from "@/lib/book/services";
 import { formatCurrency } from "@/lib/book/pricing";
 import { DEFAULT_TEAMS } from "@/lib/book/constants";
-import { getAdditionalServicesForServiceType } from "@/app/actions/booking-data";
+import { getBookExtrasForService } from "@/app/actions/booking-data";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, ArrowRight, MapPin, Calendar, Sparkles, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, MapPin, Calendar, Sparkles, Loader2, Minus, Plus } from "lucide-react";
 
 interface ExtraOption {
   id: string;
@@ -21,8 +20,10 @@ interface ExtraOption {
   price: number;
 }
 
+const MAX_EXTRA_QUANTITY = 99;
+
 export function ReviewStep() {
-  const { state, setExtras, updateState, isHydrated } = useBookForm();
+  const { state, setExtras, setExtraQuantity, updateState, isHydrated } = useBookForm();
   const router = useRouter();
   const config = getServiceConfig(state.service);
   const isTeam = usesTeamSelection(state.service);
@@ -32,18 +33,13 @@ export function ReviewStep() {
 
   useEffect(() => {
     setLoadingExtras(true);
-    getAdditionalServicesForServiceType(config.legacyServiceType)
+    getBookExtrasForService(state.service)
       .then((services) => {
         if (services.length > 0) {
-          const options = services.map((s) => ({
-            id: s.service_id,
-            label: s.name,
-            price: Number(s.price_modifier),
-          }));
-          setExtrasOptions(options);
-          const pricing = Object.fromEntries(options.map((o) => [o.id, o.price]));
+          setExtrasOptions(services);
+          const pricing = Object.fromEntries(services.map((o) => [o.id, o.price]));
           updateState({ extrasPricing: pricing });
-          const validIds = new Set(options.map((o) => o.id));
+          const validIds = new Set(services.map((o) => o.id));
           const filtered = state.selectedExtras.filter((id) => validIds.has(id));
           if (filtered.length !== state.selectedExtras.length) {
             setExtras(filtered);
@@ -65,11 +61,10 @@ export function ReviewStep() {
       })
       .finally(() => setLoadingExtras(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.service, config.legacyServiceType, state.pricingConfig]);
+  }, [state.service, state.pricingConfig]);
 
-  const toggleExtra = (id: string) => {
-    const current = state.selectedExtras;
-    setExtras(current.includes(id) ? current.filter((e) => e !== id) : [...current, id]);
+  const changeQuantity = (id: string, nextQuantity: number) => {
+    setExtraQuantity(id, Math.max(0, Math.min(MAX_EXTRA_QUANTITY, nextQuantity)));
   };
 
   return (
@@ -138,21 +133,58 @@ export function ReviewStep() {
             ) : extrasOptions.length === 0 ? (
               <p className="text-sm text-gray-500">No optional extras for this service.</p>
             ) : (
-              extrasOptions.map((extra) => (
-                <div key={extra.id} className="flex items-center gap-3">
-                  <Checkbox
-                    id={extra.id}
-                    checked={state.selectedExtras.includes(extra.id)}
-                    onCheckedChange={() => toggleExtra(extra.id)}
-                  />
-                  <Label htmlFor={extra.id} className="font-normal cursor-pointer flex-1">
-                    {extra.label}
-                    {extra.price > 0 && (
-                      <span className="text-gray-500 ml-1">(+{formatCurrency(extra.price)})</span>
-                    )}
-                  </Label>
-                </div>
-              ))
+              extrasOptions.map((extra) => {
+                const quantity = state.extraQuantities[extra.id] ?? 0;
+                const lineTotal = quantity * extra.price;
+                return (
+                  <div
+                    key={extra.id}
+                    className="rounded-lg border p-3 sm:flex sm:items-center sm:justify-between gap-4"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <Label className="font-medium">{extra.label}</Label>
+                      <p className="text-sm text-gray-500">{formatCurrency(extra.price)} each</p>
+                      {quantity > 0 && (
+                        <p className="text-sm font-medium text-brand-primary mt-1">
+                          {quantity} × {formatCurrency(extra.price)} = {formatCurrency(lineTotal)}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 mt-3 sm:mt-0" aria-label={`${extra.label} quantity`}>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        aria-label={`Remove one ${extra.label}`}
+                        disabled={quantity === 0}
+                        onClick={() => changeQuantity(extra.id, quantity - 1)}
+                      >
+                        <Minus className="w-4 h-4" />
+                      </Button>
+                      <input
+                        type="number"
+                        min={0}
+                        max={MAX_EXTRA_QUANTITY}
+                        inputMode="numeric"
+                        aria-label={`${extra.label} quantity`}
+                        className="w-16 rounded-md border px-2 py-2 text-center"
+                        value={quantity}
+                        onChange={(event) => changeQuantity(extra.id, Number(event.target.value))}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        aria-label={`Add one ${extra.label}`}
+                        disabled={quantity >= MAX_EXTRA_QUANTITY}
+                        onClick={() => changeQuantity(extra.id, quantity + 1)}
+                      >
+                        <Plus className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </CardContent>
         </Card>

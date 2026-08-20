@@ -22,6 +22,7 @@ interface BookFormContextValue {
   setRecurring: (recurring: Partial<BookFormState["recurring"]>) => void;
   setCustomer: (customer: Partial<BookFormState["customer"]>) => void;
   setExtras: (extras: string[]) => void;
+  setExtraQuantity: (extraId: string, quantity: number) => void;
   refreshPricing: () => void;
   isHydrated: boolean;
   pricingLoaded: boolean;
@@ -127,7 +128,35 @@ export function BookFormProvider({
 
   const setExtras = useCallback((extras: string[]) => {
     setState((prev) => {
-      const next = { ...prev, selectedExtras: extras };
+      const selected = new Set(extras);
+      const extraQuantities = Object.fromEntries(
+        extras.map((id) => [id, Math.max(1, Math.floor(Number(prev.extraQuantities[id] ?? 1)))])
+      );
+      const next = { ...prev, selectedExtras: [...selected], extraQuantities };
+      next.pricingSummary = calculateBookPricing(next);
+      return next;
+    });
+  }, []);
+
+  const setExtraQuantity = useCallback((extraId: string, quantity: number) => {
+    setState((prev) => {
+      const safeQuantity = Math.max(0, Math.min(99, Math.floor(Number(quantity) || 0)));
+      const selected = new Set(prev.selectedExtras);
+      const extraQuantities = { ...prev.extraQuantities };
+
+      if (safeQuantity > 0) {
+        selected.add(extraId);
+        extraQuantities[extraId] = safeQuantity;
+      } else {
+        selected.delete(extraId);
+        delete extraQuantities[extraId];
+      }
+
+      const next = {
+        ...prev,
+        selectedExtras: Array.from(selected),
+        extraQuantities,
+      };
       next.pricingSummary = calculateBookPricing(next);
       return next;
     });
@@ -143,6 +172,7 @@ export function BookFormProvider({
       setRecurring,
       setCustomer,
       setExtras,
+      setExtraQuantity,
       refreshPricing,
       isHydrated,
       pricingLoaded,
@@ -156,6 +186,7 @@ export function BookFormProvider({
       setRecurring,
       setCustomer,
       setExtras,
+      setExtraQuantity,
       refreshPricing,
       isHydrated,
       pricingLoaded,

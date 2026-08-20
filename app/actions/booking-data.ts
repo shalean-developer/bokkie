@@ -1,5 +1,6 @@
 "use server";
 
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { 
   getTimeSlots as getTimeSlotsServer,
   getAdditionalServices as getAdditionalServicesServer,
@@ -21,6 +22,7 @@ import {
   TeamMember,
   ServiceTypePricing,
 } from "@/lib/supabase/booking-data";
+import type { BookServiceSlug } from "@/lib/book/types";
 
 /**
  * Server actions for booking data
@@ -39,6 +41,36 @@ export async function getAdditionalServicesForServiceType(
   serviceType: string
 ): Promise<AdditionalService[]> {
   return await getAdditionalServicesForServiceTypeServer(serviceType);
+}
+
+export interface BookExtraOption {
+  id: string;
+  label: string;
+  price: number;
+}
+
+/** Load active extras from the current pricing_extras source of truth. */
+export async function getBookExtrasForService(
+  service: BookServiceSlug
+): Promise<BookExtraOption[]> {
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase
+    .from("pricing_extras")
+    .select("slug, name, price, sort_order")
+    .eq("is_active", true)
+    .contains("service_slugs", [service])
+    .order("sort_order", { ascending: true });
+
+  if (error) {
+    console.error("Error fetching booking extras from pricing_extras:", error);
+    return [];
+  }
+
+  return (data ?? []).map((extra) => ({
+    id: String(extra.slug),
+    label: String(extra.name),
+    price: Number(extra.price),
+  }));
 }
 
 export async function getServiceLocations(): Promise<ServiceLocation[]> {
@@ -81,4 +113,3 @@ export async function getBookPricingConfig() {
   const { fetchBookPricingConfig } = await import("@/lib/book/pricing-config-server");
   return fetchBookPricingConfig();
 }
-
