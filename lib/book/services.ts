@@ -140,11 +140,13 @@ export const BOOK_SERVICE_SLUGS: BookServiceSlug[] = [
   "carpet-cleaning",
 ];
 
-/** Services whose optional extras are loaded from pricing_extras. */
-export const DB_EXTRAS_SERVICES: BookServiceSlug[] = ["deep-cleaning", "moving-cleaning"];
-
-export function usesDbExtras(slug: BookServiceSlug): boolean {
-  return DB_EXTRAS_SERVICES.includes(slug);
+/**
+ * Compatibility helper for the authoritative save path.
+ * Book v2 no longer routes any service to a separate pricing_extras table;
+ * all extras pricing comes from additional_services through BookPricingConfig.
+ */
+export function usesDbExtras(_slug: BookServiceSlug): boolean {
+  return false;
 }
 
 export function isBookServiceSlug(value: string): value is BookServiceSlug {
