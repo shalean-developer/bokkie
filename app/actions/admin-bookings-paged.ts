@@ -34,6 +34,13 @@ export interface AdminBookingPageResult {
   totalPages: number;
 }
 
+export interface AdminBookingStats {
+  total: number;
+  pending: number;
+  completed: number;
+  paid: number;
+}
+
 function mapDatabaseToBooking(data: any): Booking {
   return {
     id: data.id,
@@ -181,4 +188,28 @@ export async function getAdminBookingsPage(
     pageSize,
     totalPages: Math.max(1, Math.ceil(total / pageSize)),
   };
+}
+
+async function countBookingsBy(
+  column?: "status" | "payment_status",
+  value?: string
+): Promise<number> {
+  const supabase = createServiceRoleClient();
+  let query = supabase.from("bookings").select("id", { count: "exact", head: true });
+  if (column && value) query = query.eq(column, value);
+
+  const { count, error } = await query;
+  if (error) throw new Error(`Failed to count bookings: ${error.message}`);
+  return count ?? 0;
+}
+
+export async function getAdminBookingStats(): Promise<AdminBookingStats> {
+  const [total, pending, completed, paid] = await Promise.all([
+    countBookingsBy(),
+    countBookingsBy("status", "pending"),
+    countBookingsBy("status", "completed"),
+    countBookingsBy("payment_status", "completed"),
+  ]);
+
+  return { total, pending, completed, paid };
 }
