@@ -5,12 +5,18 @@ import {
   saveBooking,
   generateBookingReference,
 } from "@/lib/storage/bookings-supabase";
-import { getPaystackPublicKey, getPaystackConfigError, getPaystackSecretKey } from "@/lib/paystack-config";
-import { verifyPayment } from "@/lib/paystack";
+import {
+  getPaystackPublicKey,
+  getPaystackConfigError,
+  getPaystackSecretKey,
+} from "@/lib/paystack-config";
 import { mapBookFormStateToBooking, getBookV2ExtensionPayload } from "@/lib/book/map-booking";
 import type { BookFormState, TeamAvailabilityResult } from "@/lib/book/types";
 import { MAX_TEAM_BOOKINGS_PER_DAY, DEFAULT_TEAMS } from "@/lib/book/constants";
 import { normalizeCleanerPreference, type Booking } from "@/lib/types/booking";
+import { fetchBookPricingConfig } from "@/lib/book/pricing-config-server";
+import { calculateBookPricing } from "@/lib/book/pricing";
+import { usesDbExtras } from "@/lib/book/services";
 
 const TEAM_SERVICE_TYPES = ["deep", "move-in-out"];
 
@@ -75,8 +81,7 @@ export async function checkTeamAvailability(
       availableTeams,
       bookedCount,
       maxTeams: MAX_TEAM_BOOKINGS_PER_DAY,
-      message:
-        availableTeams.length === 0 ? "No slot available for this date" : undefined,
+      message: availableTeams.length === 0 ? "No slot available for this date" : undefined,
     };
   } catch (err) {
     console.error(err);
@@ -142,19 +147,81 @@ async function applyV2Extension(
     .eq("booking_reference", bookingReference);
 }
 
+async function buildAuthoritativePricingState(state: BookFormState): Promise<BookFormState> {
+  const pricingConfig = await fetchBookPricingConfig();
+  const extrasPricing: Record<string, number> = {};
+
+  if (usesDbExtras(state.service) && state.selectedExtras.length > 0) {
+    const supabase = createServiceRoleClient();
+    const { data, error } = await supabase
+      .from("pricing_extras")
+      .select("slug, price")
+      .eq("is_active", true)
+      .contains("service_slugs", [state.service]);
+
+    if (error) {
+      console.error("Unable to load authoritative extras pricing:", error);
+      throw new Error("Current extras pricing is unavailable. Please try again.");
+    }
+
+    const liveExtras = Object.fromEntries(
+      (data ?? []).map((extra) => [String(extra.slug), Number(extra.price)])
+    );
+
+    for (const id of state.selectedExtras) {
+      const price = liveExtras[id];
+      if (!Number.isFinite(price)) {
+        throw new Error(`Selected extra is no longer available: ${id}`);
+      }
+      extrasPricing[id] = price;
+    }
+  } else {
+    for (const id of state.selectedExtras) {
+      const price = pricingConfig.extrasPricing[id];
+      if (!Number.isFinite(price)) {
+        throw new Error(`Selected extra has no current server price: ${id}`);
+      }
+      extrasPricing[id] = price;
+    }
+  }
+
+  const serverState: BookFormState = {
+    ...state,
+    pricingConfig,
+    extrasPricing,
+    pricingSummary: undefined,
+  };
+
+  serverState.pricingSummary = calculateBookPricing(serverState, pricingConfig);
+  return serverState;
+}
+
 export async function saveBookV2Booking(
   state: BookFormState,
-  userId?: string
+  _userId?: string
 ): Promise<{ success: boolean; bookingReference?: string; message?: string }> {
   try {
+    const authClient = await createClient();
+    const {
+      data: { user },
+    } = await authClient.auth.getUser();
+
+    if (!user) {
+      return { success: false, message: "Please log in before saving this booking." };
+    }
+
     const supabase = createServiceRoleClient();
     const bookingReference = state.bookingReference ?? generateBookingReference();
 
     const { data: existing } = await supabase
       .from("bookings")
-      .select("id, payment_status, created_at")
+      .select("id, payment_status, created_at, user_id")
       .eq("booking_reference", bookingReference)
       .maybeSingle();
+
+    if (existing?.user_id && existing.user_id !== user.id) {
+      return { success: false, message: "This booking belongs to another account." };
+    }
 
     if (existing?.payment_status === "completed") {
       return {
@@ -163,8 +230,9 @@ export async function saveBookV2Booking(
       };
     }
 
+    const authoritativeState = await buildAuthoritativePricingState(state);
     const booking = mapBookFormStateToBooking(
-      state,
+      authoritativeState,
       bookingReference,
       existing
         ? { id: existing.id, createdAt: existing.created_at as string }
@@ -190,9 +258,12 @@ export async function saveBookV2Booking(
         }
         const { data: dup } = await supabase
           .from("bookings")
-          .select("payment_status")
+          .select("payment_status, user_id")
           .eq("booking_reference", bookingReference)
           .maybeSingle();
+        if (dup?.user_id && dup.user_id !== user.id) {
+          return { success: false, message: "This booking belongs to another account." };
+        }
         if (dup?.payment_status === "completed") {
           return { success: false, message: "This booking has already been paid." };
         }
@@ -207,7 +278,7 @@ export async function saveBookV2Booking(
     }
 
     try {
-      await applyV2Extension(state, bookingReference, userId);
+      await applyV2Extension(authoritativeState, bookingReference, user.id);
     } catch (extensionError) {
       console.warn("V2 booking extension update skipped:", extensionError);
     }
@@ -222,8 +293,7 @@ export async function saveBookV2Booking(
 }
 
 export async function initializeBookPayment(
-  amount: number,
-  email: string
+  bookingReference: string
 ): Promise<{
   success: boolean;
   publicKey?: string;
@@ -236,12 +306,43 @@ export async function initializeBookPayment(
   if (!publicKey) {
     return { success: false, message: getPaystackConfigError() };
   }
+
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!user) {
+    return { success: false, message: "Please log in before payment." };
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data: booking, error } = await supabase
+    .from("bookings")
+    .select("total_amount, contact_email, payment_status, user_id")
+    .eq("booking_reference", bookingReference)
+    .maybeSingle();
+
+  if (error || !booking) {
+    return { success: false, message: "Booking not found." };
+  }
+  if (booking.user_id !== user.id) {
+    return { success: false, message: "This booking belongs to another account." };
+  }
+  if (booking.payment_status === "completed") {
+    return { success: false, message: "This booking has already been paid." };
+  }
+
+  const total = Number(booking.total_amount);
+  if (!Number.isFinite(total) || total <= 0) {
+    return { success: false, message: "Booking total is invalid. Please contact support." };
+  }
+
   const reference = `bokkie-v2-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
   return {
     success: true,
     publicKey,
-    amount: Math.round(amount * 100),
-    email,
+    amount: Math.round(total * 100),
+    email: String(booking.contact_email || user.email || ""),
     reference,
   };
 }
@@ -294,7 +395,12 @@ export async function bookSignupAndProfile(data: {
     email: data.email,
     password: data.password,
     options: {
-      data: { first_name: firstName, last_name: lastName, full_name: data.fullName, phone: data.cellNumber },
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        full_name: data.fullName,
+        phone: data.cellNumber,
+      },
     },
   });
 
@@ -323,6 +429,47 @@ export async function bookLogin(email: string, password: string) {
   return { success: true, userId: data.user?.id };
 }
 
+type VerifiedPaystackTransaction = {
+  status: string;
+  amount: number;
+  currency: string;
+  reference: string;
+  metadata: Record<string, unknown>;
+};
+
+async function verifyPaystackTransaction(
+  reference: string,
+  secretKey: string
+): Promise<VerifiedPaystackTransaction | null> {
+  try {
+    const response = await fetch(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`,
+      {
+        headers: { Authorization: `Bearer ${secretKey}` },
+        cache: "no-store",
+      }
+    );
+
+    if (!response.ok) return null;
+    const payload = await response.json();
+    if (!payload?.status || !payload?.data) return null;
+
+    return {
+      status: String(payload.data.status ?? ""),
+      amount: Number(payload.data.amount),
+      currency: String(payload.data.currency ?? ""),
+      reference: String(payload.data.reference ?? ""),
+      metadata:
+        payload.data.metadata && typeof payload.data.metadata === "object"
+          ? payload.data.metadata
+          : {},
+    };
+  } catch (error) {
+    console.error("Paystack verification request failed:", error);
+    return null;
+  }
+}
+
 export async function verifyAndCompleteBookPayment(
   bookingReference: string,
   paymentReference: string
@@ -332,22 +479,45 @@ export async function verifyAndCompleteBookPayment(
     return { success: false, message: getPaystackConfigError() };
   }
 
+  const authClient = await createClient();
+  const {
+    data: { user },
+  } = await authClient.auth.getUser();
+  if (!user) {
+    return { success: false, message: "Please log in before confirming payment." };
+  }
+
   const supabase = createServiceRoleClient();
   const { data: booking, error: fetchError } = await supabase
     .from("bookings")
-    .select("total_amount, payment_status")
+    .select("total_amount, payment_status, user_id")
     .eq("booking_reference", bookingReference)
     .maybeSingle();
 
   if (fetchError || !booking) {
     return { success: false, message: "Booking not found" };
   }
+  if (booking.user_id !== user.id) {
+    return { success: false, message: "This booking belongs to another account." };
+  }
 
   if (booking.payment_status === "completed") {
     return { success: true, message: "Payment already confirmed" };
   }
 
-  const verified = await verifyPayment(paymentReference, secretKey);
+  const transaction = await verifyPaystackTransaction(paymentReference, secretKey);
+  const expectedAmount = Math.round(Number(booking.total_amount) * 100);
+  const metadataBookingReference = String(
+    transaction?.metadata?.booking_reference ?? ""
+  );
+
+  const verified =
+    transaction?.status === "success" &&
+    transaction.reference === paymentReference &&
+    transaction.amount === expectedAmount &&
+    transaction.currency.toUpperCase() === "ZAR" &&
+    metadataBookingReference === bookingReference;
+
   if (!verified) {
     await supabase
       .from("bookings")
@@ -360,7 +530,8 @@ export async function verifyAndCompleteBookPayment(
 
     return {
       success: false,
-      message: "Payment could not be verified with Paystack. Please try again or contact support.",
+      message:
+        "Payment verification failed because the transaction did not match this booking's amount, currency, or reference.",
     };
   }
 
