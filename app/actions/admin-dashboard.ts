@@ -17,6 +17,7 @@ import {
   type PendingCounts,
 } from "@/lib/storage/admin-supabase";
 import { Booking } from "@/lib/types/booking";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 /**
  * Get admin dashboard data
@@ -26,6 +27,8 @@ export async function getAdminDashboardData(
   customStart?: Date,
   customEnd?: Date
 ) {
+  await requireAdmin();
+
   try {
     const [
       metrics,
