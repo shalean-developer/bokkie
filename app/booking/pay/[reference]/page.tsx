@@ -1,21 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Calendar, MapPin, Clock, Loader2, AlertCircle, Shield } from "lucide-react";
 import { Booking } from "@/lib/types/booking";
-import { initializePaymentWithAmount } from "@/app/actions/payment";
+import { initializeRebookPayment } from "@/app/actions/payment";
 import { initializePaystack } from "@/lib/paystack";
-import { formatPrice, getServiceName, getFrequencyName } from "@/lib/pricing";
+import { formatPrice } from "@/lib/pricing";
 import { getAdditionalServices } from "@/app/actions/booking-data";
-import { updateRebookedBookingPayment } from "@/app/actions/rebook-payment";
 
 export default function PayForFailedBookingPage() {
-  const router = useRouter();
   const params = useParams();
   const bookingReference = params.reference as string;
-  
+
   const [booking, setBooking] = useState<Booking | null>(null);
   const [loading, setLoading] = useState(true);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -28,14 +26,13 @@ export default function PayForFailedBookingPage() {
         setLoading(true);
         setError(null);
 
-        // Fetch booking via API
         const bookingResponse = await fetch(`/api/bookings/${encodeURIComponent(bookingReference)}`);
         if (!bookingResponse.ok) {
           setError("Booking not found");
           setLoading(false);
           return;
         }
-        
+
         const bookingData = await bookingResponse.json();
         if (!bookingData.success || !bookingData.booking) {
           setError("Booking not found");
@@ -45,7 +42,6 @@ export default function PayForFailedBookingPage() {
 
         const fetchedBooking = bookingData.booking;
 
-        // Only allow payment for failed payments
         if (fetchedBooking.paymentStatus !== "failed") {
           setError(`This booking's payment status is "${fetchedBooking.paymentStatus}". Payment links can only be used for failed payments.`);
           setLoading(false);
@@ -54,7 +50,6 @@ export default function PayForFailedBookingPage() {
 
         setBooking(fetchedBooking);
 
-        // Load extras mapping
         try {
           const additionalServices = await getAdditionalServices();
           const map: Record<string, string> = {};
@@ -85,21 +80,16 @@ export default function PayForFailedBookingPage() {
     setError(null);
 
     try {
-      // Initialize payment with the booking's total amount
-      const paymentInit = await initializePaymentWithAmount(
-        booking.totalAmount,
-        booking.email
-      );
+      const paymentInit = await initializeRebookPayment(booking.bookingReference);
 
-      if (!paymentInit.success || !paymentInit.publicKey || !paymentInit.amount || !paymentInit.reference) {
+      if (!paymentInit.success || !paymentInit.publicKey || !paymentInit.amount || !paymentInit.email || !paymentInit.reference) {
         throw new Error(paymentInit.message || "Failed to initialize payment");
       }
 
-      // Initialize Paystack payment
       initializePaystack({
         publicKey: paymentInit.publicKey,
         amount: paymentInit.amount,
-        email: paymentInit.email!,
+        email: paymentInit.email,
         reference: paymentInit.reference,
         callback_url: `${window.location.origin}/booking/pay/${booking.bookingReference}/success?ref=${paymentInit.reference}`,
         metadata: {
@@ -110,7 +100,6 @@ export default function PayForFailedBookingPage() {
         },
       });
 
-      // Reset processing state after payment popup opens
       setTimeout(() => {
         setIsProcessing(false);
       }, 500);
@@ -173,10 +162,7 @@ export default function PayForFailedBookingPage() {
               <h2 className="text-xl font-semibold text-red-900">Error</h2>
             </div>
             <p className="text-red-700 mb-4">{error}</p>
-            <Link
-              href="/"
-              className="inline-flex items-center gap-2 text-red-700 hover:text-red-900 font-medium"
-            >
+            <Link href="/" className="inline-flex items-center gap-2 text-red-700 hover:text-red-900 font-medium">
               <ArrowLeft className="w-4 h-4" />
               Go Home
             </Link>
@@ -186,14 +172,11 @@ export default function PayForFailedBookingPage() {
     );
   }
 
-  if (!booking) {
-    return null;
-  }
+  if (!booking) return null;
 
   return (
     <div className="py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Header */}
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Complete Your Payment</h1>
           <p className="text-gray-600">
@@ -210,10 +193,8 @@ export default function PayForFailedBookingPage() {
           </div>
         )}
 
-        {/* Booking Details */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Booking Details</h2>
-          
           <div className="space-y-4">
             <div className="flex items-start gap-3">
               <Calendar className="w-5 h-5 text-gray-400 mt-0.5" />
@@ -256,7 +237,6 @@ export default function PayForFailedBookingPage() {
           </div>
         </div>
 
-        {/* Payment Section */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <Shield className="w-6 h-6 text-blue-600" />
@@ -266,9 +246,7 @@ export default function PayForFailedBookingPage() {
           <div className="bg-gray-50 rounded-lg p-4 mb-6">
             <div className="flex justify-between items-center">
               <span className="text-lg font-medium text-gray-700">Total Amount</span>
-              <span className="text-3xl font-bold text-gray-900">
-                {formatPrice(booking.totalAmount)}
-              </span>
+              <span className="text-3xl font-bold text-gray-900">{formatPrice(booking.totalAmount)}</span>
             </div>
           </div>
 
@@ -290,12 +268,9 @@ export default function PayForFailedBookingPage() {
             )}
           </button>
 
-          <p className="text-sm text-gray-500 text-center mt-4">
-            Secure payment powered by Paystack
-          </p>
+          <p className="text-sm text-gray-500 text-center mt-4">Secure payment powered by Paystack</p>
         </div>
 
-        {/* Info Box */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
           <p className="text-sm text-blue-800">
             <strong>Note:</strong> Once your payment is successfully processed, your booking will be confirmed and you will receive a confirmation email.
