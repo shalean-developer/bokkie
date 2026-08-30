@@ -18,7 +18,7 @@ export interface PaymentInitResult {
 }
 
 /**
- * Initialize a failed/rebook payment from the persisted booking only.
+ * Initialize a persisted rebook/retry payment from the booking only.
  * Browser-supplied amount and email are not trusted.
  */
 export async function initializeRebookPayment(
@@ -45,10 +45,10 @@ export async function initializeRebookPayment(
       return { success: false, message: "This booking has already been paid." };
     }
 
-    if (booking.payment_status !== "failed") {
+    if (booking.payment_status !== "pending" && booking.payment_status !== "failed") {
       return {
         success: false,
-        message: `Payment can only be retried for failed bookings. Current status: ${booking.payment_status ?? "unknown"}.`,
+        message: `Payment can only be initialized for pending or failed bookings. Current status: ${booking.payment_status ?? "unknown"}.`,
       };
     }
 
