@@ -1,6 +1,7 @@
 "use server";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export interface Notification {
   id: string;
@@ -21,9 +22,6 @@ export interface Notification {
   expiresAt?: string;
 }
 
-/**
- * Map database record to Notification type
- */
 function mapDatabaseToNotification(data: any): Notification {
   return {
     id: data.id,
@@ -45,74 +43,40 @@ function mapDatabaseToNotification(data: any): Notification {
   };
 }
 
-/**
- * Get all notifications (admin access)
- */
 export async function getAllNotifications(): Promise<Notification[]> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("notifications")
     .select("*")
     .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error("Error fetching all notifications:", error);
-    throw new Error(`Failed to fetch notifications: ${error.message}`);
-  }
-
+  if (error) throw new Error(`Failed to fetch notifications: ${error.message}`);
   return (data || []).map(mapDatabaseToNotification);
 }
 
-/**
- * Get notification statistics
- */
 export async function getNotificationStats() {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const [totalResult, readResult, typeResult, priorityResult] = await Promise.all([
-    // Total count
-    supabase
-      .from("notifications")
-      .select("*", { count: "exact", head: true }),
-    
-    // Count by read status
-    supabase
-      .from("notifications")
-      .select("is_read"),
-    
-    // Count by type
-    supabase
-      .from("notifications")
-      .select("type"),
-    
-    // Count by priority
-    supabase
-      .from("notifications")
-      .select("priority"),
+    supabase.from("notifications").select("*", { count: "exact", head: true }),
+    supabase.from("notifications").select("is_read"),
+    supabase.from("notifications").select("type"),
+    supabase.from("notifications").select("priority"),
   ]);
 
-  // Count by read status
-  const byReadStatus = {
-    read: 0,
-    unread: 0,
-  };
+  const byReadStatus = { read: 0, unread: 0 };
   (readResult.data || []).forEach((notification) => {
-    if (notification.is_read) {
-      byReadStatus.read++;
-    } else {
-      byReadStatus.unread++;
-    }
+    if (notification.is_read) byReadStatus.read++;
+    else byReadStatus.unread++;
   });
 
-  // Count by type
   const byType: Record<string, number> = {};
   (typeResult.data || []).forEach((notification) => {
     const type = notification.type || "unknown";
     byType[type] = (byType[type] || 0) + 1;
   });
 
-  // Count by priority
   const byPriority: Record<string, number> = {};
   (priorityResult.data || []).forEach((notification) => {
     const priority = notification.priority || "normal";
@@ -127,12 +91,9 @@ export async function getNotificationStats() {
   };
 }
 
-/**
- * Get notification by ID
- */
 export async function getNotificationById(id: string): Promise<Notification | null> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("notifications")
     .select("*")
@@ -140,23 +101,18 @@ export async function getNotificationById(id: string): Promise<Notification | nu
     .single();
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return null;
-    }
+    if (error.code === "PGRST116") return null;
     throw new Error(`Failed to fetch notification: ${error.message}`);
   }
 
   return data ? mapDatabaseToNotification(data) : null;
 }
 
-/**
- * Create a new notification
- */
 export async function createNotification(
   notification: Omit<Notification, "id" | "createdAt" | "readAt">
 ): Promise<{ success: boolean; data?: Notification; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("notifications")
     .insert({
@@ -177,23 +133,16 @@ export async function createNotification(
     .select()
     .single();
 
-  if (error) {
-    console.error("Error creating notification:", error);
-    return { success: false, error: error.message };
-  }
-
+  if (error) return { success: false, error: error.message };
   return { success: true, data: mapDatabaseToNotification(data) };
 }
 
-/**
- * Update a notification
- */
 export async function updateNotification(
   id: string,
   updates: Partial<Omit<Notification, "id" | "createdAt">>
 ): Promise<{ success: boolean; data?: Notification; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const updateData: any = {};
   if (updates.title !== undefined) updateData.title = updates.title;
   if (updates.message !== undefined) updateData.message = updates.message;
@@ -216,124 +165,54 @@ export async function updateNotification(
     .select()
     .single();
 
-  if (error) {
-    console.error("Error updating notification:", error);
-    return { success: false, error: error.message };
-  }
-
+  if (error) return { success: false, error: error.message };
   return { success: true, data: mapDatabaseToNotification(data) };
 }
 
-/**
- * Mark notification as read
- */
 export async function markNotificationAsRead(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
-  const { error } = await supabase
-    .from("notifications")
-    .update({ is_read: true })
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error marking notification as read:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
+  const { error } = await supabase.from("notifications").update({ is_read: true }).eq("id", id);
+  return error ? { success: false, error: error.message } : { success: true };
 }
 
-/**
- * Mark notification as unread
- */
 export async function markNotificationAsUnread(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { error } = await supabase
     .from("notifications")
     .update({ is_read: false, read_at: null })
     .eq("id", id);
-
-  if (error) {
-    console.error("Error marking notification as unread:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
+  return error ? { success: false, error: error.message } : { success: true };
 }
 
-/**
- * Mark all notifications as read
- */
 export async function markAllNotificationsAsRead(): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { error } = await supabase
     .from("notifications")
     .update({ is_read: true })
     .eq("is_read", false);
-
-  if (error) {
-    console.error("Error marking all notifications as read:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
+  return error ? { success: false, error: error.message } : { success: true };
 }
 
-/**
- * Delete a notification
- */
 export async function deleteNotification(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
-  const { error } = await supabase
-    .from("notifications")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    console.error("Error deleting notification:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
+  const { error } = await supabase.from("notifications").delete().eq("id", id);
+  return error ? { success: false, error: error.message } : { success: true };
 }
 
-/**
- * Delete multiple notifications
- */
 export async function deleteNotifications(ids: string[]): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
-  const { error } = await supabase
-    .from("notifications")
-    .delete()
-    .in("id", ids);
-
-  if (error) {
-    console.error("Error deleting notifications:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
+  const { error } = await supabase.from("notifications").delete().in("id", ids);
+  return error ? { success: false, error: error.message } : { success: true };
 }
 
-/**
- * Delete all read notifications
- */
 export async function deleteAllReadNotifications(): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
-  const { error } = await supabase
-    .from("notifications")
-    .delete()
-    .eq("is_read", true);
-
-  if (error) {
-    console.error("Error deleting read notifications:", error);
-    return { success: false, error: error.message };
-  }
-
-  return { success: true };
+  const { error } = await supabase.from("notifications").delete().eq("is_read", true);
+  return error ? { success: false, error: error.message } : { success: true };
 }

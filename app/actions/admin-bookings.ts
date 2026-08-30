@@ -1,11 +1,14 @@
 "use server";
 
-import { createServiceRoleClient } from "@/lib/supabase/server";
+import { createServiceRoleClient as createSupabaseServiceRoleClient } from "@/lib/supabase/server";
 import { Booking } from "@/lib/types/booking";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
-/**
- * Map database record to Booking type
- */
+async function createServiceRoleClient() {
+  await requireAdmin();
+  return createSupabaseServiceRoleClient();
+}
+
 function mapDatabaseToBooking(data: any): Booking {
   return {
     id: data.id,
@@ -40,7 +43,6 @@ function mapDatabaseToBooking(data: any): Booking {
     serviceFee: data.service_fee ?? undefined,
     cleanerEarnings: data.cleaner_earnings ?? undefined,
     cleanerEarningsPercentage: data.cleaner_earnings_percentage ?? undefined,
-    // Recurring booking fields
     recurringGroupId: data.recurring_group_id ?? undefined,
     recurringSequence: data.recurring_sequence ?? undefined,
     parentBookingId: data.parent_booking_id ?? undefined,
@@ -52,16 +54,11 @@ function mapDatabaseToBooking(data: any): Booking {
     jobProgress: data.job_progress || null,
     createdAt: data.created_at,
     teamId: data.team_id || undefined,
-    // assignedCleanerIds will be loaded separately if needed
   };
 }
 
-/**
- * Get all bookings (admin access)
- */
 export async function getAllBookings(): Promise<Booking[]> {
-  const supabase = createServiceRoleClient();
-  
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -75,37 +72,20 @@ export async function getAllBookings(): Promise<Booking[]> {
   return (data || []).map(mapDatabaseToBooking);
 }
 
-/**
- * Get booking statistics
- */
 export async function getBookingStats() {
-  const supabase = createServiceRoleClient();
-  
+  const supabase = await createServiceRoleClient();
   const [totalResult, statusResult, paymentStatusResult] = await Promise.all([
-    // Total count
-    supabase
-      .from("bookings")
-      .select("*", { count: "exact", head: true }),
-    
-    // Count by status
-    supabase
-      .from("bookings")
-      .select("status"),
-    
-    // Count by payment status
-    supabase
-      .from("bookings")
-      .select("payment_status"),
+    supabase.from("bookings").select("*", { count: "exact", head: true }),
+    supabase.from("bookings").select("status"),
+    supabase.from("bookings").select("payment_status"),
   ]);
 
-  // Count by status
   const byStatus: Record<string, number> = {};
   (statusResult.data || []).forEach((booking) => {
     const status = booking.status || "unknown";
     byStatus[status] = (byStatus[status] || 0) + 1;
   });
 
-  // Count by payment status
   const byPaymentStatus: Record<string, number> = {};
   (paymentStatusResult.data || []).forEach((booking) => {
     const status = booking.payment_status || "unknown";
@@ -119,12 +99,8 @@ export async function getBookingStats() {
   };
 }
 
-/**
- * Get booking by reference (admin access)
- */
 export async function getBookingByReference(reference: string): Promise<Booking | null> {
-  const supabase = createServiceRoleClient();
-  
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -132,24 +108,15 @@ export async function getBookingByReference(reference: string): Promise<Booking 
     .single();
 
   if (error) {
-    if (error.code === "PGRST116") {
-      // No rows returned
-      return null;
-    }
+    if (error.code === "PGRST116") return null;
     throw new Error(`Failed to fetch booking: ${error.message}`);
   }
 
   return data ? mapDatabaseToBooking(data) : null;
 }
 
-/**
- * Get all recurring bookings grouped by recurring_group_id
- * Returns bookings grouped into recurring series
- */
 export async function getAllRecurringBookings(): Promise<Map<string, Booking[]>> {
-  const supabase = createServiceRoleClient();
-  
-  // Get all recurring bookings
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -162,26 +129,17 @@ export async function getAllRecurringBookings(): Promise<Map<string, Booking[]>>
     throw new Error(`Failed to fetch recurring bookings: ${error.message}`);
   }
 
-  // Group bookings by recurring_group_id
   const grouped = new Map<string, Booking[]>();
-  
   (data || []).forEach((bookingData) => {
     const booking = mapDatabaseToBooking(bookingData);
     const groupId = booking.recurringGroupId || "unknown";
-    
-    if (!grouped.has(groupId)) {
-      grouped.set(groupId, []);
-    }
-    
+    if (!grouped.has(groupId)) grouped.set(groupId, []);
     grouped.get(groupId)!.push(booking);
   });
 
   return grouped;
 }
 
-/**
- * Recurring Schedule type matching the recurring_schedules table
- */
 export interface RecurringSchedule {
   id: string;
   customerId: string;
@@ -208,20 +166,13 @@ export interface RecurringSchedule {
   earningsOverride: string;
   totalAmount: number | null;
   cleanerEarnings: number | null;
-  // Customer info from customers table join
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
 }
 
-/**
- * Get all recurring schedules from the recurring_schedules table
- * Joins with profiles to get customer information
- */
 export async function getAllRecurringSchedules(): Promise<RecurringSchedule[]> {
-  const supabase = createServiceRoleClient();
-  
-  // Fetch recurring schedules with customer info from customers table
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("recurring_schedules")
     .select(`
@@ -241,13 +192,11 @@ export async function getAllRecurringSchedules(): Promise<RecurringSchedule[]> {
     throw new Error(`Failed to fetch recurring schedules: ${error.message}`);
   }
 
-  // Map the data to RecurringSchedule type
   return (data || []).map((schedule: any) => {
     const customer = schedule.customers || {};
-    const customerName = 
-      (customer.first_name && customer.last_name 
-        ? `${customer.first_name} ${customer.last_name}` 
-        : customer.first_name || customer.last_name || 'Unknown Customer');
+    const customerName = customer.first_name && customer.last_name
+      ? `${customer.first_name} ${customer.last_name}`
+      : customer.first_name || customer.last_name || "Unknown Customer";
 
     return {
       id: schedule.id,
@@ -282,9 +231,6 @@ export async function getAllRecurringSchedules(): Promise<RecurringSchedule[]> {
   });
 }
 
-/**
- * Customer interface for dropdowns
- */
 export interface Customer {
   id: string;
   firstName: string;
@@ -293,9 +239,6 @@ export interface Customer {
   phone: string | null;
 }
 
-/**
- * Recurring Customer interface - customer with recurring schedule info
- */
 export interface RecurringCustomer {
   id: string;
   firstName: string;
@@ -320,18 +263,12 @@ export interface RecurringCustomer {
   }>;
 }
 
-/**
- * Cleaner interface for dropdowns
- */
 export interface Cleaner {
   id: string;
   cleanerId: string;
   name: string;
 }
 
-/**
- * Full Cleaner interface for admin pages
- */
 export interface CleanerFull {
   id: string;
   cleanerId: string;
@@ -349,12 +286,8 @@ export interface CleanerFull {
   updatedAt: string;
 }
 
-/**
- * Get all cleaners with full details for admin pages
- */
 export async function getAllCleanersFull(): Promise<CleanerFull[]> {
-  const supabase = createServiceRoleClient();
-  
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("cleaners")
     .select("*")
@@ -376,19 +309,17 @@ export async function getAllCleanersFull(): Promise<CleanerFull[]> {
     displayOrder: cleaner.display_order || 0,
     isActive: cleaner.is_active ?? true,
     isAvailable: cleaner.is_available ?? true,
-    availabilityDays: cleaner.availability_days ? (Array.isArray(cleaner.availability_days) ? cleaner.availability_days : []) : [],
+    availabilityDays: cleaner.availability_days
+      ? (Array.isArray(cleaner.availability_days) ? cleaner.availability_days : [])
+      : [],
     carpetCleaningSkill: cleaner.carpet_cleaning_skill ?? false,
     createdAt: cleaner.created_at,
     updatedAt: cleaner.updated_at,
   }));
 }
 
-/**
- * Get all customers for dropdowns
- */
 export async function getAllCustomers(): Promise<Customer[]> {
-  const supabase = createServiceRoleClient();
-  
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("customers")
     .select("id, first_name, last_name, email, phone")
@@ -408,15 +339,11 @@ export async function getAllCustomers(): Promise<Customer[]> {
   }));
 }
 
-/**
- * Update a customer
- */
 export async function updateCustomer(
   id: string,
   updates: Partial<Pick<Customer, "firstName" | "lastName" | "email" | "phone">>
 ): Promise<{ success: boolean; error?: string; data?: Customer }> {
-  const supabase = createServiceRoleClient();
-
+  const supabase = await createServiceRoleClient();
   const updateData: any = {};
   if (updates.firstName !== undefined) updateData.first_name = updates.firstName;
   if (updates.lastName !== undefined) updateData.last_name = updates.lastName;
@@ -448,14 +375,10 @@ export async function updateCustomer(
   };
 }
 
-/**
- * Delete a customer
- */
 export async function deleteCustomer(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = createServiceRoleClient();
-
+  const supabase = await createServiceRoleClient();
   const { error } = await supabase.from("customers").delete().eq("id", id);
 
   if (error) {
@@ -466,13 +389,8 @@ export async function deleteCustomer(
   return { success: true };
 }
 
-/**
- * Get all customers who have recurring schedules
- */
 export async function getRecurringCustomers(): Promise<RecurringCustomer[]> {
-  const supabase = createServiceRoleClient();
-  
-  // Fetch customers with their recurring schedules
+  const supabase = await createServiceRoleClient();
   const { data: schedulesData, error: schedulesError } = await supabase
     .from("recurring_schedules")
     .select(`
@@ -504,7 +422,6 @@ export async function getRecurringCustomers(): Promise<RecurringCustomer[]> {
     throw new Error(`Failed to fetch recurring schedules: ${schedulesError.message}`);
   }
 
-  // Group schedules by customer
   const customerMap = new Map<string, RecurringCustomer>();
 
   (schedulesData || []).forEach((schedule: any) => {
@@ -512,7 +429,6 @@ export async function getRecurringCustomers(): Promise<RecurringCustomer[]> {
     if (!customer) return;
 
     const customerId = customer.id;
-    
     if (!customerMap.has(customerId)) {
       customerMap.set(customerId, {
         id: customerId,
@@ -532,9 +448,7 @@ export async function getRecurringCustomers(): Promise<RecurringCustomer[]> {
 
     const recurringCustomer = customerMap.get(customerId)!;
     recurringCustomer.scheduleCount++;
-    if (schedule.is_active) {
-      recurringCustomer.activeScheduleCount++;
-    }
+    if (schedule.is_active) recurringCustomer.activeScheduleCount++;
 
     recurringCustomer.schedules.push({
       id: schedule.id,
@@ -548,7 +462,6 @@ export async function getRecurringCustomers(): Promise<RecurringCustomer[]> {
     });
   });
 
-  // Convert map to array and sort by customer name
   return Array.from(customerMap.values()).sort((a, b) => {
     const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
     const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
@@ -556,12 +469,8 @@ export async function getRecurringCustomers(): Promise<RecurringCustomer[]> {
   });
 }
 
-/**
- * Get all cleaners for dropdowns
- */
 export async function getAllCleaners(): Promise<Cleaner[]> {
-  const supabase = createServiceRoleClient();
-  
+  const supabase = await createServiceRoleClient();
   const { data, error } = await supabase
     .from("cleaners")
     .select("id, cleaner_id, name")
@@ -580,9 +489,6 @@ export async function getAllCleaners(): Promise<Cleaner[]> {
   }));
 }
 
-/**
- * Create a new recurring schedule
- */
 export async function createRecurringSchedule(data: {
   customerId: string;
   serviceType: string;
@@ -605,9 +511,7 @@ export async function createRecurringSchedule(data: {
   totalAmount?: number | null;
   cleanerEarnings?: number | null;
 }): Promise<{ success: boolean; error?: string }> {
-  const supabase = createServiceRoleClient();
-
-  // Convert amounts to cents if provided
+  const supabase = await createServiceRoleClient();
   const totalAmountCents = data.totalAmount ? Math.round(data.totalAmount * 100) : null;
   const cleanerEarningsCents = data.cleanerEarnings ? Math.round(data.cleanerEarnings * 100) : null;
 
@@ -644,9 +548,6 @@ export async function createRecurringSchedule(data: {
   return { success: true };
 }
 
-/**
- * Update an existing recurring schedule
- */
 export async function updateRecurringSchedule(
   id: string,
   data: {
@@ -672,10 +573,8 @@ export async function updateRecurringSchedule(
     cleanerEarnings?: number | null;
   }
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = createServiceRoleClient();
-
+  const supabase = await createServiceRoleClient();
   const updateData: any = {};
-  
   if (data.customerId !== undefined) updateData.customer_id = data.customerId;
   if (data.serviceType !== undefined) updateData.service_type = data.serviceType;
   if (data.frequency !== undefined) updateData.frequency = data.frequency;
@@ -700,7 +599,6 @@ export async function updateRecurringSchedule(
   if (data.cleanerEarnings !== undefined) {
     updateData.cleaner_earnings = data.cleanerEarnings ? Math.round(data.cleanerEarnings * 100) : null;
   }
-
   updateData.updated_at = new Date().toISOString();
 
   const { error } = await supabase
@@ -716,12 +614,8 @@ export async function updateRecurringSchedule(
   return { success: true };
 }
 
-/**
- * Delete a recurring schedule
- */
 export async function deleteRecurringSchedule(id: string): Promise<{ success: boolean; error?: string }> {
-  const supabase = createServiceRoleClient();
-
+  const supabase = await createServiceRoleClient();
   const { error } = await supabase
     .from("recurring_schedules")
     .delete()
@@ -735,12 +629,10 @@ export async function deleteRecurringSchedule(id: string): Promise<{ success: bo
   return { success: true };
 }
 
-/**
- * Assign cleaner to a recurring schedule
- */
 export async function assignCleanerToSchedule(
   scheduleId: string,
   cleanerId: string | null
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   return updateRecurringSchedule(scheduleId, { cleanerId });
 }

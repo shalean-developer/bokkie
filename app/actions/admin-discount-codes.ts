@@ -1,6 +1,7 @@
 "use server";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export interface DiscountCode {
   id: string;
@@ -19,9 +20,6 @@ export interface DiscountCode {
   updatedAt: string;
 }
 
-/**
- * Map database record to DiscountCode type
- */
 function mapDatabaseToDiscountCode(data: any): DiscountCode {
   return {
     id: data.id,
@@ -41,12 +39,9 @@ function mapDatabaseToDiscountCode(data: any): DiscountCode {
   };
 }
 
-/**
- * Get all discount codes (admin access)
- */
 export async function getAllDiscountCodes(): Promise<DiscountCode[]> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("discount_codes")
     .select("*")
@@ -60,33 +55,15 @@ export async function getAllDiscountCodes(): Promise<DiscountCode[]> {
   return (data || []).map(mapDatabaseToDiscountCode);
 }
 
-/**
- * Get discount code statistics
- */
 export async function getDiscountCodeStats() {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const [totalResult, activeResult, expiredResult] = await Promise.all([
-    // Total count
-    supabase
-      .from("discount_codes")
-      .select("*", { count: "exact", head: true }),
-    
-    // Active count
-    supabase
-      .from("discount_codes")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true),
-    
-    // Expired count (valid_until < NOW())
-    supabase
-      .from("discount_codes")
-      .select("*", { count: "exact", head: true })
-      .not("valid_until", "is", null)
-      .lt("valid_until", new Date().toISOString()),
+    supabase.from("discount_codes").select("*", { count: "exact", head: true }),
+    supabase.from("discount_codes").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("discount_codes").select("*", { count: "exact", head: true }).not("valid_until", "is", null).lt("valid_until", new Date().toISOString()),
   ]);
 
-  // Calculate total usage
   const { data: usageData } = await supabase
     .from("discount_code_usage")
     .select("discount_amount", { count: "exact", head: true });
@@ -118,61 +95,39 @@ export interface CreateDiscountCodeResult {
   data?: DiscountCode;
 }
 
-/**
- * Create a new discount code (admin access)
- */
 export async function createDiscountCode(
   input: CreateDiscountCodeInput
 ): Promise<CreateDiscountCodeResult> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
 
-  // Validate required fields
   if (!input.code || !input.code.trim()) {
-    return {
-      success: false,
-      message: "Discount code is required",
-    };
+    return { success: false, message: "Discount code is required" };
   }
 
   if (!input.discountType || !input.discountValue) {
-    return {
-      success: false,
-      message: "Discount type and value are required",
-    };
+    return { success: false, message: "Discount type and value are required" };
   }
 
-  // Validate discount value
   if (input.discountType === "percentage" && (input.discountValue < 0 || input.discountValue > 100)) {
-    return {
-      success: false,
-      message: "Percentage discount must be between 0 and 100",
-    };
+    return { success: false, message: "Percentage discount must be between 0 and 100" };
   }
 
   if (input.discountType === "fixed" && input.discountValue < 0) {
-    return {
-      success: false,
-      message: "Fixed discount amount must be positive",
-    };
+    return { success: false, message: "Fixed discount amount must be positive" };
   }
 
   try {
-    // Handle date formatting - convert date string to ISO timestamp if provided
     let validFrom = new Date().toISOString();
     if (input.validFrom && input.validFrom.trim()) {
-      // If it's a date string (YYYY-MM-DD), convert to ISO timestamp
       const date = new Date(input.validFrom);
-      if (!isNaN(date.getTime())) {
-        validFrom = date.toISOString();
-      }
+      if (!isNaN(date.getTime())) validFrom = date.toISOString();
     }
 
     let validUntil: string | null = null;
     if (input.validUntil && input.validUntil.trim()) {
       const date = new Date(input.validUntil);
-      if (!isNaN(date.getTime())) {
-        validUntil = date.toISOString();
-      }
+      if (!isNaN(date.getTime())) validUntil = date.toISOString();
     }
 
     const { data, error } = await supabase
@@ -193,18 +148,11 @@ export async function createDiscountCode(
       .single();
 
     if (error) {
-      // Check for unique constraint violation
       if (error.code === "23505") {
-        return {
-          success: false,
-          message: "A discount code with this name already exists",
-        };
+        return { success: false, message: "A discount code with this name already exists" };
       }
       console.error("Error creating discount code:", error);
-      return {
-        success: false,
-        message: `Failed to create discount code: ${error.message}`,
-      };
+      return { success: false, message: `Failed to create discount code: ${error.message}` };
     }
 
     return {
@@ -214,9 +162,6 @@ export async function createDiscountCode(
     };
   } catch (error: any) {
     console.error("Error creating discount code:", error);
-    return {
-      success: false,
-      message: `Failed to create discount code: ${error.message || "Unknown error"}`,
-    };
+    return { success: false, message: `Failed to create discount code: ${error.message || "Unknown error"}` };
   }
 }

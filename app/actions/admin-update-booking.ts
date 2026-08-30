@@ -5,6 +5,7 @@ import { getBookingByReference } from "@/app/actions/admin-bookings";
 import { BookingFormData, normalizeCleanerPreference } from "@/lib/types/booking";
 import { calculatePrice } from "@/lib/pricing";
 import { fetchPricingConfig } from "@/lib/pricing-server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
 export interface AdminUpdateBookingResult {
   success: boolean;
@@ -12,32 +13,23 @@ export interface AdminUpdateBookingResult {
   errors?: Record<string, string>;
 }
 
-/**
- * Update a booking with new data (admin access - no user restriction)
- */
 export async function adminUpdateBooking(
   bookingReference: string,
   updates: Partial<BookingFormData>
 ): Promise<AdminUpdateBookingResult> {
   try {
+    await requireAdmin();
     const supabase = createServiceRoleClient();
-
-    // Fetch the booking
     const booking = await getBookingByReference(bookingReference);
 
     if (!booking) {
-      return {
-        success: false,
-        message: "Booking not found",
-      };
+      return { success: false, message: "Booking not found" };
     }
 
-    // Validate updates
     const errors: Record<string, string> = {};
 
-    // For office service, validate officeSize instead of bedrooms
-    if (updates.service === 'office' || (booking.service === 'office' && updates.service === undefined)) {
-      if (updates.officeSize !== undefined && (!updates.officeSize || !['small', 'medium', 'large'].includes(updates.officeSize))) {
+    if (updates.service === "office" || (booking.service === "office" && updates.service === undefined)) {
+      if (updates.officeSize !== undefined && (!updates.officeSize || !["small", "medium", "large"].includes(updates.officeSize))) {
         errors.officeSize = "Please select office size";
       }
     } else if (updates.bedrooms !== undefined && (updates.bedrooms < 0 || updates.bedrooms === null)) {
@@ -61,85 +53,36 @@ export async function adminUpdateBooking(
     }
 
     if (Object.keys(errors).length > 0) {
-      return {
-        success: false,
-        message: "Please fix the validation errors",
-        errors,
-      };
+      return { success: false, message: "Please fix the validation errors", errors };
     }
 
-    // Prepare update object
-    const updateData: any = {
-      updated_at: new Date().toISOString(),
-    };
-
-    // Map BookingFormData fields to database fields
-    if (updates.service !== undefined) {
-      updateData.service_type = updates.service;
-    }
-    if (updates.frequency !== undefined) {
-      updateData.frequency = updates.frequency;
-    }
-    if (updates.scheduledDate !== undefined) {
-      updateData.scheduled_date = updates.scheduledDate;
-    }
-    if (updates.scheduledTime !== undefined) {
-      updateData.scheduled_time = updates.scheduledTime;
-    }
-    if (updates.bedrooms !== undefined) {
-      updateData.bedrooms = updates.bedrooms;
-    }
-    if (updates.bathrooms !== undefined) {
-      updateData.bathrooms = updates.bathrooms;
-    }
-    if (updates.officeSize !== undefined) {
-      updateData.office_size = updates.officeSize || null;
-    }
-    if (updates.extras !== undefined) {
-      updateData.extras = updates.extras || [];
-    }
-    if (updates.streetAddress !== undefined) {
-      updateData.street_address = updates.streetAddress;
-    }
-    if (updates.aptUnit !== undefined) {
-      updateData.apt_unit = updates.aptUnit || null;
-    }
-    if (updates.suburb !== undefined) {
-      updateData.suburb = updates.suburb;
-    }
-    if (updates.city !== undefined) {
-      updateData.city = updates.city;
-    }
+    const updateData: any = { updated_at: new Date().toISOString() };
+    if (updates.service !== undefined) updateData.service_type = updates.service;
+    if (updates.frequency !== undefined) updateData.frequency = updates.frequency;
+    if (updates.scheduledDate !== undefined) updateData.scheduled_date = updates.scheduledDate;
+    if (updates.scheduledTime !== undefined) updateData.scheduled_time = updates.scheduledTime;
+    if (updates.bedrooms !== undefined) updateData.bedrooms = updates.bedrooms;
+    if (updates.bathrooms !== undefined) updateData.bathrooms = updates.bathrooms;
+    if (updates.officeSize !== undefined) updateData.office_size = updates.officeSize || null;
+    if (updates.extras !== undefined) updateData.extras = updates.extras || [];
+    if (updates.streetAddress !== undefined) updateData.street_address = updates.streetAddress;
+    if (updates.aptUnit !== undefined) updateData.apt_unit = updates.aptUnit || null;
+    if (updates.suburb !== undefined) updateData.suburb = updates.suburb;
+    if (updates.city !== undefined) updateData.city = updates.city;
     if (updates.cleanerPreference !== undefined) {
       const normalizedPreference = normalizeCleanerPreference(updates.cleanerPreference);
       updateData.cleaner_preference = normalizedPreference;
-      // Update assigned cleaner if preference is set
       updateData.assigned_cleaner_id = normalizedPreference !== "no-preference" ? normalizedPreference : null;
     }
-    if (updates.specialInstructions !== undefined) {
-      updateData.special_instructions = updates.specialInstructions || null;
-    }
-    if (updates.firstName !== undefined) {
-      updateData.contact_first_name = updates.firstName;
-    }
-    if (updates.lastName !== undefined) {
-      updateData.contact_last_name = updates.lastName;
-    }
-    if (updates.email !== undefined) {
-      updateData.contact_email = updates.email;
-    }
-    if (updates.phone !== undefined) {
-      updateData.contact_phone = updates.phone;
-    }
-    if (updates.discountCode !== undefined) {
-      updateData.discount_code = updates.discountCode || null;
-    }
-    if (updates.tip !== undefined) {
-      updateData.tip_amount = updates.tip || 0;
-    }
+    if (updates.specialInstructions !== undefined) updateData.special_instructions = updates.specialInstructions || null;
+    if (updates.firstName !== undefined) updateData.contact_first_name = updates.firstName;
+    if (updates.lastName !== undefined) updateData.contact_last_name = updates.lastName;
+    if (updates.email !== undefined) updateData.contact_email = updates.email;
+    if (updates.phone !== undefined) updateData.contact_phone = updates.phone;
+    if (updates.discountCode !== undefined) updateData.discount_code = updates.discountCode || null;
+    if (updates.tip !== undefined) updateData.tip_amount = updates.tip || 0;
 
-    // Recalculate price if relevant fields changed
-    const needsPriceRecalculation = 
+    const needsPriceRecalculation =
       updates.service !== undefined ||
       updates.bedrooms !== undefined ||
       updates.bathrooms !== undefined ||
@@ -150,7 +93,6 @@ export async function adminUpdateBooking(
 
     if (needsPriceRecalculation) {
       try {
-        // Merge updates with existing booking data
         const updatedBookingData: BookingFormData = {
           service: updates.service ?? booking.service,
           bedrooms: updates.bedrooms ?? booking.bedrooms,
@@ -174,10 +116,8 @@ export async function adminUpdateBooking(
           specialInstructions: updates.specialInstructions ?? booking.specialInstructions,
         };
 
-        // Fetch pricing configuration and recalculate
         const pricingConfig = await fetchPricingConfig();
         const priceBreakdown = calculatePrice(updatedBookingData, pricingConfig, 0);
-        
         updateData.total_amount = priceBreakdown.total;
         updateData.subtotal = priceBreakdown.subtotal;
         updateData.frequency_discount = priceBreakdown.frequencyDiscount;
@@ -185,31 +125,20 @@ export async function adminUpdateBooking(
         updateData.service_fee = priceBreakdown.serviceFee;
       } catch (error) {
         console.error("Failed to recalculate price (non-critical):", error);
-        // Continue without price recalculation if it fails
       }
     }
 
-    // Update booking
     const { error } = await supabase
       .from("bookings")
       .update(updateData)
       .eq("booking_reference", bookingReference);
 
-    if (error) {
-      throw new Error(`Failed to update booking: ${error.message}`);
-    }
+    if (error) throw new Error(`Failed to update booking: ${error.message}`);
 
-    return {
-      success: true,
-      message: "Booking updated successfully",
-    };
+    return { success: true, message: "Booking updated successfully" };
   } catch (error) {
     console.error("Error updating booking:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    
-    return {
-      success: false,
-      message: `Failed to update booking: ${errorMessage}`,
-    };
+    return { success: false, message: `Failed to update booking: ${errorMessage}` };
   }
 }
