@@ -550,20 +550,3 @@ export async function verifyAndCompleteBookPayment(
 
   return { success: true, message: "Payment verified and booking confirmed" };
 }
-
-/** @deprecated Use verifyAndCompleteBookPayment — does not verify with Paystack */
-export async function updateBookPaymentStatus(
-  bookingReference: string,
-  paymentReference: string,
-  status: "completed" | "failed"
-) {
-  const supabase = createServiceRoleClient();
-  await supabase
-    .from("bookings")
-    .update({
-      payment_status: status,
-      payment_reference: paymentReference,
-      status: status === "completed" ? "confirmed" : "pending",
-    })
-    .eq("booking_reference", bookingReference);
-}
