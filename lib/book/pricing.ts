@@ -119,7 +119,11 @@ export function calculateBookPricing(
     pushBreakdownLine(sizeBreakdown, `Bathrooms (${bathrooms})`, bathroomAmount);
   }
 
+  const allowedExtraIds = new Set(serviceConfig.extras.map((extra) => extra.id));
   const extrasBreakdown = extras.map((id) => {
+    if (!allowedExtraIds.has(id)) {
+      throw new Error(`Extra is not available for ${service}: ${id}`);
+    }
     const configuredPrice = state.extrasPricing?.[id] ?? bookConfig.extrasPricing[id];
     const unitPrice = requireConfiguredNumber(configuredPrice, `extras.${id}`);
     const quantity = getExtraQuantity(state, id);
