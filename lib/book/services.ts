@@ -18,7 +18,7 @@ export interface BookServiceConfig {
   legacyServiceType: string;
   cleanerMode: CleanerMode;
   defaultCity: string;
-  extras: { id: string; label: string; price?: number }[];
+  extras: { id: string; label: string }[];
 }
 
 export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
@@ -66,12 +66,12 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "team",
     defaultCity: "Cape Town",
     extras: [
-      { id: "balcony-cleaning", label: "Balcony cleaning", price: 50 },
-      { id: "carpet-cleaning", label: "Carpet cleaning", price: 350 },
-      { id: "ceiling-cleaning", label: "Ceiling cleaning", price: 100 },
-      { id: "garage-cleaning", label: "Garage cleaning", price: 100 },
-      { id: "mattress-cleaning", label: "Mattress cleaning", price: 250 },
-      { id: "outside-windows", label: "Outside windows", price: 350 },
+      { id: "balcony-cleaning", label: "Balcony cleaning" },
+      { id: "carpet-cleaning", label: "Carpet cleaning" },
+      { id: "ceiling-cleaning", label: "Ceiling cleaning" },
+      { id: "garage-cleaning", label: "Garage cleaning" },
+      { id: "mattress-cleaning", label: "Mattress cleaning" },
+      { id: "outside-windows", label: "Outside windows" },
     ],
   },
   "moving-cleaning": {
@@ -84,12 +84,12 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "team",
     defaultCity: "Cape Town",
     extras: [
-      { id: "balcony-cleaning", label: "Balcony cleaning", price: 50 },
-      { id: "carpet-cleaning", label: "Carpet cleaning", price: 350 },
-      { id: "ceiling-cleaning", label: "Ceiling cleaning", price: 100 },
-      { id: "garage-cleaning", label: "Garage cleaning", price: 100 },
-      { id: "mattress-cleaning", label: "Mattress cleaning", price: 250 },
-      { id: "outside-windows", label: "Outside windows", price: 350 },
+      { id: "balcony-cleaning", label: "Balcony cleaning" },
+      { id: "carpet-cleaning", label: "Carpet cleaning" },
+      { id: "ceiling-cleaning", label: "Ceiling cleaning" },
+      { id: "garage-cleaning", label: "Garage cleaning" },
+      { id: "mattress-cleaning", label: "Mattress cleaning" },
+      { id: "outside-windows", label: "Outside windows" },
     ],
   },
   "office-cleaning": {
