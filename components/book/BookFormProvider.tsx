@@ -31,10 +31,19 @@ interface BookFormContextValue {
 const BookFormContext = createContext<BookFormContextValue | null>(null);
 
 function recalculateWithLiveConfig(state: BookFormState): BookFormState {
-  return {
-    ...state,
-    pricingSummary: state.pricingConfig ? calculateBookPricing(state, state.pricingConfig) : null,
-  };
+  if (!state.pricingConfig) {
+    return { ...state, pricingSummary: null };
+  }
+
+  try {
+    return {
+      ...state,
+      pricingSummary: calculateBookPricing(state, state.pricingConfig),
+    };
+  } catch (error) {
+    console.error("Booking pricing validation failed:", error);
+    return { ...state, pricingSummary: null };
+  }
 }
 
 export function BookFormProvider({
@@ -71,7 +80,6 @@ export function BookFormProvider({
     const next: BookFormState = {
       ...loaded,
       step: initialStep ?? loaded.step,
-      // Never restore cached pricing authority from local storage.
       pricingConfig,
       pricingSummary: null,
       tracking: {
@@ -82,8 +90,7 @@ export function BookFormProvider({
         sourcePage: typeof document !== "undefined" ? document.referrer || "direct" : undefined,
       },
     };
-    const priced = recalculateWithLiveConfig(next);
-    setState(priced);
+    setState(recalculateWithLiveConfig(next));
     setIsHydrated(true);
   }, [service, initialStep, pricingLoaded, pricingConfig]);
 
