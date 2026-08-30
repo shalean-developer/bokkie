@@ -38,7 +38,8 @@ function requireNumber(value: unknown, label: string): number {
 
 /**
  * Build the booking-flow pricing configuration exclusively from database-backed
- * pricing sources. Missing or invalid required values are fatal by design.
+ * pricing sources. Missing or invalid values are rejected when that pricing
+ * dimension is actually consumed by the selected service.
  */
 export async function fetchBookPricingConfig(): Promise<BookPricingConfig> {
   const [serviceTypePricing, roomPricingRows, additionalServices, frequencyOptions, bookSettings] =
@@ -60,23 +61,17 @@ export async function fetchBookPricingConfig(): Promise<BookPricingConfig> {
   }
 
   const roomPricing: Record<string, { bedroom: number; bathroom: number }> = {};
-  for (const serviceType of REQUIRED_SERVICE_TYPES) {
-    const bedroom = roomPricingRows.find(
-      (item) => item.service_type === serviceType && item.room_type === "bedroom"
+  const groupedRoomPricing = new Map<string, Partial<{ bedroom: number; bathroom: number }>>();
+  for (const row of roomPricingRows) {
+    const current = groupedRoomPricing.get(row.service_type) ?? {};
+    current[row.room_type] = requireNumber(
+      row.price_per_room,
+      `room_pricing.${row.service_type}.${row.room_type}`
     );
-    const bathroom = roomPricingRows.find(
-      (item) => item.service_type === serviceType && item.room_type === "bathroom"
-    );
-    roomPricing[serviceType] = {
-      bedroom: requireNumber(
-        bedroom?.price_per_room,
-        `room_pricing.${serviceType}.bedroom`
-      ),
-      bathroom: requireNumber(
-        bathroom?.price_per_room,
-        `room_pricing.${serviceType}.bathroom`
-      ),
-    };
+    groupedRoomPricing.set(row.service_type, current);
+  }
+  for (const [serviceType, rates] of groupedRoomPricing.entries()) {
+    roomPricing[serviceType] = rates as { bedroom: number; bathroom: number };
   }
 
   const extrasPricing: Record<string, number> = {};
