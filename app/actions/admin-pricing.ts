@@ -1,6 +1,7 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import type {
   ServiceTypePricing,
   AdditionalService,
@@ -10,6 +11,11 @@ import type {
   TimeSlot,
   ServiceCategoryPricing,
 } from "@/lib/supabase/booking-data";
+
+async function createClient() {
+  await requireAdmin();
+  return createSupabaseClient();
+}
 
 /**
  * Fetch all service type pricing
@@ -338,8 +344,6 @@ export async function createServiceTypePricing(data: {
 }): Promise<{ success: boolean; error?: string; data?: ServiceTypePricing }> {
   try {
     const supabase = await createClient();
-    
-    // If display_order not provided, calculate it (put at the end)
     let displayOrder = data.display_order;
     if (displayOrder === undefined) {
       const { data: existingServices } = await supabase
@@ -347,7 +351,6 @@ export async function createServiceTypePricing(data: {
         .select("display_order")
         .order("display_order", { ascending: false })
         .limit(1);
-      
       displayOrder = existingServices && existingServices.length > 0
         ? (existingServices[0].display_order || 0) + 1
         : 1;
@@ -378,9 +381,6 @@ export async function createServiceTypePricing(data: {
   }
 }
 
-/**
- * Delete a service type pricing
- */
 export async function deleteServiceTypePricing(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -403,9 +403,6 @@ export async function deleteServiceTypePricing(
   }
 }
 
-/**
- * Create a new additional service
- */
 export async function createAdditionalService(data: {
   service_id: string;
   name: string;
@@ -417,8 +414,6 @@ export async function createAdditionalService(data: {
 }): Promise<{ success: boolean; error?: string; data?: AdditionalService }> {
   try {
     const supabase = await createClient();
-    
-    // If display_order not provided, calculate it (put at the end)
     let displayOrder = data.display_order;
     if (displayOrder === undefined) {
       const { data: existingServices } = await supabase
@@ -426,7 +421,6 @@ export async function createAdditionalService(data: {
         .select("display_order")
         .order("display_order", { ascending: false })
         .limit(1);
-      
       displayOrder = existingServices && existingServices.length > 0
         ? (existingServices[0].display_order || 0) + 1
         : 1;
@@ -458,9 +452,6 @@ export async function createAdditionalService(data: {
   }
 }
 
-/**
- * Delete an additional service
- */
 export async function deleteAdditionalService(
   id: string
 ): Promise<{ success: boolean; error?: string }> {
@@ -483,9 +474,6 @@ export async function deleteAdditionalService(
   }
 }
 
-/**
- * Fetch all time slots (including inactive) for admin management
- */
 export async function getAdminTimeSlots(): Promise<TimeSlot[]> {
   try {
     const supabase = await createClient();
@@ -535,9 +523,7 @@ export async function createTimeSlot(data: {
       .select()
       .single();
 
-    if (error) {
-      return { success: false, error: error.message };
-    }
+    if (error) return { success: false, error: error.message };
     return { success: true, data: created };
   } catch {
     return { success: false, error: "Failed to create time slot" };
@@ -556,9 +542,7 @@ export async function updateTimeSlot(
   try {
     const supabase = await createClient();
     const { error } = await supabase.from("time_slots").update(updates).eq("id", id);
-    if (error) {
-      return { success: false, error: error.message };
-    }
+    if (error) return { success: false, error: error.message };
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update time slot" };
@@ -569,18 +553,13 @@ export async function deleteTimeSlot(id: string): Promise<{ success: boolean; er
   try {
     const supabase = await createClient();
     const { error } = await supabase.from("time_slots").delete().eq("id", id);
-    if (error) {
-      return { success: false, error: error.message };
-    }
+    if (error) return { success: false, error: error.message };
     return { success: true };
   } catch {
     return { success: false, error: "Failed to delete time slot" };
   }
 }
 
-/**
- * Fetch all service category display pricing (for marketing pages)
- */
 export async function getServiceCategoryPricingAdmin(): Promise<ServiceCategoryPricing[]> {
   try {
     const supabase = await createClient();
@@ -601,9 +580,6 @@ export async function getServiceCategoryPricingAdmin(): Promise<ServiceCategoryP
   }
 }
 
-/**
- * Update service category display pricing
- */
 export async function updateServiceCategoryPricing(
   id: string,
   updates: { display_price?: number; category_name?: string; description?: string; is_active?: boolean }
@@ -615,10 +591,7 @@ export async function updateServiceCategoryPricing(
       .update(updates)
       .eq("id", id);
 
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
+    if (error) return { success: false, error: error.message };
     return { success: true };
   } catch {
     return { success: false, error: "Failed to update service category pricing" };
