@@ -1,7 +1,6 @@
 "use server";
 
-import { createServiceRoleClient } from "@/lib/supabase/server";
-import { 
+import {
   getTimeSlots as getTimeSlotsServer,
   getAdditionalServices as getAdditionalServicesServer,
   getAdditionalServicesForServiceType as getAdditionalServicesForServiceTypeServer,
@@ -22,6 +21,7 @@ import {
   TeamMember,
   ServiceTypePricing,
 } from "@/lib/supabase/booking-data";
+import { getServiceConfig } from "@/lib/book/services";
 import type { BookServiceSlug } from "@/lib/book/types";
 
 /**
@@ -49,28 +49,33 @@ export interface BookExtraOption {
   price: number;
 }
 
-/** Load active extras from the current pricing_extras source of truth. */
+/**
+ * Load Book v2 extras exclusively from additional_services.
+ * Static service definitions only constrain which IDs belong to each booking service;
+ * the database supplies the live label, applicability and price.
+ */
 export async function getBookExtrasForService(
   service: BookServiceSlug
 ): Promise<BookExtraOption[]> {
-  const supabase = createServiceRoleClient();
-  const { data, error } = await supabase
-    .from("pricing_extras")
-    .select("slug, name, price, sort_order")
-    .eq("is_active", true)
-    .contains("service_slugs", [service])
-    .order("sort_order", { ascending: true });
+  const config = getServiceConfig(service);
+  const allowedIds = new Set(config.extras.map((extra) => extra.id));
+  const additionalServices = await getAdditionalServicesServer();
 
-  if (error) {
-    console.error("Error fetching booking extras from pricing_extras:", error);
-    return [];
-  }
-
-  return (data ?? []).map((extra) => ({
-    id: String(extra.slug),
-    label: String(extra.name),
-    price: Number(extra.price),
-  }));
+  return additionalServices
+    .filter((extra) => {
+      if (!allowedIds.has(extra.service_id)) return false;
+      const applicable = extra.applicable_service_types;
+      return (
+        applicable == null ||
+        (Array.isArray(applicable) && applicable.includes(config.legacyServiceType))
+      );
+    })
+    .map((extra) => ({
+      id: extra.service_id,
+      label: extra.name,
+      price: Number(extra.price_modifier),
+    }))
+    .filter((extra) => Number.isFinite(extra.price) && extra.price >= 0);
 }
 
 export async function getServiceLocations(): Promise<ServiceLocation[]> {
