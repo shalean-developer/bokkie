@@ -156,8 +156,8 @@ export function PaymentStep() {
     setBookingRef(saveResult.bookingReference);
     updateState({ bookingReference: saveResult.bookingReference });
 
-    const payInit = await initializeBookPayment(pricing.estimatedTotal, state.customer.email);
-    if (!payInit.success || !payInit.publicKey) {
+    const payInit = await initializeBookPayment(saveResult.bookingReference);
+    if (!payInit.success || !payInit.publicKey || !payInit.amount || !payInit.reference || !payInit.email) {
       setAuthError(payInit.message ?? "Payment initialization failed");
       setPaymentLoading(false);
       return;
@@ -165,9 +165,9 @@ export function PaymentStep() {
 
     initializePaystack({
       publicKey: payInit.publicKey,
-      email: state.customer.email,
-      amount: payInit.amount!,
-      reference: payInit.reference!,
+      email: payInit.email,
+      amount: payInit.amount,
+      reference: payInit.reference,
       metadata: {
         booking_reference: saveResult.bookingReference,
         form_version: "v2",
@@ -194,7 +194,6 @@ export function PaymentStep() {
       },
     });
 
-    // Paystack opens in a popup — stop button spinner once it launches
     setTimeout(() => setPaymentLoading(false), 500);
   };
 
