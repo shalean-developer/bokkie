@@ -35,28 +35,22 @@ export function ReviewStep() {
     setLoadingExtras(true);
     getBookExtrasForService(state.service)
       .then((services) => {
-        if (services.length > 0) {
-          setExtrasOptions(services);
-          const pricing = Object.fromEntries(services.map((o) => [o.id, o.price]));
-          updateState({ extrasPricing: pricing });
-          const validIds = new Set(services.map((o) => o.id));
-          const filtered = state.selectedExtras.filter((id) => validIds.has(id));
-          if (filtered.length !== state.selectedExtras.length) {
-            setExtras(filtered);
-          }
-        } else {
-          const options = config.extras.map((e) => ({
-            id: e.id,
-            label: e.label,
-            price: state.pricingConfig?.extrasPricing[e.id] ?? state.extrasPricing?.[e.id] ?? 0,
-          }));
-          setExtrasOptions(options);
-          const pricing = Object.fromEntries(
-            options.map((o) => [o.id, o.price]).filter(([, price]) => price > 0)
-          );
-          if (Object.keys(pricing).length > 0) {
-            updateState({ extrasPricing: { ...state.extrasPricing, ...pricing } });
-          }
+        setExtrasOptions(services);
+        const pricing = Object.fromEntries(services.map((option) => [option.id, option.price]));
+        updateState({ extrasPricing: pricing });
+
+        const validIds = new Set(services.map((option) => option.id));
+        const filtered = state.selectedExtras.filter((id) => validIds.has(id));
+        if (filtered.length !== state.selectedExtras.length) {
+          setExtras(filtered);
+        }
+      })
+      .catch((error) => {
+        console.error("Unable to load database-backed booking extras:", error);
+        setExtrasOptions([]);
+        updateState({ extrasPricing: {} });
+        if (state.selectedExtras.length > 0) {
+          setExtras([]);
         }
       })
       .finally(() => setLoadingExtras(false));
@@ -131,7 +125,7 @@ export function ReviewStep() {
                 Loading extras...
               </div>
             ) : extrasOptions.length === 0 ? (
-              <p className="text-sm text-gray-500">No optional extras for this service.</p>
+              <p className="text-sm text-gray-500">No database-configured optional extras for this service.</p>
             ) : (
               extrasOptions.map((extra) => {
                 const quantity = state.extraQuantities[extra.id] ?? 0;

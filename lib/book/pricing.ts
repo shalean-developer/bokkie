@@ -1,8 +1,7 @@
-import type { BookFormState, BookPricingSummary, BookServiceSlug } from "./types";
+import type { BookFormState, BookPricingSummary } from "./types";
 import { BOOK_SERVICES } from "./services";
 import {
   type BookPricingConfig,
-  FALLBACK_BOOK_PRICING_CONFIG,
   getBasePriceForService,
   getRoomPricingForService,
 } from "./pricing-config";
@@ -33,12 +32,24 @@ function getExtraQuantity(state: Partial<BookFormState>, id: string): number {
   return Math.max(1, Math.floor(raw));
 }
 
+function requireConfiguredNumber(value: unknown, label: string): number {
+  const parsed = Number(value);
+  if (value === null || value === undefined || value === "" || !Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`Missing database pricing value: ${label}`);
+  }
+  return parsed;
+}
+
 export function calculateBookPricing(
   state: Partial<BookFormState>,
-  config: BookPricingConfig = state.pricingConfig ?? FALLBACK_BOOK_PRICING_CONFIG
+  config?: BookPricingConfig
 ): BookPricingSummary {
+  const bookConfig = config ?? state.pricingConfig;
+  if (!bookConfig) {
+    throw new Error("Live database pricing is unavailable");
+  }
+
   const service = state.service ?? "regular-cleaning";
-  const bookConfig = state.pricingConfig ?? config;
   const serviceConfig = BOOK_SERVICES[service];
   const details = (state.serviceDetails ?? {}) as Record<string, unknown>;
   const extras = state.selectedExtras ?? [];
@@ -46,11 +57,11 @@ export function calculateBookPricing(
   const isTeam = serviceConfig.cleanerMode === "team";
 
   const basePrice = getBasePriceForService(service, bookConfig);
-  const roomRates = getRoomPricingForService(service, bookConfig);
   let sizeAdjustment = 0;
   const sizeBreakdown: { label: string; amount: number }[] = [];
 
   if (service === "airbnb-cleaning") {
+    const roomRates = getRoomPricingForService(service, bookConfig);
     const bedrooms = getBedrooms(details);
     const bathrooms = getBathrooms(details);
     const bedroomAmount = bedrooms * roomRates.bedroom;
@@ -60,9 +71,13 @@ export function calculateBookPricing(
     pushBreakdownLine(sizeBreakdown, `Bathrooms (${bathrooms})`, bathroomAmount);
   } else if (service === "carpet-cleaning") {
     const rooms = Number(details.numberOfRooms ?? 1);
-    const roomAmount = rooms * bookConfig.carpetPricePerRoom;
+    const roomPrice = requireConfiguredNumber(bookConfig.carpetPricePerRoom, "carpetPricePerRoom");
+    const roomAmount = rooms * roomPrice;
     const areaSize = String(details.carpetedAreaSize ?? "small") as "small" | "medium" | "large";
-    const areaAmount = bookConfig.carpetAreaAdjustments[areaSize] ?? 0;
+    const areaAmount = requireConfiguredNumber(
+      bookConfig.carpetAreaAdjustments[areaSize],
+      `carpetAreaAdjustments.${areaSize}`
+    );
     sizeAdjustment = roomAmount + areaAmount;
     pushBreakdownLine(sizeBreakdown, `Rooms (${rooms})`, roomAmount);
     pushBreakdownLine(
@@ -74,9 +89,17 @@ export function calculateBookPricing(
     const size = String(details.officeSize ?? "small") as "small" | "medium" | "large";
     const workstations = Number(details.workstations ?? 1);
     const bathrooms = getBathrooms(details);
-    const officeSizeAmount = bookConfig.officeSizeAdjustments[size] ?? 0;
-    const workstationAmount = workstations * bookConfig.workstationPrice;
-    const bathroomAmount = bathrooms * roomRates.bathroom;
+    const officeSizeAmount = requireConfiguredNumber(
+      bookConfig.officeSizeAdjustments[size],
+      `officeSizeAdjustments.${size}`
+    );
+    const workstationPrice = requireConfiguredNumber(bookConfig.workstationPrice, "workstationPrice");
+    const workstationAmount = workstations * workstationPrice;
+    const bathroomRate = requireConfiguredNumber(
+      bookConfig.roomPricing[serviceConfig.legacyServiceType]?.bathroom,
+      `roomPricing.${serviceConfig.legacyServiceType}.bathroom`
+    );
+    const bathroomAmount = bathrooms * bathroomRate;
     sizeAdjustment = officeSizeAmount + workstationAmount + bathroomAmount;
     pushBreakdownLine(
       sizeBreakdown,
@@ -86,6 +109,7 @@ export function calculateBookPricing(
     pushBreakdownLine(sizeBreakdown, `Workstations (${workstations})`, workstationAmount);
     pushBreakdownLine(sizeBreakdown, `Bathrooms (${bathrooms})`, bathroomAmount);
   } else {
+    const roomRates = getRoomPricingForService(service, bookConfig);
     const bedrooms = getBedrooms(details);
     const bathrooms = getBathrooms(details);
     const bedroomAmount = bedrooms * roomRates.bedroom;
@@ -95,8 +119,13 @@ export function calculateBookPricing(
     pushBreakdownLine(sizeBreakdown, `Bathrooms (${bathrooms})`, bathroomAmount);
   }
 
+  const allowedExtraIds = new Set(serviceConfig.extras.map((extra) => extra.id));
   const extrasBreakdown = extras.map((id) => {
-    const unitPrice = state.extrasPricing?.[id] ?? bookConfig.extrasPricing[id] ?? 50;
+    if (!allowedExtraIds.has(id)) {
+      throw new Error(`Extra is not available for ${service}: ${id}`);
+    }
+    const configuredPrice = state.extrasPricing?.[id] ?? bookConfig.extrasPricing[id];
+    const unitPrice = requireConfiguredNumber(configuredPrice, `extras.${id}`);
     const quantity = getExtraQuantity(state, id);
     return {
       label: quantity > 1 ? `${id} (${quantity} × ${formatCurrency(unitPrice)})` : id,
@@ -106,11 +135,15 @@ export function calculateBookPricing(
   const extrasTotal = extrasBreakdown.reduce((sum, item) => sum + item.amount, 0);
   const extraCleanersTotal = isTeam
     ? 0
-    : Math.max(0, cleanerCount - 1) * bookConfig.extraCleanerPrice;
+    : Math.max(0, cleanerCount - 1) *
+      requireConfiguredNumber(bookConfig.extraCleanerPrice, "extraCleanerPrice");
 
   let recurringDiscount = 0;
   if (state.recurring?.isRecurring && state.recurring.frequency) {
-    const rate = bookConfig.frequencyDiscounts[state.recurring.frequency] ?? 0;
+    const rate = requireConfiguredNumber(
+      bookConfig.frequencyDiscounts[state.recurring.frequency],
+      `frequencyDiscounts.${state.recurring.frequency}`
+    );
     recurringDiscount = Math.round((basePrice + sizeAdjustment) * rate);
   }
 

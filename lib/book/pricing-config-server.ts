@@ -1,79 +1,144 @@
-import { fetchPricingConfig } from "@/lib/pricing-server";
-import { getSystemSettings } from "@/lib/supabase/booking-data";
-import { EXTRA_CLEANER_PRICE } from "./constants";
 import {
-  type BookPricingConfig,
-  FALLBACK_BOOK_PRICING_CONFIG,
-} from "./pricing-config";
+  getAdditionalServices,
+  getFrequencyOptions,
+  getRoomPricing,
+  getServiceTypePricing,
+  getSystemSettings,
+} from "@/lib/supabase/booking-data";
+import { BOOK_SERVICES } from "./services";
+import type { BookPricingConfig } from "./pricing-config";
 
-function num(value: string | undefined, fallback: number): number {
-  if (!value) return fallback;
+const BOOK_SETTING_KEYS = [
+  "extra_cleaner_price",
+  "team_booking_fee",
+  "book_carpet_price_per_room",
+  "book_carpet_area_small",
+  "book_carpet_area_medium",
+  "book_carpet_area_large",
+  "book_office_size_small",
+  "book_office_size_medium",
+  "book_office_size_large",
+  "book_workstation_price",
+] as const;
+
+const REQUIRED_SERVICE_TYPES = Array.from(
+  new Set(Object.values(BOOK_SERVICES).map((service) => service.legacyServiceType))
+);
+
+function requireNumber(value: unknown, label: string): number {
+  if (value === null || value === undefined || value === "") {
+    throw new Error(`Missing required pricing value: ${label}`);
+  }
   const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : fallback;
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new Error(`Invalid required pricing value: ${label}`);
+  }
+  return parsed;
 }
 
-/** Build book-flow pricing config from the same DB tables the admin dashboard manages. */
+/**
+ * Build the booking-flow pricing configuration exclusively from database-backed
+ * pricing sources. Missing or invalid values are rejected when that pricing
+ * dimension is actually consumed by the selected service.
+ */
 export async function fetchBookPricingConfig(): Promise<BookPricingConfig> {
-  try {
-    const [pricingConfig, bookSettings] = await Promise.all([
-      fetchPricingConfig(),
-      getSystemSettings([
-        "extra_cleaner_price",
-        "team_booking_fee",
-        "book_carpet_price_per_room",
-        "book_carpet_area_small",
-        "book_carpet_area_medium",
-        "book_carpet_area_large",
-        "book_office_size_small",
-        "book_office_size_medium",
-        "book_office_size_large",
-        "book_workstation_price",
-      ]),
+  const [serviceTypePricing, roomPricingRows, additionalServices, frequencyOptions, bookSettings] =
+    await Promise.all([
+      getServiceTypePricing(),
+      getRoomPricing(),
+      getAdditionalServices(),
+      getFrequencyOptions(),
+      getSystemSettings([...BOOK_SETTING_KEYS]),
     ]);
 
-    const mergedExtras = {
-      ...FALLBACK_BOOK_PRICING_CONFIG.extrasPricing,
-      ...pricingConfig.extrasPricing,
-    };
-
-    const frequencyDiscounts: Record<string, number> = {
-      ...FALLBACK_BOOK_PRICING_CONFIG.frequencyDiscounts,
-    };
-    for (const [key, rate] of Object.entries(pricingConfig.frequencyDiscounts)) {
-      if (key !== "one-time") {
-        frequencyDiscounts[key] = rate;
-      }
-    }
-
-    const carpetPerRoom =
-      pricingConfig.carpetCleaningPricing?.pricePerFittedRoom ??
-      FALLBACK_BOOK_PRICING_CONFIG.carpetPricePerRoom;
-
-    return {
-      basePrices: { ...FALLBACK_BOOK_PRICING_CONFIG.basePrices, ...pricingConfig.basePrices },
-      roomPricing: { ...FALLBACK_BOOK_PRICING_CONFIG.roomPricing, ...pricingConfig.roomPricing },
-      extrasPricing: mergedExtras,
-      frequencyDiscounts,
-      extraCleanerPrice: num(bookSettings.extra_cleaner_price, EXTRA_CLEANER_PRICE),
-      teamBookingFee: num(bookSettings.team_booking_fee, FALLBACK_BOOK_PRICING_CONFIG.teamBookingFee),
-      carpetPricePerRoom: num(bookSettings.book_carpet_price_per_room, carpetPerRoom),
-      carpetAreaAdjustments: {
-        small: num(bookSettings.book_carpet_area_small, 0),
-        medium: num(bookSettings.book_carpet_area_medium, 100),
-        large: num(bookSettings.book_carpet_area_large, 200),
-      },
-      officeSizeAdjustments: {
-        small: num(bookSettings.book_office_size_small, 0),
-        medium: num(bookSettings.book_office_size_medium, 100),
-        large: num(bookSettings.book_office_size_large, 200),
-      },
-      workstationPrice: num(
-        bookSettings.book_workstation_price,
-        FALLBACK_BOOK_PRICING_CONFIG.workstationPrice
-      ),
-    };
-  } catch (error) {
-    console.error("Error fetching book pricing config, using fallback:", error);
-    return FALLBACK_BOOK_PRICING_CONFIG;
+  const basePrices: Record<string, number> = {};
+  for (const serviceType of REQUIRED_SERVICE_TYPES) {
+    const row = serviceTypePricing.find((item) => item.service_type === serviceType);
+    basePrices[serviceType] = requireNumber(
+      row?.base_price,
+      `service_type_pricing.${serviceType}.base_price`
+    );
   }
+
+  const roomPricing: Record<string, { bedroom: number; bathroom: number }> = {};
+  const groupedRoomPricing = new Map<string, Partial<{ bedroom: number; bathroom: number }>>();
+  for (const row of roomPricingRows) {
+    const current = groupedRoomPricing.get(row.service_type) ?? {};
+    current[row.room_type] = requireNumber(
+      row.price_per_room,
+      `room_pricing.${row.service_type}.${row.room_type}`
+    );
+    groupedRoomPricing.set(row.service_type, current);
+  }
+  for (const [serviceType, rates] of groupedRoomPricing.entries()) {
+    roomPricing[serviceType] = rates as { bedroom: number; bathroom: number };
+  }
+
+  const extrasPricing: Record<string, number> = {};
+  for (const service of additionalServices) {
+    extrasPricing[service.service_id] = requireNumber(
+      service.price_modifier,
+      `additional_services.${service.service_id}.price_modifier`
+    );
+  }
+
+  const frequencyDiscounts: Record<string, number> = {};
+  for (const option of frequencyOptions) {
+    frequencyDiscounts[option.frequency_id] =
+      requireNumber(
+        option.discount_percentage,
+        `frequency_options.${option.frequency_id}.discount_percentage`
+      ) / 100;
+  }
+
+  return {
+    basePrices,
+    roomPricing,
+    extrasPricing,
+    frequencyDiscounts,
+    extraCleanerPrice: requireNumber(
+      bookSettings.extra_cleaner_price,
+      "system_settings.extra_cleaner_price"
+    ),
+    teamBookingFee: requireNumber(
+      bookSettings.team_booking_fee,
+      "system_settings.team_booking_fee"
+    ),
+    carpetPricePerRoom: requireNumber(
+      bookSettings.book_carpet_price_per_room,
+      "system_settings.book_carpet_price_per_room"
+    ),
+    carpetAreaAdjustments: {
+      small: requireNumber(
+        bookSettings.book_carpet_area_small,
+        "system_settings.book_carpet_area_small"
+      ),
+      medium: requireNumber(
+        bookSettings.book_carpet_area_medium,
+        "system_settings.book_carpet_area_medium"
+      ),
+      large: requireNumber(
+        bookSettings.book_carpet_area_large,
+        "system_settings.book_carpet_area_large"
+      ),
+    },
+    officeSizeAdjustments: {
+      small: requireNumber(
+        bookSettings.book_office_size_small,
+        "system_settings.book_office_size_small"
+      ),
+      medium: requireNumber(
+        bookSettings.book_office_size_medium,
+        "system_settings.book_office_size_medium"
+      ),
+      large: requireNumber(
+        bookSettings.book_office_size_large,
+        "system_settings.book_office_size_large"
+      ),
+    },
+    workstationPrice: requireNumber(
+      bookSettings.book_workstation_price,
+      "system_settings.book_workstation_price"
+    ),
+  };
 }

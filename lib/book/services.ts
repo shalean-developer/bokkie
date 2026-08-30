@@ -18,7 +18,11 @@ export interface BookServiceConfig {
   legacyServiceType: string;
   cleanerMode: CleanerMode;
   defaultCity: string;
-  extras: { id: string; label: string; price?: number }[];
+  /**
+   * Allow-list of additional_services.service_id values for this Book v2 service.
+   * Labels/prices remain database authoritative.
+   */
+  extras: { id: string; label: string }[];
 }
 
 export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
@@ -32,12 +36,8 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
     extras: [
-      { id: "linen-change", label: "Linen change" },
-      { id: "towel-setup", label: "Towel setup" },
-      { id: "restocking-essentials", label: "Restocking essentials" },
-      { id: "guest-ready-photo", label: "Guest-ready photo report" },
       { id: "inside-fridge", label: "Inside fridge cleaning" },
-      { id: "laundry-assistance", label: "Laundry and Ironing" },
+      { id: "laundry", label: "Laundry and Ironing" },
     ],
   },
   "carpet-cleaning": {
@@ -49,12 +49,7 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "carpet-cleaning",
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
-    extras: [
-      { id: "stain-treatment", label: "Stain treatment" },
-      { id: "pet-odor-treatment", label: "Pet odor treatment" },
-      { id: "rug-cleaning", label: "Rug cleaning" },
-      { id: "upholstery-cleaning", label: "Upholstery cleaning" },
-    ],
+    extras: [],
   },
   "deep-cleaning": {
     slug: "deep-cleaning",
@@ -66,12 +61,12 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "team",
     defaultCity: "Cape Town",
     extras: [
-      { id: "balcony-cleaning", label: "Balcony cleaning", price: 50 },
-      { id: "carpet-cleaning", label: "Carpet cleaning", price: 350 },
-      { id: "ceiling-cleaning", label: "Ceiling cleaning", price: 100 },
-      { id: "garage-cleaning", label: "Garage cleaning", price: 100 },
-      { id: "mattress-cleaning", label: "Mattress cleaning", price: 250 },
-      { id: "outside-windows", label: "Outside windows", price: 350 },
+      { id: "balcony-cleaning", label: "Balcony cleaning" },
+      { id: "carpet-cleaning", label: "Carpet cleaning" },
+      { id: "ceiling-cleaning", label: "Ceiling cleaning" },
+      { id: "garage-cleaning", label: "Garage cleaning" },
+      { id: "mattress-cleaning", label: "Mattress cleaning" },
+      { id: "exterior-windows", label: "Exterior windows" },
     ],
   },
   "moving-cleaning": {
@@ -84,12 +79,12 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     cleanerMode: "team",
     defaultCity: "Cape Town",
     extras: [
-      { id: "balcony-cleaning", label: "Balcony cleaning", price: 50 },
-      { id: "carpet-cleaning", label: "Carpet cleaning", price: 350 },
-      { id: "ceiling-cleaning", label: "Ceiling cleaning", price: 100 },
-      { id: "garage-cleaning", label: "Garage cleaning", price: 100 },
-      { id: "mattress-cleaning", label: "Mattress cleaning", price: 250 },
-      { id: "outside-windows", label: "Outside windows", price: 350 },
+      { id: "balcony-cleaning", label: "Balcony cleaning" },
+      { id: "carpet-cleaning", label: "Carpet cleaning" },
+      { id: "ceiling-cleaning", label: "Ceiling cleaning" },
+      { id: "garage-cleaning", label: "Garage cleaning" },
+      { id: "mattress-cleaning", label: "Mattress cleaning" },
+      { id: "exterior-windows", label: "Exterior windows" },
     ],
   },
   "office-cleaning": {
@@ -101,12 +96,7 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "office",
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
-    extras: [
-      { id: "after-hours", label: "After-hours cleaning" },
-      { id: "waste-removal", label: "Waste removal" },
-      { id: "consumable-restocking", label: "Consumable restocking" },
-      { id: "meeting-room-reset", label: "Meeting room reset" },
-    ],
+    extras: [],
   },
   "regular-cleaning": {
     slug: "regular-cleaning",
@@ -123,9 +113,7 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
       { id: "interior-windows", label: "Interior window cleaning" },
       { id: "inside-cabinets", label: "Inside Cabinets" },
       { id: "interior-walls", label: "Interior Walls" },
-      { id: "balcony-patio", label: "Balcony/patio cleaning" },
-      { id: "laundry-assistance", label: "Laundry and Ironing" },
-      { id: "dishwashing", label: "Dishwashing" },
+      { id: "laundry", label: "Laundry and Ironing" },
     ],
   },
 };
@@ -140,11 +128,13 @@ export const BOOK_SERVICE_SLUGS: BookServiceSlug[] = [
   "carpet-cleaning",
 ];
 
-/** Services whose optional extras are loaded from pricing_extras. */
-export const DB_EXTRAS_SERVICES: BookServiceSlug[] = ["deep-cleaning", "moving-cleaning"];
-
-export function usesDbExtras(slug: BookServiceSlug): boolean {
-  return DB_EXTRAS_SERVICES.includes(slug);
+/**
+ * Compatibility helper for the authoritative save path.
+ * Book v2 no longer routes any service to a separate pricing_extras table;
+ * all extras pricing comes from additional_services through BookPricingConfig.
+ */
+export function usesDbExtras(_slug: BookServiceSlug): boolean {
+  return false;
 }
 
 export function isBookServiceSlug(value: string): value is BookServiceSlug {
