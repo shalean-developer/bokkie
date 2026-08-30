@@ -189,7 +189,7 @@ async function buildAuthoritativePricingState(state: BookFormState): Promise<Boo
     ...state,
     pricingConfig,
     extrasPricing,
-    pricingSummary: undefined,
+    pricingSummary: null,
   };
 
   serverState.pricingSummary = calculateBookPricing(serverState, pricingConfig);
