@@ -30,6 +30,13 @@ interface BookFormContextValue {
 
 const BookFormContext = createContext<BookFormContextValue | null>(null);
 
+function recalculateWithLiveConfig(state: BookFormState): BookFormState {
+  return {
+    ...state,
+    pricingSummary: state.pricingConfig ? calculateBookPricing(state, state.pricingConfig) : null,
+  };
+}
+
 export function BookFormProvider({
   service,
   children,
@@ -45,12 +52,15 @@ export function BookFormProvider({
   const [pricingConfig, setPricingConfig] = useState<BookPricingConfig | undefined>();
 
   useEffect(() => {
+    setPricingLoaded(false);
+    setPricingConfig(undefined);
     getBookPricingConfig()
-      .then((config) => {
-        setPricingConfig(config);
-        setPricingLoaded(true);
+      .then((config) => setPricingConfig(config))
+      .catch((error) => {
+        console.error("Live booking pricing unavailable:", error);
+        setPricingConfig(undefined);
       })
-      .catch(() => setPricingLoaded(true));
+      .finally(() => setPricingLoaded(true));
   }, []);
 
   useEffect(() => {
@@ -61,7 +71,9 @@ export function BookFormProvider({
     const next: BookFormState = {
       ...loaded,
       step: initialStep ?? loaded.step,
-      pricingConfig: pricingConfig ?? loaded.pricingConfig,
+      // Never restore cached pricing authority from local storage.
+      pricingConfig,
+      pricingSummary: null,
       tracking: {
         ...loaded.tracking,
         ...utm,
@@ -70,8 +82,8 @@ export function BookFormProvider({
         sourcePage: typeof document !== "undefined" ? document.referrer || "direct" : undefined,
       },
     };
-    next.pricingSummary = calculateBookPricing(next);
-    setState(next);
+    const priced = recalculateWithLiveConfig(next);
+    setState(priced);
     setIsHydrated(true);
   }, [service, initialStep, pricingLoaded, pricingConfig]);
 
@@ -80,26 +92,20 @@ export function BookFormProvider({
   }, [state, isHydrated]);
 
   const refreshPricing = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
-      pricingSummary: calculateBookPricing(prev),
-    }));
+    setState((prev) => recalculateWithLiveConfig(prev));
   }, []);
 
   const updateState = useCallback((patch: Partial<BookFormState>) => {
-    setState((prev) => {
-      const next = { ...prev, ...patch };
-      next.pricingSummary = calculateBookPricing(next);
-      return next;
-    });
+    setState((prev) => recalculateWithLiveConfig({ ...prev, ...patch }));
   }, []);
 
   const setServiceDetails = useCallback((details: Record<string, unknown>) => {
-    setState((prev) => {
-      const next = { ...prev, serviceDetails: { ...prev.serviceDetails, ...details } };
-      next.pricingSummary = calculateBookPricing(next);
-      return next;
-    });
+    setState((prev) =>
+      recalculateWithLiveConfig({
+        ...prev,
+        serviceDetails: { ...prev.serviceDetails, ...details },
+      })
+    );
   }, []);
 
   const setAddress = useCallback((address: Partial<BookFormState["address"]>) => {
@@ -107,19 +113,21 @@ export function BookFormProvider({
   }, []);
 
   const setSchedule = useCallback((schedule: Partial<BookFormState["schedule"]>) => {
-    setState((prev) => {
-      const next = { ...prev, schedule: { ...prev.schedule, ...schedule } };
-      next.pricingSummary = calculateBookPricing(next);
-      return next;
-    });
+    setState((prev) =>
+      recalculateWithLiveConfig({
+        ...prev,
+        schedule: { ...prev.schedule, ...schedule },
+      })
+    );
   }, []);
 
   const setRecurring = useCallback((recurring: Partial<BookFormState["recurring"]>) => {
-    setState((prev) => {
-      const next = { ...prev, recurring: { ...prev.recurring, ...recurring } };
-      next.pricingSummary = calculateBookPricing(next);
-      return next;
-    });
+    setState((prev) =>
+      recalculateWithLiveConfig({
+        ...prev,
+        recurring: { ...prev.recurring, ...recurring },
+      })
+    );
   }, []);
 
   const setCustomer = useCallback((customer: Partial<BookFormState["customer"]>) => {
@@ -132,9 +140,11 @@ export function BookFormProvider({
       const extraQuantities = Object.fromEntries(
         extras.map((id) => [id, Math.max(1, Math.floor(Number(prev.extraQuantities[id] ?? 1)))])
       );
-      const next = { ...prev, selectedExtras: [...selected], extraQuantities };
-      next.pricingSummary = calculateBookPricing(next);
-      return next;
+      return recalculateWithLiveConfig({
+        ...prev,
+        selectedExtras: [...selected],
+        extraQuantities,
+      });
     });
   }, []);
 
@@ -152,13 +162,11 @@ export function BookFormProvider({
         delete extraQuantities[extraId];
       }
 
-      const next = {
+      return recalculateWithLiveConfig({
         ...prev,
         selectedExtras: Array.from(selected),
         extraQuantities,
-      };
-      next.pricingSummary = calculateBookPricing(next);
-      return next;
+      });
     });
   }, []);
 
