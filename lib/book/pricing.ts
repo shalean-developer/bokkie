@@ -57,11 +57,11 @@ export function calculateBookPricing(
   const isTeam = serviceConfig.cleanerMode === "team";
 
   const basePrice = getBasePriceForService(service, bookConfig);
-  const roomRates = getRoomPricingForService(service, bookConfig);
   let sizeAdjustment = 0;
   const sizeBreakdown: { label: string; amount: number }[] = [];
 
   if (service === "airbnb-cleaning") {
+    const roomRates = getRoomPricingForService(service, bookConfig);
     const bedrooms = getBedrooms(details);
     const bathrooms = getBathrooms(details);
     const bedroomAmount = bedrooms * roomRates.bedroom;
@@ -95,7 +95,11 @@ export function calculateBookPricing(
     );
     const workstationPrice = requireConfiguredNumber(bookConfig.workstationPrice, "workstationPrice");
     const workstationAmount = workstations * workstationPrice;
-    const bathroomAmount = bathrooms * roomRates.bathroom;
+    const bathroomRate = requireConfiguredNumber(
+      bookConfig.roomPricing[serviceConfig.legacyServiceType]?.bathroom,
+      `roomPricing.${serviceConfig.legacyServiceType}.bathroom`
+    );
+    const bathroomAmount = bathrooms * bathroomRate;
     sizeAdjustment = officeSizeAmount + workstationAmount + bathroomAmount;
     pushBreakdownLine(
       sizeBreakdown,
@@ -105,6 +109,7 @@ export function calculateBookPricing(
     pushBreakdownLine(sizeBreakdown, `Workstations (${workstations})`, workstationAmount);
     pushBreakdownLine(sizeBreakdown, `Bathrooms (${bathrooms})`, bathroomAmount);
   } else {
+    const roomRates = getRoomPricingForService(service, bookConfig);
     const bedrooms = getBedrooms(details);
     const bathrooms = getBathrooms(details);
     const bedroomAmount = bedrooms * roomRates.bedroom;
