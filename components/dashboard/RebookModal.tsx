@@ -6,7 +6,7 @@ import { Booking } from "@/lib/types/booking";
 import { getTimeSlots } from "@/app/actions/booking-data";
 import { FALLBACK_TIME_SLOTS } from "@/lib/supabase/booking-data-fallbacks";
 import { rebookBookingWithSchedule } from "@/app/actions/rebook-schedule";
-import { initializePaymentWithAmount } from "@/app/actions/payment";
+import { initializeRebookPayment } from "@/app/actions/payment";
 import { initializePaystack } from "@/lib/paystack";
 import { formatPrice, getServiceName, getFrequencyName } from "@/lib/pricing";
 import DatePicker from "@/components/booking/DatePicker";
@@ -30,7 +30,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
   const [error, setError] = useState<string | null>(null);
   const [extrasMap, setExtrasMap] = useState<Record<string, string>>({});
 
-  // Load time slots on mount
   useEffect(() => {
     const loadTimeSlots = async () => {
       try {
@@ -45,7 +44,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
     loadTimeSlots();
   }, []);
 
-  // Reset state when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       setStep("schedule");
@@ -56,14 +54,12 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
     }
   }, [isOpen, booking]);
 
-  // Handle backdrop click
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isProcessing) {
       onClose();
     }
   };
 
-  // Handle schedule step - continue to payment
   const handleContinueToPayment = async () => {
     if (!selectedDate || !selectedTime) {
       setError("Please select both date and time");
@@ -74,7 +70,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
     setError(null);
 
     try {
-      // Create duplicate booking with new schedule
       const result = await rebookBookingWithSchedule(
         booking.bookingReference,
         selectedDate,
@@ -95,7 +90,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
     }
   };
 
-  // Handle payment
   const handlePayment = async () => {
     if (!rebookedBookingReference || isProcessing) return;
 
@@ -103,23 +97,16 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
     setError(null);
 
     try {
-      // Initialize payment with fixed amount
-      const paymentInit = await initializePaymentWithAmount(
-        booking.totalAmount,
-        booking.email
-      );
+      const paymentInit = await initializeRebookPayment(rebookedBookingReference);
 
-      if (!paymentInit.success || !paymentInit.publicKey || !paymentInit.amount || !paymentInit.reference) {
+      if (!paymentInit.success || !paymentInit.publicKey || !paymentInit.amount || !paymentInit.email || !paymentInit.reference) {
         throw new Error(paymentInit.message || "Failed to initialize payment");
       }
 
-      // Initialize Paystack payment
-      // Note: Paystack redirects to callback_url on success, so the modal will close
-      // The payment-success page will handle updating the booking
       initializePaystack({
         publicKey: paymentInit.publicKey,
         amount: paymentInit.amount,
-        email: paymentInit.email!,
+        email: paymentInit.email,
         reference: paymentInit.reference,
         callback_url: `${window.location.origin}/dashboard/bookings/${rebookedBookingReference}/payment-success?ref=${paymentInit.reference}&modal=true`,
         metadata: {
@@ -131,7 +118,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
         },
       });
 
-      // Reset processing state after payment popup opens
       setTimeout(() => {
         setIsProcessing(false);
       }, 500);
@@ -173,7 +159,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
         className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900">Rebook Service</h2>
           <button
@@ -185,7 +170,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
           </button>
         </div>
 
-        {/* Content */}
         <div className="p-6">
           {step === "schedule" && (
             <div className="space-y-6">
@@ -196,7 +180,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 </p>
               </div>
 
-              {/* Date Picker */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Calendar className="w-4 h-4 inline mr-2" />
@@ -210,7 +193,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 />
               </div>
 
-              {/* Time Picker */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   <Clock className="w-4 h-4 inline mr-2" />
@@ -238,14 +220,12 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 </div>
               </div>
 
-              {/* Current Schedule Info */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                 <p className="text-sm text-blue-900">
                   <strong>Current schedule:</strong> {formatDate(booking.scheduledDate)} at {formatTime(booking.scheduledTime)}
                 </p>
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
@@ -253,7 +233,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 </div>
               )}
 
-              {/* Actions */}
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   onClick={onClose}
@@ -268,10 +247,7 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                   className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Processing...
-                    </>
+                    <><Loader2 className="w-4 h-4 animate-spin" />Processing...</>
                   ) : (
                     "Continue to Payment"
                   )}
@@ -289,7 +265,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 </p>
               </div>
 
-              {/* Booking Summary */}
               <div className="bg-gray-50 rounded-lg p-4 space-y-3">
                 <div>
                   <p className="text-sm text-gray-600">Service</p>
@@ -323,7 +298,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 </div>
               </div>
 
-              {/* Payment Amount */}
               <div className="bg-white border-2 border-blue-200 rounded-lg p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <Shield className="w-5 h-5 text-blue-500" />
@@ -335,7 +309,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 <p className="text-sm text-gray-600">Same amount as your previous booking</p>
               </div>
 
-              {/* Error Message */}
               {error && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-2">
                   <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
@@ -343,7 +316,6 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                 </div>
               )}
 
-              {/* Actions */}
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   onClick={() => setStep("schedule")}
@@ -358,10 +330,7 @@ export default function RebookModal({ isOpen, onClose, booking, onSuccess }: Reb
                   className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      Processing...
-                    </>
+                    <><Loader2 className="w-4 h-4 animate-spin" />Processing...</>
                   ) : (
                     `Pay ${formatPrice(booking.totalAmount)}`
                   )}
