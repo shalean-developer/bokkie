@@ -18,11 +18,6 @@ export interface BookServiceConfig {
   legacyServiceType: string;
   cleanerMode: CleanerMode;
   defaultCity: string;
-  /**
-   * Allow-list of additional_services.service_id values for this Book v2 service.
-   * Labels/prices remain database authoritative.
-   */
-  extras: { id: string; label: string }[];
 }
 
 export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
@@ -35,10 +30,6 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "airbnb",
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
-    extras: [
-      { id: "inside-fridge", label: "Inside fridge cleaning" },
-      { id: "laundry", label: "Laundry and Ironing" },
-    ],
   },
   "carpet-cleaning": {
     slug: "carpet-cleaning",
@@ -49,7 +40,6 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "carpet-cleaning",
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
-    extras: [],
   },
   "deep-cleaning": {
     slug: "deep-cleaning",
@@ -60,14 +50,6 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "deep",
     cleanerMode: "team",
     defaultCity: "Cape Town",
-    extras: [
-      { id: "balcony-cleaning", label: "Balcony cleaning" },
-      { id: "carpet-cleaning", label: "Carpet cleaning" },
-      { id: "ceiling-cleaning", label: "Ceiling cleaning" },
-      { id: "garage-cleaning", label: "Garage cleaning" },
-      { id: "mattress-cleaning", label: "Mattress cleaning" },
-      { id: "exterior-windows", label: "Exterior windows" },
-    ],
   },
   "moving-cleaning": {
     slug: "moving-cleaning",
@@ -78,14 +60,6 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "move-in-out",
     cleanerMode: "team",
     defaultCity: "Cape Town",
-    extras: [
-      { id: "balcony-cleaning", label: "Balcony cleaning" },
-      { id: "carpet-cleaning", label: "Carpet cleaning" },
-      { id: "ceiling-cleaning", label: "Ceiling cleaning" },
-      { id: "garage-cleaning", label: "Garage cleaning" },
-      { id: "mattress-cleaning", label: "Mattress cleaning" },
-      { id: "exterior-windows", label: "Exterior windows" },
-    ],
   },
   "office-cleaning": {
     slug: "office-cleaning",
@@ -96,7 +70,6 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "office",
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
-    extras: [],
   },
   "regular-cleaning": {
     slug: "regular-cleaning",
@@ -107,14 +80,6 @@ export const BOOK_SERVICES: Record<BookServiceSlug, BookServiceConfig> = {
     legacyServiceType: "standard",
     cleanerMode: "individual_cleaners",
     defaultCity: "Cape Town",
-    extras: [
-      { id: "inside-fridge", label: "Inside fridge cleaning" },
-      { id: "inside-oven", label: "Inside oven cleaning" },
-      { id: "interior-windows", label: "Interior window cleaning" },
-      { id: "inside-cabinets", label: "Inside Cabinets" },
-      { id: "interior-walls", label: "Interior Walls" },
-      { id: "laundry", label: "Laundry and Ironing" },
-    ],
   },
 };
 
@@ -127,15 +92,6 @@ export const BOOK_SERVICE_SLUGS: BookServiceSlug[] = [
   "airbnb-cleaning",
   "carpet-cleaning",
 ];
-
-/**
- * Compatibility helper for the authoritative save path.
- * Book v2 no longer routes any service to a separate pricing_extras table;
- * all extras pricing comes from additional_services through BookPricingConfig.
- */
-export function usesDbExtras(_slug: BookServiceSlug): boolean {
-  return false;
-}
 
 export function isBookServiceSlug(value: string): value is BookServiceSlug {
   return value in BOOK_SERVICES;
