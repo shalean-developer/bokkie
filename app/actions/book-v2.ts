@@ -16,7 +16,8 @@ import { MAX_TEAM_BOOKINGS_PER_DAY, DEFAULT_TEAMS } from "@/lib/book/constants";
 import { normalizeCleanerPreference, type Booking } from "@/lib/types/booking";
 import { fetchBookPricingConfig } from "@/lib/book/pricing-config-server";
 import { calculateBookPricing } from "@/lib/book/pricing";
-import { usesDbExtras } from "@/lib/book/services";
+import { getServiceConfig } from "@/lib/book/services";
+import { getAdditionalServicesForServiceType } from "@/lib/supabase/booking-data";
 
 const TEAM_SERVICE_TYPES = ["deep", "move-in-out"];
 
@@ -149,40 +150,21 @@ async function applyV2Extension(
 
 async function buildAuthoritativePricingState(state: BookFormState): Promise<BookFormState> {
   const pricingConfig = await fetchBookPricingConfig();
+  const serviceConfig = getServiceConfig(state.service);
+  const scopedExtras = await getAdditionalServicesForServiceType(
+    serviceConfig.legacyServiceType
+  );
+  const liveExtras = Object.fromEntries(
+    scopedExtras.map((extra) => [extra.service_id, Number(extra.price_modifier)])
+  );
   const extrasPricing: Record<string, number> = {};
 
-  if (usesDbExtras(state.service) && state.selectedExtras.length > 0) {
-    const supabase = createServiceRoleClient();
-    const { data, error } = await supabase
-      .from("pricing_extras")
-      .select("slug, price")
-      .eq("is_active", true)
-      .contains("service_slugs", [state.service]);
-
-    if (error) {
-      console.error("Unable to load authoritative extras pricing:", error);
-      throw new Error("Current extras pricing is unavailable. Please try again.");
+  for (const id of state.selectedExtras) {
+    const price = liveExtras[id];
+    if (!Number.isFinite(price)) {
+      throw new Error(`Selected extra is no longer available for ${state.service}: ${id}`);
     }
-
-    const liveExtras = Object.fromEntries(
-      (data ?? []).map((extra) => [String(extra.slug), Number(extra.price)])
-    );
-
-    for (const id of state.selectedExtras) {
-      const price = liveExtras[id];
-      if (!Number.isFinite(price)) {
-        throw new Error(`Selected extra is no longer available: ${id}`);
-      }
-      extrasPricing[id] = price;
-    }
-  } else {
-    for (const id of state.selectedExtras) {
-      const price = pricingConfig.extrasPricing[id];
-      if (!Number.isFinite(price)) {
-        throw new Error(`Selected extra has no current server price: ${id}`);
-      }
-      extrasPricing[id] = price;
-    }
+    extrasPricing[id] = price;
   }
 
   const serverState: BookFormState = {
