@@ -51,25 +51,17 @@ export interface BookExtraOption {
 
 /**
  * Load Book v2 extras exclusively from additional_services.
- * Static service definitions only constrain which IDs belong to each booking service;
- * the database supplies the live label, applicability and price.
+ * The database supplies the live label, service applicability and price.
  */
 export async function getBookExtrasForService(
   service: BookServiceSlug
 ): Promise<BookExtraOption[]> {
   const config = getServiceConfig(service);
-  const allowedIds = new Set(config.extras.map((extra) => extra.id));
-  const additionalServices = await getAdditionalServicesServer();
+  const additionalServices = await getAdditionalServicesForServiceTypeServer(
+    config.legacyServiceType
+  );
 
   return additionalServices
-    .filter((extra) => {
-      if (!allowedIds.has(extra.service_id)) return false;
-      const applicable = extra.applicable_service_types;
-      return (
-        applicable == null ||
-        (Array.isArray(applicable) && applicable.includes(config.legacyServiceType))
-      );
-    })
     .map((extra) => ({
       id: extra.service_id,
       label: extra.name,
