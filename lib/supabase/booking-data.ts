@@ -191,11 +191,16 @@ export async function getAdditionalServicesForServiceType(
   serviceType: string
 ): Promise<AdditionalService[]> {
   const all = await getAdditionalServices();
-  return all.filter(
-    (service) =>
-      Array.isArray(service.applicable_service_types) &&
-      service.applicable_service_types.includes(serviceType)
-  );
+  return all.filter((service) => {
+    const applicable = service.applicable_service_types;
+
+    // NULL means the extra is global and available to every booking service.
+    // Otherwise, the database service scope is authoritative.
+    return (
+      applicable == null ||
+      (Array.isArray(applicable) && applicable.includes(serviceType))
+    );
+  });
 }
 
 /**
