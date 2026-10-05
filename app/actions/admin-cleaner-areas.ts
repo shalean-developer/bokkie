@@ -1,12 +1,9 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { isUserAdmin } from "@/lib/storage/profile-supabase";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { revalidatePath } from "next/cache";
 
-/**
- * Get areas for a specific cleaner (admin only)
- */
 export async function getCleanerAreas(
   cleanerId: string
 ): Promise<{
@@ -15,30 +12,9 @@ export async function getCleanerAreas(
   error?: string;
 }> {
   try {
-    // Verify admin status
-    const adminCheck = await isUserAdmin();
-    if (!adminCheck) {
-      return {
-        success: false,
-        error: "Unauthorized: Admin access required",
-      };
-    }
-
+    await requireAdmin();
     const supabase = await createClient();
 
-    // Check authentication
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return {
-        success: false,
-        error: "Unauthorized",
-      };
-    }
-
-    // Fetch areas from database
     const { data, error } = await supabase
       .from("cleaners")
       .select("areas")
@@ -47,16 +23,10 @@ export async function getCleanerAreas(
 
     if (error) {
       console.error("Error fetching cleaner areas:", error);
-      return {
-        success: false,
-        error: error.message,
-      };
+      return { success: false, error: error.message };
     }
 
-    return {
-      success: true,
-      data: data.areas || [],
-    };
+    return { success: true, data: data.areas || [] };
   } catch (error) {
     console.error("Error in getCleanerAreas:", error);
     return {
@@ -66,40 +36,14 @@ export async function getCleanerAreas(
   }
 }
 
-/**
- * Update areas for a specific cleaner (admin only)
- */
 export async function updateCleanerAreas(
   cleanerId: string,
   areas: string[]
 ): Promise<{ success: boolean; message: string; error?: string }> {
   try {
-    // Verify admin status
-    const adminCheck = await isUserAdmin();
-    if (!adminCheck) {
-      return {
-        success: false,
-        message: "Unauthorized",
-        error: "Admin access required to update cleaner areas",
-      };
-    }
-
+    await requireAdmin();
     const supabase = await createClient();
 
-    // Check authentication
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      return {
-        success: false,
-        message: "Unauthorized",
-        error: "You must be logged in to update areas",
-      };
-    }
-
-    // Verify cleaner exists
     const { data: cleaner, error: fetchError } = await supabase
       .from("cleaners")
       .select("cleaner_id")
@@ -114,7 +58,6 @@ export async function updateCleanerAreas(
       };
     }
 
-    // Update areas in database
     const { error } = await supabase
       .from("cleaners")
       .update({
@@ -132,14 +75,10 @@ export async function updateCleanerAreas(
       };
     }
 
-    // Revalidate relevant paths
     revalidatePath("/admin/cleaners");
     revalidatePath("/cleaner/areas");
 
-    return {
-      success: true,
-      message: "Areas updated successfully",
-    };
+    return { success: true, message: "Areas updated successfully" };
   } catch (error) {
     console.error("Error in updateCleanerAreas:", error);
     return {
@@ -149,4 +88,3 @@ export async function updateCleanerAreas(
     };
   }
 }
-

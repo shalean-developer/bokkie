@@ -2,10 +2,8 @@
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
 import { CleanerApplication, CleanerApplicationStatus, CleanerApplicationStats } from "@/lib/types/cleaner-application";
+import { requireAdmin } from "@/lib/auth/require-admin";
 
-/**
- * Map database record to CleanerApplication type
- */
 function mapDatabaseToApplication(data: any): CleanerApplication {
   return {
     id: data.id,
@@ -29,12 +27,9 @@ function mapDatabaseToApplication(data: any): CleanerApplication {
   };
 }
 
-/**
- * Get all cleaner applications
- */
 export async function getAllApplications(): Promise<CleanerApplication[]> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("cleaner_applications")
     .select("*")
@@ -48,12 +43,9 @@ export async function getAllApplications(): Promise<CleanerApplication[]> {
   return (data || []).map(mapDatabaseToApplication);
 }
 
-/**
- * Get application by ID
- */
 export async function getApplicationById(id: string): Promise<CleanerApplication | null> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("cleaner_applications")
     .select("*")
@@ -61,9 +53,7 @@ export async function getApplicationById(id: string): Promise<CleanerApplication
     .single();
 
   if (error) {
-    if (error.code === "PGRST116") {
-      return null;
-    }
+    if (error.code === "PGRST116") return null;
     console.error("Error fetching application:", error);
     throw new Error(`Failed to fetch application: ${error.message}`);
   }
@@ -71,12 +61,9 @@ export async function getApplicationById(id: string): Promise<CleanerApplication
   return data ? mapDatabaseToApplication(data) : null;
 }
 
-/**
- * Get application statistics
- */
 export async function getApplicationStats(): Promise<CleanerApplicationStats> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-  
   const { data, error } = await supabase
     .from("cleaner_applications")
     .select("status");
@@ -97,40 +84,36 @@ export async function getApplicationStats(): Promise<CleanerApplicationStats> {
 
   (data || []).forEach((app) => {
     const status = app.status as CleanerApplicationStatus;
-    if (stats.hasOwnProperty(status)) {
-      stats[status]++;
-    }
+    if (stats.hasOwnProperty(status)) stats[status]++;
   });
 
   return stats;
 }
 
-/**
- * Update application status
- */
 export async function updateApplicationStatus(
   id: string,
   status: CleanerApplicationStatus,
   adminNotes?: string
 ): Promise<{ success: boolean; error?: string }> {
+  const adminUser = await requireAdmin();
   const supabase = createServiceRoleClient();
-  
-  // Get current user for reviewed_by
-  const { data: { user } } = await supabase.auth.getUser();
-  
   const updateData: any = {
     status,
     updated_at: new Date().toISOString(),
   };
 
-  if (adminNotes !== undefined) {
-    updateData.admin_notes = adminNotes;
-  }
+  if (adminNotes !== undefined) updateData.admin_notes = adminNotes;
 
-  // Set reviewed_by and reviewed_at if status is being changed from pending
-  const currentApp = await getApplicationById(id);
-  if (currentApp && currentApp.status === "pending" && status !== "pending") {
-    updateData.reviewed_by = user?.id || null;
+  const { data: currentApp, error: currentError } = await supabase
+    .from("cleaner_applications")
+    .select("status")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (currentError) return { success: false, error: currentError.message };
+
+  if (currentApp?.status === "pending" && status !== "pending") {
+    updateData.reviewed_by = adminUser.id;
     updateData.reviewed_at = new Date().toISOString();
   }
 
@@ -147,12 +130,9 @@ export async function updateApplicationStatus(
   return { success: true };
 }
 
-/**
- * Delete an application
- */
 export async function deleteApplication(id: string): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const supabase = createServiceRoleClient();
-
   const { error } = await supabase
     .from("cleaner_applications")
     .delete()
@@ -166,9 +146,7 @@ export async function deleteApplication(id: string): Promise<{ success: boolean;
   return { success: true };
 }
 
-/**
- * Create a new application (for public form)
- */
+/** Public cleaner application submission. This action intentionally remains public. */
 export async function createApplication(
   formData: {
     firstName: string;
