@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Calendar, MapPin, Clock, User, Phone, Mail, Home, Shield, Loader2, AlertCircle } from "lucide-react";
 import { Booking } from "@/lib/types/booking";
 import { rebookBooking } from "@/app/actions/rebook";
-import { initializePaymentWithAmount } from "@/app/actions/payment";
+import { initializeRebookPayment } from "@/app/actions/payment";
 import { initializePaystack } from "@/lib/paystack";
 import { formatPrice, getServiceName, getFrequencyName } from "@/lib/pricing";
 import { getAdditionalServices } from "@/app/actions/booking-data";
@@ -29,7 +29,6 @@ export default function RebookPaymentPage() {
         setLoading(true);
         setError(null);
 
-        // Fetch original booking via API
         const bookingResponse = await fetch(`/api/bookings/${encodeURIComponent(originalReference)}`);
         if (!bookingResponse.ok) {
           setError("Original booking not found");
@@ -46,7 +45,6 @@ export default function RebookPaymentPage() {
 
         setOriginalBooking(bookingData.booking);
 
-        // Load extras mapping
         try {
           const additionalServices = await getAdditionalServices();
           const map: Record<string, string> = {};
@@ -75,7 +73,6 @@ export default function RebookPaymentPage() {
     setError(null);
 
     try {
-      // First, create the duplicate booking
       const rebookResult = await rebookBooking(originalReference);
       
       if (!rebookResult.success || !rebookResult.newBookingReference) {
@@ -84,21 +81,16 @@ export default function RebookPaymentPage() {
 
       setRebookedBookingReference(rebookResult.newBookingReference);
 
-      // Initialize payment with the original booking's total amount (fixed amount)
-      const paymentInit = await initializePaymentWithAmount(
-        originalBooking.totalAmount,
-        originalBooking.email
-      );
+      const paymentInit = await initializeRebookPayment(rebookResult.newBookingReference);
 
-      if (!paymentInit.success || !paymentInit.publicKey || !paymentInit.amount || !paymentInit.reference) {
+      if (!paymentInit.success || !paymentInit.publicKey || !paymentInit.amount || !paymentInit.email || !paymentInit.reference) {
         throw new Error(paymentInit.message || "Failed to initialize payment");
       }
 
-      // Initialize Paystack payment
       initializePaystack({
         publicKey: paymentInit.publicKey,
         amount: paymentInit.amount,
-        email: paymentInit.email!,
+        email: paymentInit.email,
         reference: paymentInit.reference,
         callback_url: `${window.location.origin}/dashboard/bookings/${rebookResult.newBookingReference}/payment-success?ref=${paymentInit.reference}`,
         metadata: {
@@ -110,7 +102,6 @@ export default function RebookPaymentPage() {
         },
       });
 
-      // Reset processing state after payment popup opens
       setTimeout(() => {
         setIsProcessing(false);
       }, 500);
@@ -189,7 +180,6 @@ export default function RebookPaymentPage() {
   return (
     <div className="py-12">
       <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back Link */}
         <Link
           href={`/dashboard/bookings/${originalReference}`}
           className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
@@ -198,26 +188,18 @@ export default function RebookPaymentPage() {
           Back to Booking
         </Link>
 
-        {/* Header */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Rebook Service
-          </h1>
-          <p className="text-gray-600">
-            Review your booking details and complete payment to confirm your rebooking.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Rebook Service</h1>
+          <p className="text-gray-600">Review your booking details and complete payment to confirm your rebooking.</p>
         </div>
 
-        {/* Booking Summary */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Booking Summary</h2>
-          
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-1">Service Type</p>
               <p className="font-medium text-gray-900">{formatServiceType(originalBooking.service)}</p>
             </div>
-
             <div>
               <p className="text-sm text-gray-600 mb-1">Schedule</p>
               <p className="font-medium text-gray-900">
@@ -225,7 +207,6 @@ export default function RebookPaymentPage() {
               </p>
               <p className="text-sm text-gray-600 mt-1">{getFrequencyName(originalBooking.frequency)}</p>
             </div>
-
             <div>
               <p className="text-sm text-gray-600 mb-1">Property Details</p>
               <p className="font-medium text-gray-900">
@@ -234,64 +215,49 @@ export default function RebookPaymentPage() {
               {originalBooking.extras && originalBooking.extras.length > 0 && (
                 <ul className="mt-2 space-y-1">
                   {originalBooking.extras.map((extraId) => (
-                    <li key={extraId} className="text-sm text-gray-700">
-                      • {extrasMap[extraId] || extraId}
-                    </li>
+                    <li key={extraId} className="text-sm text-gray-700">• {extrasMap[extraId] || extraId}</li>
                   ))}
                 </ul>
               )}
             </div>
-
             <div>
               <p className="text-sm text-gray-600 mb-1">Service Address</p>
               <p className="font-medium text-gray-900">
-                {originalBooking.streetAddress}
-                {originalBooking.aptUnit && `, ${originalBooking.aptUnit}`}
+                {originalBooking.streetAddress}{originalBooking.aptUnit && `, ${originalBooking.aptUnit}`}
               </p>
-              <p className="text-sm text-gray-600">
-                {originalBooking.suburb}, {originalBooking.city}
-              </p>
+              <p className="text-sm text-gray-600">{originalBooking.suburb}, {originalBooking.city}</p>
             </div>
           </div>
         </div>
 
-        {/* Payment Section */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
           <div className="flex items-center gap-2 mb-4">
             <Shield className="w-5 h-5 text-blue-500" />
             <h2 className="text-xl font-semibold text-gray-900">Payment</h2>
           </div>
-
           <div className="mb-6">
-            <div className="text-3xl font-bold text-blue-600 mb-2">
-              {formatPrice(originalBooking.totalAmount)}
-            </div>
+            <div className="text-3xl font-bold text-blue-600 mb-2">{formatPrice(originalBooking.totalAmount)}</div>
             <p className="text-sm text-gray-600">Same amount as your previous booking</p>
           </div>
-
           {originalBooking.discountCode && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-gray-600">Discount Code Applied</p>
               <p className="font-medium text-blue-700">{originalBooking.discountCode}</p>
             </div>
           )}
-
           {originalBooking.tip && originalBooking.tip > 0 && (
             <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-gray-600">Tip for Cleaner</p>
               <p className="font-medium text-blue-700">{formatPrice(originalBooking.tip)}</p>
             </div>
           )}
-
           <div className="pt-4 border-t border-gray-200">
             <p className="text-xs text-gray-500 mb-4 flex items-center gap-1">
-              <Shield className="w-3 h-3" />
-              Secure payment powered by Paystack
+              <Shield className="w-3 h-3" /> Secure payment powered by Paystack
             </p>
           </div>
         </div>
 
-        {/* Error Message */}
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
             <div className="flex items-center gap-2">
@@ -301,7 +267,6 @@ export default function RebookPaymentPage() {
           </div>
         )}
 
-        {/* Pay Button */}
         <div className="flex justify-end">
           <button
             onClick={handlePayment}
@@ -309,10 +274,7 @@ export default function RebookPaymentPage() {
             className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isProcessing ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Processing...
-              </>
+              <><Loader2 className="w-5 h-5 animate-spin" />Processing...</>
             ) : (
               `Pay ${formatPrice(originalBooking.totalAmount)}`
             )}
