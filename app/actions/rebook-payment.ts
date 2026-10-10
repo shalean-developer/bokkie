@@ -1,9 +1,7 @@
 "use server";
 import { getPaystackSecretKey } from "@/lib/paystack-config";
 
-import { BookingFormData } from "@/lib/types/booking";
-import { getBookingByReference, updatePaymentStatus, updateBookingStatus } from "@/lib/storage/bookings-supabase";
-import { verifyPayment } from "@/lib/paystack";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export interface RebookPaymentResult {
   success: boolean;
@@ -20,36 +18,46 @@ export async function updateRebookedBookingPayment(
   paymentReference: string
 ): Promise<RebookPaymentResult> {
   try {
-    // Verify the booking exists
-    const booking = await getBookingByReference(bookingReference);
-    
-    if (!booking) {
-      return {
-        success: false,
-        message: "Booking not found",
-      };
+    const key = getPaystackSecretKey();
+    if (!key) return { success: false, message: "Payment verification unavailable" };
+    const db = createServiceRoleClient();
+    const { data: booking, error: lookupError } = await db.from("bookings")
+      .select("total_amount, payment_status, payment_reference")
+      .eq("booking_reference", bookingReference).maybeSingle();
+    if (lookupError || !booking) return { success: false, message: "Booking not found" };
+    if (booking.payment_status === "completed") {
+      return booking.payment_reference === paymentReference
+        ? { success: true, message: "Payment already confirmed", bookingReference }
+        : { success: false, message: "Booking already paid with another reference" };
     }
-
-    // Verify payment
-    let paymentStatus: "pending" | "completed" | "failed" = "pending";
-    if (getPaystackSecretKey()) {
-      const verified = await verifyPayment(paymentReference, getPaystackSecretKey());
-      paymentStatus = verified ? "completed" : "failed";
+    const response = await fetch(
+      `https://api.paystack.co/transaction/verify/${encodeURIComponent(paymentReference)}`,
+      { headers: { Authorization: `Bearer ${key}` }, cache: "no-store" }
+    );
+    if (!response.ok) return { success: false, message: "Payment verification unavailable" };
+    const result = await response.json();
+    const tx = result?.data;
+    const expectedAmount = Math.round(Number(booking.total_amount) * 100);
+    if (!result?.status || !tx || tx.status !== "success" ||
+        tx.reference !== paymentReference || String(tx.currency).toUpperCase() !== "ZAR" ||
+        !Number.isFinite(expectedAmount) || expectedAmount <= 0 ||
+        Number(tx.amount) !== expectedAmount ||
+        tx.metadata?.booking_reference !== bookingReference) {
+      return { success: false, message: "Payment does not match booking" };
     }
-
-    // Update payment status and reference
-    await updatePaymentStatus(bookingReference, paymentStatus, paymentReference);
-
-    // Update booking status if payment completed
-    if (paymentStatus === "completed") {
-      await updateBookingStatus(bookingReference, "confirmed");
-    }
-
-    return {
-      success: true,
-      message: "Payment updated successfully",
-      bookingReference: booking.bookingReference,
-    };
+    const { data: updated, error: updateError } = await db.from("bookings")
+      .update({ payment_status: "completed", payment_reference: paymentReference, status: "confirmed" })
+      .eq("booking_reference", bookingReference)
+      .neq("payment_status", "completed")
+      .select("booking_reference");
+    if (updateError) return { success: false, message: "Payment settlement failed" };
+    if (updated?.length === 1) return { success: true, message: "Payment confirmed", bookingReference };
+    const { data: latest } = await db.from("bookings")
+      .select("payment_status, payment_reference")
+      .eq("booking_reference", bookingReference).maybeSingle();
+    return latest?.payment_status === "completed" && latest.payment_reference === paymentReference
+      ? { success: true, message: "Payment already confirmed", bookingReference }
+      : { success: false, message: "Booking payment state changed" };
   } catch (error) {
     console.error("Error updating rebooked booking payment:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
