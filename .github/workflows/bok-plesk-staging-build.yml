@@ -82,19 +82,18 @@ jobs:
           bash scripts/verify-plesk-runtime.sh .next/standalone
           tar -czf /tmp/bokkie-staging-standalone.tar.gz -C .next/standalone .
 
-      - name: Dry-run deployment replacement without publishing
+      - name: Dry-run standalone runtime replacement
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p /tmp/bokkie-dry-run
           cd /tmp/bokkie-dry-run
           git init -q
-          git config user.name "bokkie-ci"
-          git config user.email "bokkie-ci@example.invalid"
-          printf 'old source file\\n' > old-source.txt
+          git config user.name bokkie-ci
+          git config user.email bokkie-ci@example.invalid
+          echo old > old-source.txt
           git add old-source.txt
-          git commit -qm "fixture"
-          test -d .git
+          git commit -qm fixture
           git ls-files -z | xargs -0 -r git rm -q -f --
           rsync -a --delete --exclude='.git/' "$GITHUB_WORKSPACE/.next/standalone/" ./
           test -d .git
@@ -102,7 +101,7 @@ jobs:
           bash "$GITHUB_WORKSPACE/scripts/verify-plesk-runtime.sh" .
           git add --all --force
           test -n "$(git diff --cached --name-only)"
-          if git diff --cached --name-only | grep -E '(^|/)([.]env([.]|$)|id_rsa$)|[.]pem
+      - name: Upload runtime artifact (not deployed)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: bokkie-staging-standalone
@@ -158,64 +157,3 @@ jobs:
           git diff --cached --quiet && { echo "No runtime change"; exit 0; }
           git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
           git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" push origin HEAD:deploy/staging
-; then
-            echo "Unexpected sensitive file staged"
-            exit 1
-          fi
-
-      - name: Upload runtime artifact (not deployed)
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: bokkie-staging-standalone
-          path: /tmp/bokkie-staging-standalone.tar.gz
-          retention-days: 3
-          if-no-files-found: error
-
-  publish:
-    name: Publish standalone to Plesk staging branch
-    needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bok-plesk-01-runtime-prep' && vars.BOKKIE_ENABLE_PLESK_PUBLISH == 'true'
-    runs-on: ubuntu-latest
-    environment: bokkie-staging-build
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          name: bokkie-staging-standalone
-          path: /tmp/bokkie-bundle
-
-      - name: Verify artifact and publish without force push
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-          SOURCE_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-          test -s /tmp/bokkie-bundle/bokkie-staging-standalone.tar.gz
-          mkdir -p /tmp/bokkie-deploy
-          tar -xzf /tmp/bokkie-bundle/bokkie-staging-standalone.tar.gz -C /tmp/bokkie-deploy
-          test -f /tmp/bokkie-deploy/server.js
-          test -d /tmp/bokkie-deploy/.next/static
-          test -d /tmp/bokkie-deploy/public
-          test -f /tmp/bokkie-deploy/.next/BUILD_ID
-          if find /tmp/bokkie-deploy -type f \( -name '.env' -o -name '.env.local' -o -name '.env.production' -o -name '*.pem' \) | grep -q .; then exit 1; fi
-          mkdir -p /tmp/bokkie-publish
-          cd /tmp/bokkie-publish
-          git init
-          git config user.name "bokkie-deploy-bot"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git fetch --depth=1 origin deploy/staging
-          git checkout -B deploy/staging FETCH_HEAD
-          # Replace the existing tracked tree only after checking out the deploy branch.
-          git ls-files -z | xargs -0 -r git rm -q -f --
-          rsync -a --delete --exclude=.git/ /tmp/bokkie-deploy/ ./
-          test -f server.js
-          test -d .next/static
-          test -d public
-          printf '%s\n' "${SOURCE_SHA}" > RELEASE_SHA
-          git add --all --force
-          git diff --cached --quiet && { echo "No runtime change"; exit 0; }
-          git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
-          git push origin HEAD:deploy/staging
