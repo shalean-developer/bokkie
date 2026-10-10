@@ -1,0 +1,35 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/recurring-customers/page": {
+          "moduleId": 944678,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/recurring-customers/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "005866746af471f1384e3bad07d96f77f4ef9521c2": {
+      "workers": {
+        "app/admin/recurring-customers/page": {
+          "moduleId": 944678,
+          "async": false,
+          "exportedName": "getRecurringCustomers",
+          "filename": "app/actions/admin-bookings.ts"
+        }
+      },
+      "layer": {
+        "app/admin/recurring-customers/page": "action-browser"
+      },
+      "exportedName": "getRecurringCustomers",
+      "filename": "app/actions/admin-bookings.ts"
+    }
+  },
+  "edge": {}
+}

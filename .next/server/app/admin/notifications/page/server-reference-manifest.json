@@ -1,0 +1,125 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "0003ca4c3bb74fd57543fd94930abca792fb0fc5bd": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "getAllNotifications",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "getAllNotifications",
+      "filename": "app/actions/admin-notifications.ts"
+    },
+    "00cc7c5dfaea1b63486ad3954f809e73c6c25b192c": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "getNotificationStats",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "getNotificationStats",
+      "filename": "app/actions/admin-notifications.ts"
+    },
+    "40b01736b31cc6c2d6e35f9486accdf9aac8725ec0": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "markNotificationAsRead",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "markNotificationAsRead",
+      "filename": "app/actions/admin-notifications.ts"
+    },
+    "4091e6d72293e233dc4c9f87156e7b6b45cbec450f": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "markNotificationAsUnread",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "markNotificationAsUnread",
+      "filename": "app/actions/admin-notifications.ts"
+    },
+    "00f2b58587088f2d976850f3fd73d3cb406b13318f": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "markAllNotificationsAsRead",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "markAllNotificationsAsRead",
+      "filename": "app/actions/admin-notifications.ts"
+    },
+    "407115fd031b835d4943cb9db03c8df1fc8a4d1ccc": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "deleteNotification",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "deleteNotification",
+      "filename": "app/actions/admin-notifications.ts"
+    },
+    "00a488d3a92c97566c3b9c38e99a663995f740b19c": {
+      "workers": {
+        "app/admin/notifications/page": {
+          "moduleId": 733635,
+          "async": false,
+          "exportedName": "deleteAllReadNotifications",
+          "filename": "app/actions/admin-notifications.ts"
+        }
+      },
+      "layer": {
+        "app/admin/notifications/page": "action-browser"
+      },
+      "exportedName": "deleteAllReadNotifications",
+      "filename": "app/actions/admin-notifications.ts"
+    }
+  },
+  "edge": {}
+}

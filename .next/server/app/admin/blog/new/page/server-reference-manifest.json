@@ -1,0 +1,50 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/blog/new/page": {
+          "moduleId": 130482,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/new/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "40699f5887f090b1e9235e45a0f26df021d2de1f54": {
+      "workers": {
+        "app/admin/blog/new/page": {
+          "moduleId": 130482,
+          "async": false,
+          "exportedName": "createBlogPost",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/new/page": "action-browser"
+      },
+      "exportedName": "createBlogPost",
+      "filename": "app/actions/blog.ts"
+    },
+    "00c64ace2d780b36f68e4a545b93e82892603935d5": {
+      "workers": {
+        "app/admin/blog/new/page": {
+          "moduleId": 130482,
+          "async": false,
+          "exportedName": "getBlogCategories",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/new/page": "action-browser"
+      },
+      "exportedName": "getBlogCategories",
+      "filename": "app/actions/blog.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,3 @@
+{
+  "/api/vouchers/check-pending/route": "app/api/vouchers/check-pending/route.js"
+}

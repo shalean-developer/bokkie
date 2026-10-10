@@ -1,0 +1,3 @@
+{
+  "/dashboard/cleaners/[cleanerId]/page": "app/dashboard/cleaners/[cleanerId]/page.js"
+}

@@ -1,0 +1,50 @@
+{
+  "node": {
+    "4086959c94c5bc86620486d34b23198475bb1003aa": {
+      "workers": {
+        "app/booking/quote/page": {
+          "moduleId": 738374,
+          "async": false,
+          "exportedName": "submitQuote",
+          "filename": "app/actions/submit-quote.ts"
+        }
+      },
+      "layer": {
+        "app/booking/quote/page": "action-browser"
+      },
+      "exportedName": "submitQuote",
+      "filename": "app/actions/submit-quote.ts"
+    },
+    "006e96c57aa0a1df6c04292b538227514564b1ebb6": {
+      "workers": {
+        "app/booking/quote/page": {
+          "moduleId": 738374,
+          "async": false,
+          "exportedName": "getServiceLocations",
+          "filename": "app/actions/booking-data.ts"
+        }
+      },
+      "layer": {
+        "app/booking/quote/page": "action-browser"
+      },
+      "exportedName": "getServiceLocations",
+      "filename": "app/actions/booking-data.ts"
+    },
+    "00211de0efa4e90f54236abab0f7bfd01d5bafdc1a": {
+      "workers": {
+        "app/booking/quote/page": {
+          "moduleId": 738374,
+          "async": false,
+          "exportedName": "getAdditionalServices",
+          "filename": "app/actions/booking-data.ts"
+        }
+      },
+      "layer": {
+        "app/booking/quote/page": "action-browser"
+      },
+      "exportedName": "getAdditionalServices",
+      "filename": "app/actions/booking-data.ts"
+    }
+  },
+  "edge": {}
+}

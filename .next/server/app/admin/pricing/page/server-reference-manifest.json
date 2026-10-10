@@ -1,0 +1,305 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "00cbc30157895109567a098cee558d275e51ca7373": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "getAllPricingData",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "getAllPricingData",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "60fd80b06e8b781f25936c9c359ce1e0584abb1ce0": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateServiceTypePricing",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateServiceTypePricing",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "6081011decb2de58dfc8927dfa735efc5d64cae281": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateRoomPricing",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateRoomPricing",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "601b4ef69c0d00737fe87e5258c4f70fd11fa2c452": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateAdditionalService",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateAdditionalService",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "60355274643b413e00b26d91c210c40a6124e491b1": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateFrequencyOption",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateFrequencyOption",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "600a4ac927912ea9628e6394d04e0f0fd2dde29984": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateSystemSetting",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateSystemSetting",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "409eee313bfae6630c8bfd61a773f899ced1cf2457": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "createServiceTypePricing",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "createServiceTypePricing",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "4079f99583baab95cea5763af15e70a93c056fc329": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "deleteServiceTypePricing",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "deleteServiceTypePricing",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "401b307852604caa9cd8c6c099ec50e4217099fc0b": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "createAdditionalService",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "createAdditionalService",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "40c8e7da4edf8b49e43c647892f29d5037f6712e3c": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "deleteAdditionalService",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "deleteAdditionalService",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "60c57178d101c3523d21aeb4175dc5c2decbc75b4a": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateServiceCategoryPricing",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateServiceCategoryPricing",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "40b33b921cfd0c34650435db733515aa3392676f30": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "createTimeSlot",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "createTimeSlot",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "404540391dfc3c46194bb1786ac46fdfcb1a355ee0": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "deleteTimeSlot",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "deleteTimeSlot",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "0006e242c715f1ace8e0d1c2b0480b250d7125bb36": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "getAdminTimeSlots",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "getAdminTimeSlots",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "6057ba84aec0eb49ea5842b579ab641d829cca398b": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updateTimeSlot",
+          "filename": "app/actions/admin-pricing.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updateTimeSlot",
+      "filename": "app/actions/admin-pricing.ts"
+    },
+    "00421f4c1527bb8554f81bf27fa3f44bc25c0b5094": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "getAllPopularServices",
+          "filename": "app/actions/popular-services.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "getAllPopularServices",
+      "filename": "app/actions/popular-services.ts"
+    },
+    "78025f1a21cfb9bd0cf775e583fcf195370788ca44": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "addPopularService",
+          "filename": "app/actions/popular-services.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "addPopularService",
+      "filename": "app/actions/popular-services.ts"
+    },
+    "60ff2aa76d5546352c1c22973773af98965cada75b": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "updatePopularService",
+          "filename": "app/actions/popular-services.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "updatePopularService",
+      "filename": "app/actions/popular-services.ts"
+    },
+    "4081cf6cb71e2e36ea36b5a869d07ae244d38ad979": {
+      "workers": {
+        "app/admin/pricing/page": {
+          "moduleId": 528097,
+          "async": false,
+          "exportedName": "deletePopularService",
+          "filename": "app/actions/popular-services.ts"
+        }
+      },
+      "layer": {
+        "app/admin/pricing/page": "action-browser"
+      },
+      "exportedName": "deletePopularService",
+      "filename": "app/actions/popular-services.ts"
+    }
+  },
+  "edge": {}
+}

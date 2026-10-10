@@ -1,0 +1,3 @@
+{
+  "/api/vouchers/complete-purchase/route": "app/api/vouchers/complete-purchase/route.js"
+}

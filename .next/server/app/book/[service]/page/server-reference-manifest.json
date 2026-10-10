@@ -1,0 +1,20 @@
+{
+  "node": {
+    "00b57bb6b4b6e4c71f46b35e1e2281b9b74bdfe322": {
+      "workers": {
+        "app/book/[service]/page": {
+          "moduleId": 291037,
+          "async": false,
+          "exportedName": "getBookPricingConfig",
+          "filename": "app/actions/booking-data.ts"
+        }
+      },
+      "layer": {
+        "app/book/[service]/page": "action-browser"
+      },
+      "exportedName": "getBookPricingConfig",
+      "filename": "app/actions/booking-data.ts"
+    }
+  },
+  "edge": {}
+}

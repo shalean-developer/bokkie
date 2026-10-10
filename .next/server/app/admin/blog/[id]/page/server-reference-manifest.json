@@ -1,0 +1,65 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/blog/[id]/page": {
+          "moduleId": 925582,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/[id]/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "4075e441c86ef8c4299f9cb94c394400a387254022": {
+      "workers": {
+        "app/admin/blog/[id]/page": {
+          "moduleId": 925582,
+          "async": false,
+          "exportedName": "getBlogPostById",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/[id]/page": "action-browser"
+      },
+      "exportedName": "getBlogPostById",
+      "filename": "app/actions/blog.ts"
+    },
+    "601791899a90c9121bc199e7e8242eb03d8277f156": {
+      "workers": {
+        "app/admin/blog/[id]/page": {
+          "moduleId": 925582,
+          "async": false,
+          "exportedName": "updateBlogPost",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/[id]/page": "action-browser"
+      },
+      "exportedName": "updateBlogPost",
+      "filename": "app/actions/blog.ts"
+    },
+    "00c64ace2d780b36f68e4a545b93e82892603935d5": {
+      "workers": {
+        "app/admin/blog/[id]/page": {
+          "moduleId": 925582,
+          "async": false,
+          "exportedName": "getBlogCategories",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/admin/blog/[id]/page": "action-browser"
+      },
+      "exportedName": "getBlogCategories",
+      "filename": "app/actions/blog.ts"
+    }
+  },
+  "edge": {}
+}

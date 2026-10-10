@@ -1,0 +1,3 @@
+module.exports=[358426,a=>{"use strict";var b=a.i(998310);async function c(){let a=await (0,b.createClient)(),{data:{user:c}}=await a.auth.getUser();if(!c)return null;let{data:d}=await a.from("profiles").select("*").eq("id",c.id).single();return{id:c.id,firstName:d?.first_name||null,lastName:d?.last_name||null,fullName:d?.full_name||c.user_metadata?.full_name||null,phone:d?.phone||null,email:d?.email||c.email||"",isAdmin:d?.is_admin||!1}}async function d(){let a=await c();return a?.firstName?a.firstName:a?.fullName?a.fullName:a?.email?a.email.split("@")[0]:"there"}async function e(){let a=await c();return a?.isAdmin||!1}a.s(["getUserDisplayName",()=>d,"getUserProfile",()=>c,"isUserAdmin",()=>e])}];
+
+//# sourceMappingURL=lib_storage_profile-supabase_ts_fc49dc4f._.js.map

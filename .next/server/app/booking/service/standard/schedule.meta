@@ -1,0 +1,18 @@
+{
+  "headers": {
+    "x-nextjs-stale-time": "300",
+    "x-nextjs-prerender": "1",
+    "x-next-cache-tags": "_N_T_/layout,_N_T_/booking/layout,_N_T_/booking/service/layout,_N_T_/booking/service/standard/layout,_N_T_/booking/service/standard/schedule/layout,_N_T_/booking/service/standard/schedule/page,_N_T_/booking/service/standard/schedule"
+  },
+  "segmentPaths": [
+    "/_tree",
+    "/_full",
+    "/booking/service/standard/schedule/__PAGE__",
+    "/booking/service/standard/schedule",
+    "/booking/service/standard",
+    "/booking/service",
+    "/booking",
+    "/_index",
+    "/_head"
+  ]
+}

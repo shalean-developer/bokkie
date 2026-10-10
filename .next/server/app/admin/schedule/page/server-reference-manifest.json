@@ -1,0 +1,35 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/schedule/page": {
+          "moduleId": 301395,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/schedule/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "00150391408ff8adbc18bf5a6cac457310b1cfa402": {
+      "workers": {
+        "app/admin/schedule/page": {
+          "moduleId": 301395,
+          "async": false,
+          "exportedName": "getAllBookings",
+          "filename": "app/actions/admin-bookings.ts"
+        }
+      },
+      "layer": {
+        "app/admin/schedule/page": "action-browser"
+      },
+      "exportedName": "getAllBookings",
+      "filename": "app/actions/admin-bookings.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,50 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/payments/page": {
+          "moduleId": 934070,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/payments/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "00396c3e94ce0e2c5e09786438af67cfb3a02f93c8": {
+      "workers": {
+        "app/admin/payments/page": {
+          "moduleId": 934070,
+          "async": false,
+          "exportedName": "getAllPayments",
+          "filename": "app/actions/admin-payments.ts"
+        }
+      },
+      "layer": {
+        "app/admin/payments/page": "action-browser"
+      },
+      "exportedName": "getAllPayments",
+      "filename": "app/actions/admin-payments.ts"
+    },
+    "0086cb64ac0a2d776f31f2980fc788149a0821588c": {
+      "workers": {
+        "app/admin/payments/page": {
+          "moduleId": 934070,
+          "async": false,
+          "exportedName": "getPaymentStats",
+          "filename": "app/actions/admin-payments.ts"
+        }
+      },
+      "layer": {
+        "app/admin/payments/page": "action-browser"
+      },
+      "exportedName": "getPaymentStats",
+      "filename": "app/actions/admin-payments.ts"
+    }
+  },
+  "edge": {}
+}

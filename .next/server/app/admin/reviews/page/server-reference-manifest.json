@@ -1,0 +1,95 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 776752,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "40ac0afd14bd4697d4297759c480a701fdc07849c2": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 776752,
+          "async": false,
+          "exportedName": "getReviews",
+          "filename": "app/actions/reviews.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "getReviews",
+      "filename": "app/actions/reviews.ts"
+    },
+    "40250228b85965e8841093303575ffd21352818997": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 776752,
+          "async": false,
+          "exportedName": "createReview",
+          "filename": "app/actions/reviews.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "createReview",
+      "filename": "app/actions/reviews.ts"
+    },
+    "60bb51c522a713f6b0caf28b6a537e80832cf98373": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 776752,
+          "async": false,
+          "exportedName": "updateReview",
+          "filename": "app/actions/reviews.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "updateReview",
+      "filename": "app/actions/reviews.ts"
+    },
+    "40eaf377e4a6b7c15e8b41f67a83b294cf6da5b768": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 776752,
+          "async": false,
+          "exportedName": "deleteReview",
+          "filename": "app/actions/reviews.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "deleteReview",
+      "filename": "app/actions/reviews.ts"
+    },
+    "408dca0883df6c04631bba4d7636cc65795f8f594a": {
+      "workers": {
+        "app/admin/reviews/page": {
+          "moduleId": 776752,
+          "async": false,
+          "exportedName": "approveReview",
+          "filename": "app/actions/reviews.ts"
+        }
+      },
+      "layer": {
+        "app/admin/reviews/page": "action-browser"
+      },
+      "exportedName": "approveReview",
+      "filename": "app/actions/reviews.ts"
+    }
+  },
+  "edge": {}
+}

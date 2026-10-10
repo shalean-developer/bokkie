@@ -1,0 +1,65 @@
+{
+  "node": {
+    "00aa214a1b8ccb4bff569856fe87983ade187cc97c": {
+      "workers": {
+        "app/admin/customers/page": {
+          "moduleId": 517823,
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/actions/auth.ts"
+        }
+      },
+      "layer": {
+        "app/admin/customers/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/actions/auth.ts"
+    },
+    "00527d67788efa38aa0cca5271ac05b4bee357863a": {
+      "workers": {
+        "app/admin/customers/page": {
+          "moduleId": 517823,
+          "async": false,
+          "exportedName": "getAllCustomers",
+          "filename": "app/actions/admin-bookings.ts"
+        }
+      },
+      "layer": {
+        "app/admin/customers/page": "action-browser"
+      },
+      "exportedName": "getAllCustomers",
+      "filename": "app/actions/admin-bookings.ts"
+    },
+    "60f29cbaf86ae086b767c00b687957d97390f69af6": {
+      "workers": {
+        "app/admin/customers/page": {
+          "moduleId": 517823,
+          "async": false,
+          "exportedName": "updateCustomer",
+          "filename": "app/actions/admin-bookings.ts"
+        }
+      },
+      "layer": {
+        "app/admin/customers/page": "action-browser"
+      },
+      "exportedName": "updateCustomer",
+      "filename": "app/actions/admin-bookings.ts"
+    },
+    "402145eae42ba4bca13b7bcf78dbf7a490360d6ee2": {
+      "workers": {
+        "app/admin/customers/page": {
+          "moduleId": 517823,
+          "async": false,
+          "exportedName": "deleteCustomer",
+          "filename": "app/actions/admin-bookings.ts"
+        }
+      },
+      "layer": {
+        "app/admin/customers/page": "action-browser"
+      },
+      "exportedName": "deleteCustomer",
+      "filename": "app/actions/admin-bookings.ts"
+    }
+  },
+  "edge": {}
+}

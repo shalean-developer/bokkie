@@ -1,0 +1,27 @@
+User-Agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /private/
+Disallow: /dashboard/
+Disallow: /cleaner/
+Disallow: /auth/
+Disallow: /booking/service/
+Disallow: /booking/pay/
+Disallow: /booking/quote/confirmation
+
+User-Agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_next/
+Disallow: /private/
+Disallow: /dashboard/
+Disallow: /cleaner/
+Disallow: /auth/
+Disallow: /booking/service/
+Disallow: /booking/pay/
+Disallow: /booking/quote/confirmation
+
+Sitemap: https://bokkiecleaning.co.za/sitemap.xml
