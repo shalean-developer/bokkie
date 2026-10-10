@@ -1,6 +1,6 @@
 {
   "node": {
-    "000cd3ac262fbebb38c8fd114ed14029cae473d41f": {
+    "00b49b1767f9abb1edaf0bd04b0c0ba4dd18872be5": {
       "workers": {
         "app/admin/check-services/page": {
           "moduleId": 551031,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "00df96a323700d1414a2313efdfcc1337c389821dc": {
+    "0065cad8049452d01dba249188ced5bea48a44ca97": {
       "workers": {
         "app/admin/check-services/page": {
           "moduleId": 551031,
