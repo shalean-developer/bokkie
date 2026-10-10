@@ -106,6 +106,9 @@ jobs:
       - name: Verify payment-date dashboard separation
         run: bash scripts/check-dashboard-payment-date-reporting.sh
 
+      - name: Verify optional financial metric comparison SSR guard
+        run: bash scripts/check-metric-card-optional-change.sh
+
       - name: Verify admin financial metric invariants
         run: bash scripts/check-admin-financial-metrics.sh
 
