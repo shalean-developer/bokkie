@@ -31,16 +31,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify signature if provided (Paystack always sends it for webhooks)
-    if (signature) {
-      const isValid = verifyWebhookSignature(rawBody, signature, secretKey);
-      if (!isValid) {
-        console.error("Invalid webhook signature");
-        return NextResponse.json(
-          { success: false, message: "Invalid signature" },
-          { status: 401 }
-        );
-      }
+    // Paystack signs every webhook. Reject missing or invalid signatures.
+    if (!signature || !verifyWebhookSignature(rawBody, signature, secretKey)) {
+      console.error("Paystack webhook signature missing or invalid");
+      return NextResponse.json(
+        { success: false, message: "Invalid signature" },
+        { status: 401 }
+      );
     }
 
     // Parse the webhook event
