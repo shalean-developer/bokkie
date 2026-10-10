@@ -49,7 +49,7 @@ export interface PendingCounts {
 /**
  * Get date range boundaries
  */
-function getDateRange(dateRange: DateRange, customStart?: Date, customEnd?: Date): { start: Date; end: Date } {
+export function getDateRange(dateRange: DateRange, customStart?: Date, customEnd?: Date): { start: Date; end: Date } {
   const end = new Date();
   end.setHours(23, 59, 59, 999);
   
