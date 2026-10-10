@@ -1,3 +1,4 @@
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 import { NextRequest, NextResponse } from "next/server";
 import { submitBooking } from "@/app/actions/submit-booking";
 import { updateRebookedBookingPayment } from "@/app/actions/rebook-payment";
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     
     // Verify webhook signature for security
     const signature = request.headers.get("x-paystack-signature");
-    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const secretKey = getPaystackSecretKey();
 
     if (!secretKey) {
       console.error("PAYSTACK_SECRET_KEY is not configured");
