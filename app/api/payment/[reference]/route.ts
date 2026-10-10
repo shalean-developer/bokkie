@@ -1,3 +1,4 @@
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 import { NextRequest, NextResponse } from "next/server";
 
 /**
@@ -10,7 +11,7 @@ export async function GET(
 ) {
   try {
     const { reference } = await params;
-    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const secretKey = getPaystackSecretKey();
 
     if (!secretKey) {
       return NextResponse.json(
