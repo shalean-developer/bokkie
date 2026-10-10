@@ -151,6 +151,7 @@ export function initializePaystack(config: PaystackConfig): void {
  */
 export async function verifyPayment(reference: string, secretKey: string): Promise<boolean> {
   try {
+    if (process.env.BOKKIE_APP_ENV === 'staging' && !secretKey.startsWith('sk_test_')) return false;
     const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
       headers: {
         Authorization: `Bearer ${secretKey}`,
