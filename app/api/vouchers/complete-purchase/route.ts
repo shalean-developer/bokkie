@@ -1,3 +1,4 @@
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { verifyPayment } from "@/lib/paystack";
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify payment with Paystack
-    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const secretKey = getPaystackSecretKey();
     if (!secretKey) {
       console.error("PAYSTACK_SECRET_KEY is not configured");
       return NextResponse.json(
