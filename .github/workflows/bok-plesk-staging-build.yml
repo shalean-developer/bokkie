@@ -58,6 +58,9 @@ jobs:
       - name: Run existing regression test
         run: npm run test:blog-sanitize
 
+      - name: Test staging outbound guard
+        run: npx tsx --test lib/staging-guards.test.ts
+
       - name: Build standalone Next.js
         run: npm run build
 
