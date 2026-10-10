@@ -214,6 +214,8 @@ jobs:
           # Publish it with every source release so the running Next.js process reloads.
           mkdir -p tmp
           printf '%s\n' "${SOURCE_SHA}" > tmp/restart.txt
+          test -s tmp/restart.txt
+          test "$(cat tmp/restart.txt)" = "$SOURCE_SHA"
 
           git add --all --force
           git diff --cached --quiet && { echo "No runtime change"; exit 0; }
