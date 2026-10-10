@@ -152,6 +152,12 @@ jobs:
           test -f server.js
           test -d .next/static
           test -d public
+          # GitHub rejects individual files larger than 100 MiB.
+          oversized="$(find . -path './.git' -prune -o -type f -size +95M -print -quit)"
+          if [ -n "$oversized" ]; then
+            echo "::error title=Oversized deployment file::A runtime file exceeds the safe GitHub size limit"
+            exit 1
+          fi
           printf '%s\n' "${SOURCE_SHA}" > RELEASE_SHA
           git add --all --force
           git diff --cached --quiet && { echo "No runtime change"; exit 0; }
