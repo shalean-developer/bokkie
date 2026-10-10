@@ -88,6 +88,12 @@ jobs:
       - name: Verify independent admin pending queues
         run: bash scripts/check-admin-pending-counts.sh
 
+      - name: Test verified payment timestamps
+        run: npx tsx --test lib/payments/paid-at.test.ts
+
+      - name: Verify immutable settlement payment timestamp contract
+        run: bash scripts/check-paid-at-settlement.sh
+
       - name: Verify admin financial metric invariants
         run: bash scripts/check-admin-financial-metrics.sh
 
