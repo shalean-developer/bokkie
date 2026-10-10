@@ -59,6 +59,7 @@ export function PaymentStep() {
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
   const [alreadyPaid, setAlreadyPaid] = useState(false);
+  const [paidReference, setPaidReference] = useState("");
   const [bookingRef, setBookingRef] = useState("");
 
   const isAuthenticated = !!user;
@@ -90,7 +91,7 @@ export function PaymentStep() {
     }
     let active = true;
     getBookV2PaidStatus(reference).then(({ paid }) => {
-      if (active) setAlreadyPaid(paid);
+      if (active) { setAlreadyPaid(paid); if (paid) setPaidReference(reference); }
     }).catch(() => {
       if (active) setAlreadyPaid(false);
     });
@@ -166,6 +167,7 @@ export function PaymentStep() {
 
     if (!saveResult.success || !saveResult.bookingReference) {
       if (saveResult.message === "This booking has already been paid." && state.bookingReference) {
+        setPaidReference(state.bookingReference);
         setAlreadyPaid(true);
         setAuthError("");
         setPaymentLoading(false);
@@ -181,6 +183,13 @@ export function PaymentStep() {
 
     const payInit = await initializeBookPayment(saveResult.bookingReference);
     if (!payInit.success || !payInit.publicKey || !payInit.amount || !payInit.reference || !payInit.email) {
+      if (payInit.message === "This booking has already been paid.") {
+        setPaidReference(saveResult.bookingReference);
+        setAlreadyPaid(true);
+        setAuthError("");
+        setPaymentLoading(false);
+        return;
+      }
       setAuthError(payInit.message ?? "Payment initialization failed");
       setPaymentLoading(false);
       return;
@@ -334,12 +343,12 @@ export function PaymentStep() {
               <Shield className="w-3.5 h-3.5" />
               Secured by Paystack · Status: pending until paid
             </div>
-            {alreadyPaid && state.bookingReference && (
+            {alreadyPaid && (paidReference || state.bookingReference) && (
               <Alert>
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertTitle>Payment already completed</AlertTitle>
                 <AlertDescription>
-                  Booking {state.bookingReference} is confirmed and paid.
+                  Booking {paidReference || state.bookingReference} is confirmed and paid.
                   <div className="mt-3">
                     <Button variant="outline" asChild>
                       <Link href="/dashboard/bookings"><ExternalLink className="w-4 h-4" /> View Booking</Link>
