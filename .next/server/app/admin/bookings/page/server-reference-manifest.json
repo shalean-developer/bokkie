@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f369e2093c29c3bedbee95685640cdde066d15e5": {
+    "00393d6fad1b0dcdc4c7ae1385b1969178ef94a02c": {
       "workers": {
         "app/admin/bookings/page": {
           "moduleId": 388700,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "002bb7079f4d6999acd807fe99f14e085d93ec12b1": {
+    "000add8410887a7f4648afd4bc780daf73e174c542": {
       "workers": {
         "app/admin/bookings/page": {
           "moduleId": 388700,
@@ -30,7 +30,7 @@
       "exportedName": "getAllBookings",
       "filename": "app/actions/admin-bookings.ts"
     },
-    "00b0219590b5a37e8edf210b50ef0722cfe90349cb": {
+    "003646d2d981b27a93bdfd3d45283d0a2fb9b10f50": {
       "workers": {
         "app/admin/bookings/page": {
           "moduleId": 388700,
