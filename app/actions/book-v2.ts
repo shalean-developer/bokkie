@@ -435,6 +435,7 @@ export async function bookLogin(email: string, password: string) {
 }
 
 type VerifiedPaystackTransaction = {
+  paid_at?: unknown;
   status: string;
   amount: number;
   currency: string;
@@ -460,6 +461,7 @@ async function verifyPaystackTransaction(
     if (!payload?.status || !payload?.data) return null;
 
     return {
+      paid_at: payload.data.paid_at,
       status: String(payload.data.status ?? ""),
       amount: Number(payload.data.amount),
       currency: String(payload.data.currency ?? ""),
