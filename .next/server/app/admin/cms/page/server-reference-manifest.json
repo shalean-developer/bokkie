@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f81d76282448afb6af8a8ac6ce3852c4d1c2d70d": {
+    "00bf4746cdad69eb19724550d6ae464102d8098bc1": {
       "workers": {
         "app/admin/cms/page": {
           "moduleId": 234426,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "40fe63cb9fa3567a0ffa59891f4278b28cc6b97f5c": {
+    "4022d4c4601f82b3ef89bf8956584511a583fa3687": {
       "workers": {
         "app/admin/cms/page": {
           "moduleId": 234426,
@@ -30,7 +30,7 @@
       "exportedName": "getCMSContent",
       "filename": "app/actions/cms.ts"
     },
-    "40f707b5701a0187710f615d62d495883aef4eaf97": {
+    "4051cfc699833c8c2b5236e774d377caef382bba46": {
       "workers": {
         "app/admin/cms/page": {
           "moduleId": 234426,

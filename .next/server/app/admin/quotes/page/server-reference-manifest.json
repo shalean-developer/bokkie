@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f81d76282448afb6af8a8ac6ce3852c4d1c2d70d": {
+    "00bf4746cdad69eb19724550d6ae464102d8098bc1": {
       "workers": {
         "app/admin/quotes/page": {
           "moduleId": 967272,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "00fb6ab5e5915669972a0b7e84a92e82a6e90c9870": {
+    "000cee1e75497ee4b0c027316ace176e0aede4aea9": {
       "workers": {
         "app/admin/quotes/page": {
           "moduleId": 967272,
@@ -30,7 +30,7 @@
       "exportedName": "getAllQuotes",
       "filename": "app/actions/admin-quotes.ts"
     },
-    "003793a7b9df77b18b258045186822f401f53f0d0c": {
+    "0014a3678d592f916a436a84b71de21144b3f9a372": {
       "workers": {
         "app/admin/quotes/page": {
           "moduleId": 967272,
@@ -45,7 +45,7 @@
       "exportedName": "getQuoteStats",
       "filename": "app/actions/admin-quotes.ts"
     },
-    "6046c2f8a938dbf44fc9d2f07978dd8854be76bcde": {
+    "60d823b8e8945c2ba4ce3e1b52547b84fbfd64d9a7": {
       "workers": {
         "app/admin/quotes/page": {
           "moduleId": 967272,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "40be12e02447ceffa0b271b6872c4384d165651a0c": {
+    "406944518613cb5ec840401b6426b8b4a8963978f1": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60a2b8486b3fef1f5fa086e77c565c5332ccbf3d72": {
+    "60fa0d82f4a15323ee00bab4b2f599af6ca2ddce2f": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "403f0f3420aeb87a59664a48a1841b39c1f168a7be": {
+    "40ac755c1d120624c32e6d431ae7e6ea4769c091c4": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "00f81d76282448afb6af8a8ac6ce3852c4d1c2d70d": {
+    "00bf4746cdad69eb19724550d6ae464102d8098bc1": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "40567f6173d4aad87550dd2c6670f1c1869efa4d37": {
+    "4011d2637b5a3956bca13f21fb2e0a1240c5571f50": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "009a270ac9c507efd3861bc977134998a0fdb5065f": {
+    "0035d24bd23e4b1c728029f996545d987b2fc0ba91": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "00999904c08e58d3f2486b993046da19ea94f45d65": {
+    "0093f7a917d0ce19d38aac93c54fbc20cddbef8afc": {
       "workers": {
         "app/dashboard/bookings/page": {
           "moduleId": 623574,
