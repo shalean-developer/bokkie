@@ -61,6 +61,9 @@ jobs:
       - name: Test privileged Supabase client fail-closed contract
         run: bash scripts/check-service-role-fail-closed.sh
 
+      - name: Verify redacted booking diagnostics
+        run: bash scripts/check-booking-stage-diagnostics.sh
+
       - name: Verify booking ownership invariants
         run: bash scripts/check-v2-booking-ownership.sh
 
