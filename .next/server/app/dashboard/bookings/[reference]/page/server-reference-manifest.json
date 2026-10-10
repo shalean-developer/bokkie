@@ -1,6 +1,6 @@
 {
   "node": {
-    "40401e27d4a0bc7605116240efbaa5362347d0c73b": {
+    "40415f2cb972e0d149719375f831dfbe8bfe1797ae": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "6010abbc766e414e10c41a4178057a88b36bfbe28b": {
+    "60576a8ccc06f6daef2ee81fd9613eff7b507ca0b4": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "40387c738a8f22570fdddebfd0b266727ef6759aa5": {
+    "40eb32f0b63e99230cc046f6b1ffc629404489ff3d": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "0019ab33ec7b1330914944ec962b046405e2b3625a": {
+    "0081a554b53bc5f79c8c045236478528e8f1bf7f96": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "407960443475eaf04165360e773cc85dcc9ea87a52": {
+    "4034960089cbc6b18872a30660c28c00e4420e0688": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "00b48d9a3cbb8d4b3a6c8b47c1a84bc11706bfaad4": {
+    "00ebaf41c208609f182a4c3aea4e1cf7ad65101219": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "00cac2fbe48f5895e927d610d960006c41a4b02b24": {
+    "003f9dce470efc8ace26baf837fb0b6e34461c0168": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -105,7 +105,7 @@
       "exportedName": "getLoginRedirectPath",
       "filename": "app/actions/auth.ts"
     },
-    "00a88aa1dfb3d9028ff46439fb03440a73b2fdf66a": {
+    "005a15aaae1afaed950d18afd64cdc94d7d8479512": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -120,7 +120,7 @@
       "exportedName": "getTimeSlots",
       "filename": "app/actions/booking-data.ts"
     },
-    "70b694b85ae0f5de298e62510e4ae7a3cc45396f34": {
+    "70563183efe0d539a8013f51d4a581900d0a9cf0e0": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -135,7 +135,7 @@
       "exportedName": "rebookBookingWithSchedule",
       "filename": "app/actions/rebook-schedule.ts"
     },
-    "60b5f3f6d7b7a41012e64fc9f930b38628653891bf": {
+    "604d3bb6a53f81bc48e511fc995a6a2fe7a0d83785": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,
@@ -150,7 +150,7 @@
       "exportedName": "initializePaymentWithAmount",
       "filename": "app/actions/payment.ts"
     },
-    "404b16c55c5e9021c189be02b2d233bb8dddf34812": {
+    "40388243e4da9e3cf17879fe6c2d165d63998f3aae": {
       "workers": {
         "app/dashboard/bookings/[reference]/page": {
           "moduleId": 256820,

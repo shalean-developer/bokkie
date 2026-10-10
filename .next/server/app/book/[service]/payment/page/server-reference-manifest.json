@@ -1,6 +1,6 @@
 {
   "node": {
-    "00560e5f7175cea81e58bddc4482821125d4ec4405": {
+    "00ade5e9dbcdbc21c72a71e55369091dd51ba54791": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
@@ -15,7 +15,7 @@
       "exportedName": "getBookPricingConfig",
       "filename": "app/actions/booking-data.ts"
     },
-    "0078d08738fe1f50ea4c6926b66a416153acb7ea5d": {
+    "00e4a304e606dcc181e7d7df8ceca3aa88a366fee8": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
@@ -30,7 +30,7 @@
       "exportedName": "getCustomerProfileForBooking",
       "filename": "app/actions/book-v2.ts"
     },
-    "60f2532b09c43220475fcb10adb19b7cfa64a30933": {
+    "609ca44945546bf99e40eac7f8ba58d71fe3eef027": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
@@ -45,7 +45,7 @@
       "exportedName": "bookLogin",
       "filename": "app/actions/book-v2.ts"
     },
-    "4059894262be1ee117995540cf05c0b679c826e196": {
+    "4051e55e6063337ed487ad478592767794fdbd8f88": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
@@ -60,7 +60,7 @@
       "exportedName": "bookSignupAndProfile",
       "filename": "app/actions/book-v2.ts"
     },
-    "607b57061b9b1b7c84348922759cbe5ee1e3b515c8": {
+    "60fc1920a560eaa95aca2a96eb2763650850fdae8e": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
@@ -75,7 +75,22 @@
       "exportedName": "saveBookV2Booking",
       "filename": "app/actions/book-v2.ts"
     },
-    "60ac6096a3d4eed5dec0d34819955d29a45ec44bab": {
+    "40066c9051d17b483db155297442612243074a1dbf": {
+      "workers": {
+        "app/book/[service]/payment/page": {
+          "moduleId": 984023,
+          "async": false,
+          "exportedName": "getBookV2PaidStatus",
+          "filename": "app/actions/book-v2.ts"
+        }
+      },
+      "layer": {
+        "app/book/[service]/payment/page": "action-browser"
+      },
+      "exportedName": "getBookV2PaidStatus",
+      "filename": "app/actions/book-v2.ts"
+    },
+    "60f2a02f73aeb6dd4f877c4b4e220f2c8ad734a031": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
@@ -90,7 +105,7 @@
       "exportedName": "verifyAndCompleteBookPayment",
       "filename": "app/actions/book-v2.ts"
     },
-    "40b1db8ebe50184a47a098d774edecb7a64948da83": {
+    "400d187da9a7a9d94df93083b702b12a4118f5e215": {
       "workers": {
         "app/book/[service]/payment/page": {
           "moduleId": 984023,
