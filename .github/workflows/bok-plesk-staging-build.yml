@@ -34,10 +34,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -n "$NEXT_PUBLIC_SUPABASE_URL"
-          test -n "$NEXT_PUBLIC_SUPABASE_ANON_KEY"
-          test -n "$PAYSTACK_PUBLIC_KEY"
-          test "$PAYSTACK_PUBLIC_KEY" != "pk_live"
+          for name in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY PAYSTACK_PUBLIC_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error title=Missing staging setting::Configure $name in the bokkie-staging-build GitHub environment"
+              exit 1
+            fi
+          done
           case "$PAYSTACK_PUBLIC_KEY" in
             pk_test_*) ;;
             *) echo "Staging requires a Paystack test public key"; exit 1 ;;
