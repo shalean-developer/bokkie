@@ -1,6 +1,6 @@
 {
   "node": {
-    "4088aeb8e791e4652940dbe7c39b720070d9aa4411": {
+    "401a7b5c1a3cc6a6b500140884a66572207879694e": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60f70efb9cf19ff185f2e9b3252a9154fd6c894ab2": {
+    "60562f7f2780e3afd84cebb4cb3c65a4b9565502d7": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "408e10c4eaaf183d8e9b741c9c897241999c212b8b": {
+    "40f560da60956425ec790ce9d2926b3e03c7fbd143": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "005c27f711922504214cf50108fc5dc46bc51af27e": {
+    "005ab34dd53429d39ea7e9ccbee083e4b815e3650c": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "4032de3b39630b3ce47671bb51e3946875da5d1b73": {
+    "4088afadcc483a1cab870ce706a0a5a5e470bc659d": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "006bc36064cb056133be22618d7972817d0aad590f": {
+    "00e8d5c1deb784e5a7c5a5e9ab04e581994791da1f": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "00c3df34a9488d76c5b610fa86941a8e1d28b8e6c5": {
+    "00d163143644f267b1524247bb462718b22f2e6e99": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -105,7 +105,7 @@
       "exportedName": "getLoginRedirectPath",
       "filename": "app/actions/auth.ts"
     },
-    "40538ce484c571c5f405169df328ed95c4941de914": {
+    "40c94685e89475361bc58ebd5523b02802a3319ef5": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
@@ -120,7 +120,7 @@
       "exportedName": "acceptBookingAction",
       "filename": "app/actions/cleaner-bookings.ts"
     },
-    "40389dcfe130e68859ff7228871c37a08302d4334f": {
+    "4093dd577ac5585e45d481658aeeee01fd14a79e8b": {
       "workers": {
         "app/cleaner/bookings/page": {
           "moduleId": 251167,
