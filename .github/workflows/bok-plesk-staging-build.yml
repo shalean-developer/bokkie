@@ -85,6 +85,9 @@ jobs:
       - name: Test staging outbound guard
         run: npx tsx --test lib/staging-guards.test.ts
 
+      - name: Check staging-only static asset diagnostics
+        run: bash scripts/check-static-asset-probe.sh
+
       - name: Build standalone Next.js
         run: npm run build
 
