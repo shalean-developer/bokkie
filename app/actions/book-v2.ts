@@ -186,6 +186,8 @@ export async function saveBookV2Booking(
   state: BookFormState,
   _userId?: string
 ): Promise<{ success: boolean; bookingReference?: string; message?: string }> {
+  let stage = "authenticate";
+  const traceId = crypto.randomUUID();
   try {
     const authClient = await createClient();
     const {
@@ -196,9 +198,11 @@ export async function saveBookV2Booking(
       return { success: false, message: "Please log in before saving this booking." };
     }
 
+    stage = "service_client";
     const supabase = createServiceRoleClient();
     const bookingReference = state.bookingReference ?? generateBookingReference();
 
+    stage = "reference_lookup";
     const { data: existing, error: existingError } = await supabase
       .from("bookings")
       .select("id, payment_status, created_at, user_id")
@@ -217,6 +221,7 @@ export async function saveBookV2Booking(
       };
     }
 
+    stage = "pricing";
     const authoritativeState = await buildAuthoritativePricingState(state);
     const booking = mapBookFormStateToBooking(
       authoritativeState,
@@ -227,6 +232,7 @@ export async function saveBookV2Booking(
     );
 
     if (existing) {
+      stage = "update_existing";
       const { data: updated, error: updateError } = await supabase
         .from("bookings")
         .update(bookingToUpdateRow(booking))
@@ -239,6 +245,7 @@ export async function saveBookV2Booking(
       }
       if (updated?.length !== 1) return { success: false, message: "Booking ownership could not be verified." };
     } else {
+      stage = "insert_new";
       try {
         await saveBooking(booking, user.id);
       } catch (insertErr) {
@@ -246,6 +253,7 @@ export async function saveBookV2Booking(
         if (!message.includes("bookings_booking_reference_key")) {
           throw insertErr;
         }
+        stage = "duplicate_lookup";
         const { data: dup, error: duplicateError } = await supabase
           .from("bookings")
           .select("payment_status, user_id")
@@ -258,6 +266,7 @@ export async function saveBookV2Booking(
         if (dup?.payment_status === "completed") {
           return { success: false, message: "This booking has already been paid." };
         }
+        stage = "duplicate_retry";
         const { data: retried, error: retryUpdateError } = await supabase
           .from("bookings")
           .update(bookingToUpdateRow(booking))
@@ -271,10 +280,19 @@ export async function saveBookV2Booking(
       }
     }
 
+    stage = "extension";
     await applyV2Extension(authoritativeState, bookingReference, user.id);
 
     return { success: true, bookingReference };
   } catch (err) {
+    const code = typeof err === "object" && err !== null && "code" in err && typeof err.code === "string"
+      ? err.code
+      : "UNCLASSIFIED";
+    console.error("[BOK-PLESK-13H02] booking save failure", {
+      stage,
+      traceId,
+      code,
+    });
     return {
       success: false,
       message: err instanceof Error ? err.message : "Failed to save booking",
