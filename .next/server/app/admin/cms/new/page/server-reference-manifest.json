@@ -1,6 +1,6 @@
 {
   "node": {
-    "00b49b1767f9abb1edaf0bd04b0c0ba4dd18872be5": {
+    "00c52948ca09dc5c89d788a810b4b7313d6314c3db": {
       "workers": {
         "app/admin/cms/new/page": {
           "moduleId": 675011,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "40cbc939cd47208e87986afb8ab904e0f627df3fc8": {
+    "409ce44f475cc99727c85e732e9e0f234413fc0bfe": {
       "workers": {
         "app/admin/cms/new/page": {
           "moduleId": 675011,
