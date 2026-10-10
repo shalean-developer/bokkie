@@ -1,5 +1,5 @@
-import { verifiedPaidAt } from "@/lib/payments/paid-at";
 "use server";
+import { verifiedPaidAt } from "@/lib/payments/paid-at";
 
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import {
