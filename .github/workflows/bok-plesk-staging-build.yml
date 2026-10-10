@@ -172,6 +172,12 @@ jobs:
           git config user.name "bokkie-deploy-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          # Never publish an outdated bundle after a newer feature commit exists.
+          latest_source="$(git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" ls-remote origin refs/heads/feature/bok-plesk-01-runtime-prep | cut -f1)"
+          if [ "$SOURCE_SHA" != "$latest_source" ]; then
+            echo "Skipping stale staging bundle: source $SOURCE_SHA; latest $latest_source"
+            exit 0
+          fi
           git fetch --depth=1 origin deploy/staging
           git checkout -B deploy/staging FETCH_HEAD
           # Replace the existing tracked tree only after checking out the deploy branch.
@@ -190,4 +196,9 @@ jobs:
           git add --all --force
           git diff --cached --quiet && { echo "No runtime change"; exit 0; }
           git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
+          latest_source="$(git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" ls-remote origin refs/heads/feature/bok-plesk-01-runtime-prep | cut -f1)"
+          if [ "$SOURCE_SHA" != "$latest_source" ]; then
+            echo "Skipping stale staging push: newer source is $latest_source"
+            exit 0
+          fi
           git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" push origin HEAD:deploy/staging
