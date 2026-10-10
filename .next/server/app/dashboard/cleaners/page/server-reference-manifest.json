@@ -1,6 +1,6 @@
 {
   "node": {
-    "40ebe5472b9eea53dacd301d2cf2c1dd40ffec1809": {
+    "4072197d570bf88c57fe0dd184746621d0bce209a1": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60881f4207c6391d7df949853c3cbef76057e37a85": {
+    "606359ac85e5bd21c0d2a9f1d620fafa4dbc212e02": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "40881d92943be3b327d4f80f86846353680e23f47c": {
+    "4020a3baba8fbc1d9bc30f34eb9b9ce48f1de61fd2": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "0056ff20a9e08b23c789247099e4090dc9b0b4e6ea": {
+    "007915d5ad7c75e65e4c7f01706732aaee08ff0d9d": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "4010d880535b3bc2e48f378cfa957a609f7b807cd5": {
+    "406405f8a27f6ae14bdb74ae03b6f1c46b6ad3dbbf": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "0041e949d960e01ee46f9d0786db34bce6f7d3b3cd": {
+    "0087b59fdfa6acee5e41ce0e168fb4d55a521c0930": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "00352a63372956d604575bbb2a5b1fcd3917e7a06b": {
+    "007109c6045b8febc3a84195159c46c31791732afe": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -105,7 +105,7 @@
       "exportedName": "getLoginRedirectPath",
       "filename": "app/actions/auth.ts"
     },
-    "40a5c8e01465764a5e65e35c00cc7cdab3eefa2248": {
+    "40b9f73ed06f35600369fb0f1865cb6dcdd4b53162": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -120,7 +120,7 @@
       "exportedName": "getMostRecentBookingByCleaner",
       "filename": "app/actions/get-booking-by-cleaner.ts"
     },
-    "408150b8d3e31ac729220b83484716d99f9d22634d": {
+    "40976781998a764d3863b351f215473ddcf5875923": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -135,7 +135,7 @@
       "exportedName": "getBookingByReferenceAction",
       "filename": "app/actions/get-booking-by-cleaner.ts"
     },
-    "00871949ff05059849118a8c8c0adaac46f95d896e": {
+    "0029593a986147a39694d8cc5535b242253dc3d542": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -150,7 +150,7 @@
       "exportedName": "getTimeSlots",
       "filename": "app/actions/booking-data.ts"
     },
-    "70d2b5599149a9a627e87c66b769533e5b57eaf41c": {
+    "70b65450184ba626b23576da16d4fec09acb9c1610": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,
@@ -165,7 +165,7 @@
       "exportedName": "rebookBookingWithSchedule",
       "filename": "app/actions/rebook-schedule.ts"
     },
-    "60ce52c35dc09f3e0c0793325cb1963710f6a0971e": {
+    "60a7ec57bf503628c53ebb04b590851d8bbfed0170": {
       "workers": {
         "app/dashboard/cleaners/page": {
           "moduleId": 346622,

@@ -1,6 +1,6 @@
 {
   "node": {
-    "002e53d06c3335f3473e4afaec69b080c2e0110de1": {
+    "0072e077601983a5d346957916397b15f7136f006b": {
       "workers": {
         "app/book/[service]/page": {
           "moduleId": 291037,
