@@ -9,7 +9,7 @@ if find "$bundle" -type f \( -name '.env' -o -name '.env.local' -o -name '.env.p
   echo "Unexpected secret-bearing files in runtime bundle" >&2
   exit 1
 fi
-if find "$bundle" -type d -name '.git' | grep -q .; then
+if [[ "${ALLOW_PUBLISH_WORKTREE_GIT:-false}" != "true" ]] && find "$bundle" -type d -name '.git' | grep -q .; then
   echo "Git metadata found in runtime bundle" >&2
   exit 1
 fi
