@@ -85,6 +85,11 @@ jobs:
       - name: Test staging outbound guard
         run: npx tsx --test lib/staging-guards.test.ts
 
+      - name: Verify runtime release identifier fallback
+        run: |
+          grep -Fq 'path.join(process.cwd(), "RELEASE_SHA")' app/api/health/environment/route.ts
+          grep -Fq 'releaseSha: await getReleaseSha()' app/api/health/environment/route.ts
+
       - name: Check staging-only static asset diagnostics
         run: bash scripts/check-static-asset-probe.sh
 
