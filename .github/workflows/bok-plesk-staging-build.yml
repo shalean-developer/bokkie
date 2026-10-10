@@ -64,6 +64,9 @@ jobs:
       - name: Verify redacted booking diagnostics
         run: bash scripts/check-booking-stage-diagnostics.sh
 
+      - name: Verify atomic V2 booking persistence
+        run: bash scripts/check-v2-atomic-persistence.sh
+
       - name: Verify booking ownership invariants
         run: bash scripts/check-v2-booking-ownership.sh
 
