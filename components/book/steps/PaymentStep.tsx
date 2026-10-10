@@ -15,6 +15,7 @@ import {
   bookSignupAndProfile,
   saveBookV2Booking,
   getBookV2PaidStatus,
+  getConfirmedBookV2Details,
   verifyAndCompleteBookPayment,
   initializeBookPayment,
 } from "@/app/actions/book-v2";
@@ -61,6 +62,8 @@ export function PaymentStep() {
   const [alreadyPaid, setAlreadyPaid] = useState(false);
   const [paidReference, setPaidReference] = useState("");
   const [bookingRef, setBookingRef] = useState("");
+  const [confirmedDetails, setConfirmedDetails] = useState<Awaited<ReturnType<typeof getConfirmedBookV2Details>>>(null);
+  const [confirmationLoading, setConfirmationLoading] = useState(false);
   const [recoveryBookingReference, setRecoveryBookingReference] = useState("");
   const [recoveryPaymentReference, setRecoveryPaymentReference] = useState("");
   const [recoveryLoading, setRecoveryLoading] = useState(false);
@@ -220,6 +223,7 @@ export function PaymentStep() {
           return;
         }
         setConfirmed(true);
+        void loadConfirmedDetails(saveResult.bookingReference!);
         clearBookState();
         setPaymentLoading(false);
       },
@@ -232,6 +236,17 @@ export function PaymentStep() {
     });
 
     setTimeout(() => setPaymentLoading(false), 500);
+  };
+
+  const loadConfirmedDetails = async (reference: string) => {
+    setConfirmationLoading(true);
+    try {
+      setConfirmedDetails(await getConfirmedBookV2Details(reference));
+    } catch {
+      setConfirmedDetails(null);
+    } finally {
+      setConfirmationLoading(false);
+    }
   };
 
   const handleRecoverPayment = async () => {
@@ -255,6 +270,7 @@ export function PaymentStep() {
       setPaidReference(bookingReference);
       setAlreadyPaid(true);
       setConfirmed(true);
+      void loadConfirmedDetails(bookingReference);
       clearBookState();
     } catch {
       setAuthError("Payment verification unavailable. Do not pay again; please contact support.");
@@ -278,8 +294,16 @@ export function PaymentStep() {
             Reference: {bookingRef}
           </Badge>
           <div className="text-sm text-gray-600 space-y-1">
-            <p>{config.title} · {state.schedule.serviceDate} at {state.schedule.serviceTime}</p>
-            <p>{isTeam ? `Team: ${teamName}` : `${state.schedule.cleanerCount} cleaner(s)`}</p>
+            {confirmationLoading && <p>Loading confirmed booking details...</p>}
+            {confirmedDetails && (
+              <>
+                <p>{confirmedDetails.serviceType} · {confirmedDetails.serviceDate || "Date to be confirmed"} at {confirmedDetails.serviceTime || "Time to be confirmed"}</p>
+                {confirmedDetails.teamId && (
+                  <p>Team: {DEFAULT_TEAMS.find((t) => t.id === confirmedDetails.teamId)?.teamName || "Assigned team"}</p>
+                )}
+              </>
+            )}
+            {!confirmationLoading && !confirmedDetails && <p>View your booking for confirmed schedule details.</p>}
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Button asChild><Link href="/"><Home className="w-4 h-4" /> Back to Home</Link></Button>
