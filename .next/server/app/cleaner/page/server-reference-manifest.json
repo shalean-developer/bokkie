@@ -1,6 +1,6 @@
 {
   "node": {
-    "401cff76fef63a7bc5d2eefcbd82a8745afaaa9001": {
+    "40a2c4d40137ca9d178b4e93b9e64b61435338a696": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "604e85d05313014933769d843489be8b32e6346591": {
+    "6013eb623b538bdcd7123e12c3f1ce3b8e28230922": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "400e52501e191113b50154a38a85cf1b50a53ca00a": {
+    "401c95ffd0d5f87c64ba747b407c0bd9fd0344847a": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "00393d6fad1b0dcdc4c7ae1385b1969178ef94a02c": {
+    "0098355b7bbb6caef17a473dc01d6609d44b473001": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "40c63d4488da8e2802e0eca69f36ca4ed23f64b4a5": {
+    "407fe21fdeafc869d6e4813b57c470d1a1870f1e20": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "001ea4b2e7204af2e518a33692bdf0419385205469": {
+    "004c0257373f8890eea2f1385899b794906b34acf6": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "0052b8dea7e6bcd2a6f3b501167470f079e203ab2f": {
+    "008f6a41d54f4f0399411a6aa8c926d1732c081daa": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -105,7 +105,7 @@
       "exportedName": "getLoginRedirectPath",
       "filename": "app/actions/auth.ts"
     },
-    "40aef0a1a8fc0ccec0e7266ee1ff591fd7eaf48047": {
+    "40e9a1665a7bdb5ef6febf4427bef813ef5ef17b36": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,
@@ -120,7 +120,7 @@
       "exportedName": "acceptBookingAction",
       "filename": "app/actions/cleaner-bookings.ts"
     },
-    "40edb055ffb61a54a3172b38bdd2154ef75c0b8cb9": {
+    "40a3642b38504945f06d26fac8f8fc12ee6447e87b": {
       "workers": {
         "app/cleaner/page": {
           "moduleId": 99879,

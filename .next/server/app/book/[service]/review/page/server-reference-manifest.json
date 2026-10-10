@@ -1,6 +1,6 @@
 {
   "node": {
-    "00798778102eefc3d787b040dc562e1603ad9b8f1d": {
+    "0033d174252f111e3bead5d070ab3a44131608eabd": {
       "workers": {
         "app/book/[service]/review/page": {
           "moduleId": 448617,
@@ -15,7 +15,7 @@
       "exportedName": "getBookPricingConfig",
       "filename": "app/actions/booking-data.ts"
     },
-    "40c41a0f8b396eb98be8b22038699e75f228b6ff72": {
+    "40a22baae25c88628fba0a43615b5a0903a8300454": {
       "workers": {
         "app/book/[service]/review/page": {
           "moduleId": 448617,
