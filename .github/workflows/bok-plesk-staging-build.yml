@@ -113,15 +113,22 @@ jobs:
           test -f /tmp/bokkie-deploy/server.js
           test -d /tmp/bokkie-deploy/.next/static
           test -d /tmp/bokkie-deploy/public
-          cd /tmp/bokkie-deploy
+          mkdir -p /tmp/bokkie-publish
+          cd /tmp/bokkie-publish
           git init
           git config user.name "bokkie-deploy-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git fetch --depth=1 origin deploy/staging
           git checkout -B deploy/staging FETCH_HEAD
-          # Clear tracked source files, keeping the verified runtime unpacked here.
+          # Replace the existing tracked tree only after checking out the deploy branch.
           git ls-files -z | xargs -0 -r git rm -q -f --
-          git add -f -A
+          rsync -a --delete --exclude=.git/ /tmp/bokkie-deploy/ ./
+          test -f server.js
+          test -d .next/static
+          test -d public
+          printf '%s\n' "${SOURCE_SHA}" > RELEASE_SHA
+          git add --all --force
+          git diff --cached --quiet && { echo "No runtime change"; exit 0; }
           git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
           git push origin HEAD:deploy/staging
