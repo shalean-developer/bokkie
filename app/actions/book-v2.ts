@@ -138,14 +138,18 @@ function bookingToUpdateRow(booking: Booking) {
 async function applyV2Extension(
   state: BookFormState,
   bookingReference: string,
-  userId?: string
+  userId: string
 ) {
   const supabase = createServiceRoleClient();
   const extension = getBookV2ExtensionPayload(state);
-  await supabase
+  const { data, error } = await supabase
     .from("bookings")
-    .update({ ...extension, user_id: userId ?? null })
-    .eq("booking_reference", bookingReference);
+    .update(extension)
+    .eq("booking_reference", bookingReference)
+    .eq("user_id", userId)
+    .select("id");
+  if (error) throw error;
+  if (data?.length !== 1) throw new Error("Booking extension ownership verification failed");
 }
 
 async function buildAuthoritativePricingState(state: BookFormState): Promise<BookFormState> {
@@ -195,13 +199,14 @@ export async function saveBookV2Booking(
     const supabase = createServiceRoleClient();
     const bookingReference = state.bookingReference ?? generateBookingReference();
 
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from("bookings")
       .select("id, payment_status, created_at, user_id")
       .eq("booking_reference", bookingReference)
       .maybeSingle();
 
-    if (existing?.user_id && existing.user_id !== user.id) {
+    if (existingError) throw existingError;
+    if (existing && existing.user_id !== user.id) {
       return { success: false, message: "This booking belongs to another account." };
     }
 
@@ -222,48 +227,51 @@ export async function saveBookV2Booking(
     );
 
     if (existing) {
-      const { error: updateError } = await supabase
+      const { data: updated, error: updateError } = await supabase
         .from("bookings")
         .update(bookingToUpdateRow(booking))
-        .eq("booking_reference", bookingReference);
+        .eq("booking_reference", bookingReference)
+        .eq("user_id", user.id)
+        .select("id");
 
       if (updateError) {
         return { success: false, message: updateError.message };
       }
+      if (updated?.length !== 1) return { success: false, message: "Booking ownership could not be verified." };
     } else {
       try {
-        await saveBooking(booking);
+        await saveBooking(booking, user.id);
       } catch (insertErr) {
         const message = insertErr instanceof Error ? insertErr.message : "";
         if (!message.includes("bookings_booking_reference_key")) {
           throw insertErr;
         }
-        const { data: dup } = await supabase
+        const { data: dup, error: duplicateError } = await supabase
           .from("bookings")
           .select("payment_status, user_id")
           .eq("booking_reference", bookingReference)
           .maybeSingle();
-        if (dup?.user_id && dup.user_id !== user.id) {
+        if (duplicateError) throw duplicateError;
+        if (!dup || dup.user_id !== user.id) {
           return { success: false, message: "This booking belongs to another account." };
         }
         if (dup?.payment_status === "completed") {
           return { success: false, message: "This booking has already been paid." };
         }
-        const { error: retryUpdateError } = await supabase
+        const { data: retried, error: retryUpdateError } = await supabase
           .from("bookings")
           .update(bookingToUpdateRow(booking))
-          .eq("booking_reference", bookingReference);
+          .eq("booking_reference", bookingReference)
+          .eq("user_id", user.id)
+          .select("id");
         if (retryUpdateError) {
           return { success: false, message: retryUpdateError.message };
         }
+        if (retried?.length !== 1) return { success: false, message: "Booking ownership could not be verified." };
       }
     }
 
-    try {
-      await applyV2Extension(authoritativeState, bookingReference, user.id);
-    } catch (extensionError) {
-      console.warn("V2 booking extension update skipped:", extensionError);
-    }
+    await applyV2Extension(authoritativeState, bookingReference, user.id);
 
     return { success: true, bookingReference };
   } catch (err) {
