@@ -1,6 +1,6 @@
 {
   "node": {
-    "009cf9b14296fe634c21bdde47b61527b4ba16006d": {
+    "003b6c336588abf654df72c562279339ed4d443d95": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,
@@ -15,7 +15,7 @@
       "exportedName": "getBlogTags",
       "filename": "app/actions/blog.ts"
     },
-    "00ce06e922e5b249336785f1472e00ce9daee2d8f0": {
+    "00babd930f83db29ba3afaf2dcb853efce22b80c18": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,
@@ -30,82 +30,7 @@
       "exportedName": "getBlogCategories",
       "filename": "app/actions/blog.ts"
     },
-    "402b13efa4afdb1a47638eae03c6dbeab052214419": {
-      "workers": {
-        "app/blog/page": {
-          "moduleId": 123046,
-          "async": false,
-          "exportedName": "getBlogPostBySlug",
-          "filename": "app/actions/blog.ts"
-        }
-      },
-      "layer": {
-        "app/blog/page": "rsc"
-      },
-      "exportedName": "getBlogPostBySlug",
-      "filename": "app/actions/blog.ts"
-    },
-    "40440225f3c1afa684605b31002ce436a771606c38": {
-      "workers": {
-        "app/blog/page": {
-          "moduleId": 123046,
-          "async": false,
-          "exportedName": "getBlogPostById",
-          "filename": "app/actions/blog.ts"
-        }
-      },
-      "layer": {
-        "app/blog/page": "rsc"
-      },
-      "exportedName": "getBlogPostById",
-      "filename": "app/actions/blog.ts"
-    },
-    "4055572e4487bb6fbcbe80e84eba68a0c2420ad0bd": {
-      "workers": {
-        "app/blog/page": {
-          "moduleId": 123046,
-          "async": false,
-          "exportedName": "deleteBlogPost",
-          "filename": "app/actions/blog.ts"
-        }
-      },
-      "layer": {
-        "app/blog/page": "rsc"
-      },
-      "exportedName": "deleteBlogPost",
-      "filename": "app/actions/blog.ts"
-    },
-    "4087cffe2d4a2255397d95ed4c4474109a54c6cfb4": {
-      "workers": {
-        "app/blog/page": {
-          "moduleId": 123046,
-          "async": false,
-          "exportedName": "publishBlogPost",
-          "filename": "app/actions/blog.ts"
-        }
-      },
-      "layer": {
-        "app/blog/page": "rsc"
-      },
-      "exportedName": "publishBlogPost",
-      "filename": "app/actions/blog.ts"
-    },
-    "40a0e96ae0ad38a72533042983642d9f534a28c36a": {
-      "workers": {
-        "app/blog/page": {
-          "moduleId": 123046,
-          "async": false,
-          "exportedName": "getBlogPosts",
-          "filename": "app/actions/blog.ts"
-        }
-      },
-      "layer": {
-        "app/blog/page": "rsc"
-      },
-      "exportedName": "getBlogPosts",
-      "filename": "app/actions/blog.ts"
-    },
-    "40a0f0439ca5b47266d6d9d16e0f923db975dd4be4": {
+    "4014c7e891961eb3898e061f6f43ddb4cf9ba9a446": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,
@@ -120,7 +45,67 @@
       "exportedName": "incrementBlogViews",
       "filename": "app/actions/blog.ts"
     },
-    "40d3f16501310a2e21b05ebc369d1675d26ae1dc4f": {
+    "402536b8c390a51ab3c0fc5defad7d2bbd15a783fa": {
+      "workers": {
+        "app/blog/page": {
+          "moduleId": 123046,
+          "async": false,
+          "exportedName": "deleteBlogPost",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/blog/page": "rsc"
+      },
+      "exportedName": "deleteBlogPost",
+      "filename": "app/actions/blog.ts"
+    },
+    "403c4973c17b3c034cfe876bb816eb0736738c4902": {
+      "workers": {
+        "app/blog/page": {
+          "moduleId": 123046,
+          "async": false,
+          "exportedName": "publishBlogPost",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/blog/page": "rsc"
+      },
+      "exportedName": "publishBlogPost",
+      "filename": "app/actions/blog.ts"
+    },
+    "404851dbb8bfda72c60a70e5f4a3af6e8aea6823d4": {
+      "workers": {
+        "app/blog/page": {
+          "moduleId": 123046,
+          "async": false,
+          "exportedName": "getBlogPostBySlug",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/blog/page": "rsc"
+      },
+      "exportedName": "getBlogPostBySlug",
+      "filename": "app/actions/blog.ts"
+    },
+    "40ac538636bfa8847520759ea274800696955f4368": {
+      "workers": {
+        "app/blog/page": {
+          "moduleId": 123046,
+          "async": false,
+          "exportedName": "getBlogPosts",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/blog/page": "rsc"
+      },
+      "exportedName": "getBlogPosts",
+      "filename": "app/actions/blog.ts"
+    },
+    "40b1a8b05595c374c4ef79a50bf6e04fc4d54c5134": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,
@@ -135,7 +120,22 @@
       "exportedName": "createBlogPost",
       "filename": "app/actions/blog.ts"
     },
-    "60c2ae777d02f129202aad0c89dcadb921690a7565": {
+    "40c279ab2738a01bfdd676aca946a855b92edf7529": {
+      "workers": {
+        "app/blog/page": {
+          "moduleId": 123046,
+          "async": false,
+          "exportedName": "getBlogPostById",
+          "filename": "app/actions/blog.ts"
+        }
+      },
+      "layer": {
+        "app/blog/page": "rsc"
+      },
+      "exportedName": "getBlogPostById",
+      "filename": "app/actions/blog.ts"
+    },
+    "60e8343462ece01b9d30a0488fdabb78194c3458f5": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,
@@ -150,7 +150,7 @@
       "exportedName": "searchBlogPosts",
       "filename": "app/actions/blog.ts"
     },
-    "60f610268e4d06e315f3d054dae3099aed03497e7c": {
+    "60ef00f69565eae6bd39cd12d6b1663cea3500b6bf": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,
@@ -165,7 +165,7 @@
       "exportedName": "updateBlogPost",
       "filename": "app/actions/blog.ts"
     },
-    "78169906073bb822878ba1cc18cca96383c515fa4b": {
+    "78f8d6cb74ea5267b3d3ca03c923b8e09ae198b7e7": {
       "workers": {
         "app/blog/page": {
           "moduleId": 123046,

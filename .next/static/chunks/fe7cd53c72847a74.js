@@ -1,0 +1,1 @@
+(globalThis.TURBOPACK||(globalThis.TURBOPACK=[])).push(["object"==typeof document?document.currentScript:void 0,649027,i=>{"use strict";i.s([],768935),i.i(768935);var t=i.i(542423);i.s(["getPricingConfig",()=>t.getPricingConfig],649027)}]);
