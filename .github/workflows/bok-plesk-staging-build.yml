@@ -58,6 +58,9 @@ jobs:
       - name: Run existing regression test
         run: npm run test:blog-sanitize
 
+      - name: Test privileged Supabase client fail-closed contract
+        run: bash scripts/check-service-role-fail-closed.sh
+
       - name: Test staging outbound guard
         run: npx tsx --test lib/staging-guards.test.ts
 
