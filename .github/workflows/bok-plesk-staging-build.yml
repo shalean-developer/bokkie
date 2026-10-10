@@ -85,3 +85,43 @@ jobs:
           path: /tmp/bokkie-staging-standalone.tar.gz
           retention-days: 3
           if-no-files-found: error
+
+  publish:
+    name: Publish standalone to Plesk staging branch
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bok-plesk-01-runtime-prep' && vars.BOKKIE_ENABLE_PLESK_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    environment: bokkie-staging-build
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: bokkie-staging-standalone
+          path: /tmp/bokkie-bundle
+
+      - name: Verify artifact and publish without force push
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -s /tmp/bokkie-bundle/bokkie-staging-standalone.tar.gz
+          mkdir -p /tmp/bokkie-deploy
+          tar -xzf /tmp/bokkie-bundle/bokkie-staging-standalone.tar.gz -C /tmp/bokkie-deploy
+          test -f /tmp/bokkie-deploy/server.js
+          test -d /tmp/bokkie-deploy/.next/static
+          test -d /tmp/bokkie-deploy/public
+          cd /tmp/bokkie-deploy
+          git init
+          git config user.name "bokkie-deploy-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git fetch --depth=1 origin deploy/staging
+          git checkout -B deploy/staging FETCH_HEAD
+          # Clear tracked source files, keeping the verified runtime unpacked here.
+          git ls-files -z | xargs -0 -r git rm -q -f --
+          git add -f -A
+          git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
+          git push origin HEAD:deploy/staging
