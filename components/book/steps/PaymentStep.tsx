@@ -61,6 +61,9 @@ export function PaymentStep() {
   const [alreadyPaid, setAlreadyPaid] = useState(false);
   const [paidReference, setPaidReference] = useState("");
   const [bookingRef, setBookingRef] = useState("");
+  const [recoveryBookingReference, setRecoveryBookingReference] = useState("");
+  const [recoveryPaymentReference, setRecoveryPaymentReference] = useState("");
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const isAuthenticated = !!user;
   const isTeam = usesTeamSelection(state.service);
@@ -205,6 +208,8 @@ export function PaymentStep() {
         form_version: "v2",
       },
       onSuccess: async (reference) => {
+        setRecoveryBookingReference(saveResult.bookingReference!);
+        setRecoveryPaymentReference(reference);
         const verifyResult = await verifyAndCompleteBookPayment(
           saveResult.bookingReference!,
           reference
@@ -227,6 +232,35 @@ export function PaymentStep() {
     });
 
     setTimeout(() => setPaymentLoading(false), 500);
+  };
+
+  const handleRecoverPayment = async () => {
+    if (!isAuthenticated || recoveryLoading) return;
+    const bookingReference = recoveryBookingReference.trim();
+    const paymentReference = recoveryPaymentReference.trim();
+    if (!bookingReference || !paymentReference) {
+      setAuthError("Enter your existing booking and Paystack references.");
+      return;
+    }
+    setRecoveryLoading(true);
+    setAuthError("");
+    try {
+      // This action verifies an EXISTING Paystack transaction; it never starts checkout.
+      const result = await verifyAndCompleteBookPayment(bookingReference, paymentReference);
+      if (!result.success) {
+        setAuthError(result.message ?? "Unable to verify existing payment.");
+        return;
+      }
+      setBookingRef(bookingReference);
+      setPaidReference(bookingReference);
+      setAlreadyPaid(true);
+      setConfirmed(true);
+      clearBookState();
+    } catch {
+      setAuthError("Payment verification unavailable. Do not pay again; please contact support.");
+    } finally {
+      setRecoveryLoading(false);
+    }
   };
 
   if (confirmed && bookingRef) {
@@ -359,6 +393,23 @@ export function PaymentStep() {
             )}
             {authError && isAuthenticated && (
               <Alert variant="destructive"><AlertDescription>{authError}</AlertDescription></Alert>
+            )}
+            {!alreadyPaid && isAuthenticated && (
+              <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+                <p className="text-sm font-medium text-brand-primary">Already completed payment?</p>
+                <p className="text-xs text-gray-600">Verify your existing Paystack transaction without paying again.</p>
+                <div>
+                  <Label htmlFor="recovery-booking">Booking reference</Label>
+                  <Input id="recovery-booking" className="mt-1" value={recoveryBookingReference} onChange={(e) => setRecoveryBookingReference(e.target.value)} placeholder="BOK-..." />
+                </div>
+                <div>
+                  <Label htmlFor="recovery-payment">Paystack transaction reference</Label>
+                  <Input id="recovery-payment" className="mt-1" value={recoveryPaymentReference} onChange={(e) => setRecoveryPaymentReference(e.target.value)} placeholder="bokkie-v2-..." />
+                </div>
+                <Button type="button" variant="outline" className="w-full" disabled={recoveryLoading || paymentLoading || !recoveryBookingReference.trim() || !recoveryPaymentReference.trim()} onClick={handleRecoverPayment}>
+                  {recoveryLoading ? "Verifying..." : "Verify Existing Payment"}
+                </Button>
+              </div>
             )}
             {!alreadyPaid && <Button
               size="lg"
