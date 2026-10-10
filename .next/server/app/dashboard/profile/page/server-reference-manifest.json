@@ -1,6 +1,6 @@
 {
   "node": {
-    "4034106487704ae9372db601a52d6b977f317cf54c": {
+    "407866265bf552b9d077f5b957decf4829179cf099": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60b34df9ecb67d385c1d7b33c4147d2dce06db17a0": {
+    "60c7e9acdb830f515a563b4bbd2591cee575264d2e": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "401c0193af17cc2134ecd4ed83b65f94588b5857d2": {
+    "40136d0c15fdff7ccc73d11fd10f240aa43a350b4b": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "007fd7166340c5f0bdf50147c16dd4b19e53533e57": {
+    "00737d055dc17f3f6d34b9e60e1fdb44cec2e33f18": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "40ac06f288051accb7f7ef8ce9a954372c33eda125": {
+    "409dc161dc2a6f4f3f88319d5c3b63c68888aa895e": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "00bd4dcfa7de24fde74ec39d8e2e6aa3197abc8a37": {
+    "00035fbce81ea51ee36f7fff7d368029cc0bc6a15a": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "005148151319c8e4370d793c8f8498ed2d46ebeb1d": {
+    "009f86ffdca68ba897ef1fbc58a61381a6e4ad2b05": {
       "workers": {
         "app/dashboard/profile/page": {
           "moduleId": 764386,
