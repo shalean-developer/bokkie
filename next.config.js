@@ -1,5 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Produce a self-contained Node.js runtime bundle that can be deployed
+  // outside Vercel (for example, Plesk) without shipping the full source tree.
+  output: 'standalone',
   typescript: {
     // Ignore TypeScript errors in generated Next.js route type files
     // This is a known issue with Next.js 16 generating incorrect types for dynamic routes
