@@ -1,6 +1,6 @@
 {
   "node": {
-    "406944518613cb5ec840401b6426b8b4a8963978f1": {
+    "40820d9be11276acd5a00e5b008a4fc2cba2e5476b": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60fa0d82f4a15323ee00bab4b2f599af6ca2ddce2f": {
+    "60baeafc782e100b848ca1287506d8d24346acee9d": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "40ac755c1d120624c32e6d431ae7e6ea4769c091c4": {
+    "40bc62963caa221b5695bfa92b2c02133049b724cf": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "00bf4746cdad69eb19724550d6ae464102d8098bc1": {
+    "00585efdffdbbe027b2022d7f63b748d04293e0ed2": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "4011d2637b5a3956bca13f21fb2e0a1240c5571f50": {
+    "407905920e2e960e5497d584c7c6e7f99bb03e50f1": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "0035d24bd23e4b1c728029f996545d987b2fc0ba91": {
+    "00e4ceeb196c9a76993259d22c5096b2ecc93a768b": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "0093f7a917d0ce19d38aac93c54fbc20cddbef8afc": {
+    "005951c7831e8bcf74c64eeac0752d8d00d99aaf73": {
       "workers": {
         "app/cleaner/contract/page": {
           "moduleId": 696496,
