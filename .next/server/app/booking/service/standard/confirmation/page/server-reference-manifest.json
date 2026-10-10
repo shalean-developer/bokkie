@@ -1,6 +1,6 @@
 {
   "node": {
-    "00a880bffe380c5eb530330c134025694f23433a88": {
+    "00546fa2f988c86ab0fef69b1af5923e80db3254c4": {
       "workers": {
         "app/booking/service/standard/confirmation/page": {
           "moduleId": 582423,
@@ -15,7 +15,7 @@
       "exportedName": "getPricingConfig",
       "filename": "app/actions/pricing.ts"
     },
-    "708eea3c4d93e523f35fd62d6e45e26b180b4aba54": {
+    "702758d97cb6c1e86e7da3170146fd9f3eebe4a340": {
       "workers": {
         "app/booking/service/standard/confirmation/page": {
           "moduleId": 582423,
@@ -30,7 +30,7 @@
       "exportedName": "submitBooking",
       "filename": "app/actions/submit-booking.ts"
     },
-    "60133055e138ce39e381f6193200885ff66961f1b8": {
+    "60ac7419b9f751344449cb5baddbf36d11cfaf10ce": {
       "workers": {
         "app/booking/service/standard/confirmation/page": {
           "moduleId": 582423,
@@ -45,7 +45,7 @@
       "exportedName": "validateDiscountCode",
       "filename": "app/actions/discount.ts"
     },
-    "0055914cd12a811e5ea9d20f0170022a8a34821f7a": {
+    "00fc955d43668644ba783ca6fbfeed8a9ef32634f3": {
       "workers": {
         "app/booking/service/standard/confirmation/page": {
           "moduleId": 582423,
@@ -60,7 +60,7 @@
       "exportedName": "getPublicDiscountCodes",
       "filename": "app/actions/discount.ts"
     },
-    "7c8274672a2c78ab75be1d406ecf5e147197695450": {
+    "7c9e869cd9f98e62fd907ed7ceda2ebe9332dd3c43": {
       "workers": {
         "app/booking/service/standard/confirmation/page": {
           "moduleId": 582423,
