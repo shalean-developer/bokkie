@@ -1,3 +1,4 @@
+import { verifiedPaidAt } from "@/lib/payments/paid-at";
 "use server";
 
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
@@ -532,12 +533,16 @@ export async function verifyAndCompleteBookPayment(
     };
   }
 
+  const paidAt = verifiedPaidAt(transaction);
+  if (!paidAt) return { success: false, message: "Paystack did not provide a valid payment completion time." };
+
   // Conditional update: concurrent callbacks must not overwrite a completed booking.
   const { data: updated, error: updateError } = await supabase
     .from("bookings")
     .update({
       payment_status: "completed",
       payment_reference: paymentReference,
+      paid_at: paidAt,
       status: "confirmed",
     })
     .eq("booking_reference", bookingReference)
