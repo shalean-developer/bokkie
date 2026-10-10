@@ -63,6 +63,7 @@ export default async function AdminDashboardPage({
 
           {/* Completed payments are reported by verified payment date only.
               Undated historical payments remain visible separately. */}
+          {paymentDateReport ? <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
             <MetricCard title="Verified Payment-date Revenue" value={formatCurrency(paymentDateReport.verifiedPeriodRevenue)} icon={DollarSign} />
             <MetricCard title="Historical Paid — Date Unknown" value={formatCurrency(paymentDateReport.undatedHistoricalRevenue)} icon={DollarSign} />
@@ -75,9 +76,11 @@ export default async function AdminDashboardPage({
             Verified revenue follows payment completion dates. {paymentDateReport.undatedHistoricalCount} historical completed payments lack verified dates and are excluded from the dated chart, not from lifetime recorded payments. Refund reconciliation remains pending.
           </p>
 
+          </> : <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-4 mb-6 text-sm text-amber-900">Verified payment-date reporting is temporarily unavailable. Financial totals are not shown until the source-of-truth query succeeds.</div>}
+
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            <RevenueChart data={paymentDateReport.verifiedTrends} />
+            {paymentDateReport && <RevenueChart data={paymentDateReport.verifiedTrends} />}
             <BookingsChart data={bookingsTrends} />
           </div>
 
