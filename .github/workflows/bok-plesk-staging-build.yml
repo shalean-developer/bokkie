@@ -112,12 +112,25 @@ jobs:
   publish:
     name: Publish standalone to Plesk staging branch
     needs: build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bok-plesk-01-runtime-prep' && vars.BOKKIE_ENABLE_PLESK_PUBLISH == 'true'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bok-plesk-01-runtime-prep'
     runs-on: ubuntu-latest
     environment: bokkie-staging-build
     permissions:
       contents: write
+    concurrency:
+      group: bokkie-plesk-deploy-staging
+      cancel-in-progress: false
     steps:
+      - name: Confirm controlled staging publishing is enabled
+        shell: bash
+        env:
+          ENABLED: ${{ vars.BOKKIE_ENABLE_PLESK_PUBLISH }}
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "::error::BOKKIE_ENABLE_PLESK_PUBLISH must be true in bokkie-staging-build"
+            exit 1
+          fi
+
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: bokkie-staging-standalone
