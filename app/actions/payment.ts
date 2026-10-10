@@ -1,5 +1,5 @@
-import { getPaystackPublicKey } from "@/lib/paystack-config";
 "use server";
+import { getPaystackPublicKey } from "@/lib/paystack-config";
 
 import { BookingFormData } from "@/lib/types/booking";
 import { calculatePrice } from "@/lib/pricing";
