@@ -281,6 +281,21 @@ export async function saveBookV2Booking(
   }
 }
 
+/** Read-only, owner-scoped status for restoring an already-paid booking view. */
+export async function getBookV2PaidStatus(reference: string): Promise<{ paid: boolean }> {
+  if (!reference || !/^BOK-[A-Z0-9-]+$/.test(reference)) return { paid: false };
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return { paid: false };
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("bookings")
+    .select("payment_status")
+    .eq("booking_reference", reference)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return { paid: !error && data?.payment_status === "completed" };
+}
+
 export async function initializeBookPayment(
   bookingReference: string
 ): Promise<{
