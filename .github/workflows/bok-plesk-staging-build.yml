@@ -79,6 +79,7 @@ jobs:
           mkdir -p .next/standalone/.next
           cp -R .next/static .next/standalone/.next/static
           cp -R public .next/standalone/public
+          bash scripts/verify-plesk-runtime.sh .next/standalone
           tar -czf /tmp/bokkie-staging-standalone.tar.gz -C .next/standalone .
 
       - name: Upload runtime artifact (not deployed)
@@ -116,6 +117,8 @@ jobs:
           test -f /tmp/bokkie-deploy/server.js
           test -d /tmp/bokkie-deploy/.next/static
           test -d /tmp/bokkie-deploy/public
+          test -f /tmp/bokkie-deploy/.next/BUILD_ID
+          if find /tmp/bokkie-deploy -type f \( -name '.env' -o -name '.env.local' -o -name '.env.production' -o -name '*.pem' \) | grep -q .; then exit 1; fi
           mkdir -p /tmp/bokkie-publish
           cd /tmp/bokkie-publish
           git init
