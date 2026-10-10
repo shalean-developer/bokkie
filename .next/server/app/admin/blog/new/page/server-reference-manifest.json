@@ -1,6 +1,6 @@
 {
   "node": {
-    "00e824e49e9aecc34c4088824835d47aa678d3f0fe": {
+    "0082974ccb1f29d8e3b4a3064620b24e25d8bfcae8": {
       "workers": {
         "app/admin/blog/new/page": {
           "moduleId": 130482,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "40a9e4a32e1ee7298b19933db9a385989150618781": {
+    "402607aedeaeaff7475263054a22575e23483c9f2a": {
       "workers": {
         "app/admin/blog/new/page": {
           "moduleId": 130482,
@@ -30,7 +30,7 @@
       "exportedName": "createBlogPost",
       "filename": "app/actions/blog.ts"
     },
-    "002533d70a506b22845af99613d2416125076cfb4f": {
+    "00b3794bc456ab8d44cd9fd7a8a4bf09ec17440b75": {
       "workers": {
         "app/admin/blog/new/page": {
           "moduleId": 130482,
