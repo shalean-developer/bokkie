@@ -1,3 +1,4 @@
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 "use server";
 
 import { BookingFormData } from "@/lib/types/booking";
@@ -31,8 +32,8 @@ export async function updateRebookedBookingPayment(
 
     // Verify payment
     let paymentStatus: "pending" | "completed" | "failed" = "pending";
-    if (process.env.PAYSTACK_SECRET_KEY) {
-      const verified = await verifyPayment(paymentReference, process.env.PAYSTACK_SECRET_KEY);
+    if (getPaystackSecretKey()) {
+      const verified = await verifyPayment(paymentReference, getPaystackSecretKey());
       paymentStatus = verified ? "completed" : "failed";
     }
 
