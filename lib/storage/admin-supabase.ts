@@ -429,25 +429,28 @@ export async function getRecentBookings(limit: number = 10): Promise<Booking[]> 
  */
 export async function getPendingCounts(): Promise<PendingCounts> {
   const supabase = createServiceRoleClient();
-  
-  const [pendingBookingsResult, pendingApplicationsResult] = await Promise.all([
-    // Pending bookings (status = pending)
-    supabase
-      .from("bookings")
-      .select("id", { count: "exact" })
-      .eq("status", "pending"),
-    
-    // Pending applications (status = pending AND cleaner_response IS NULL)
-    supabase
-      .from("bookings")
-      .select("id", { count: "exact" })
-      .eq("status", "pending")
-      .is("cleaner_response", null),
+
+  // These are independent business queues; never derive quote/application counts
+  // from booking rows (or from each other).
+  const [quotesResult, applicationsResult, bookingsResult] = await Promise.all([
+    supabase.from("quotes").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("cleaner_applications").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("bookings").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
-  
+
+  for (const [name, result] of [
+    ["quotes", quotesResult],
+    ["cleaner_applications", applicationsResult],
+    ["bookings", bookingsResult],
+  ] as const) {
+    if (result.error || result.count === null) {
+      throw new Error(`Failed to count pending ${name}: ${result.error?.message ?? "missing exact count"}`);
+    }
+  }
+
   return {
-    pendingQuotes: pendingBookingsResult.count || 0, // Same as pending bookings for now
-    pendingApplications: pendingApplicationsResult.count || 0,
-    pendingBookings: pendingBookingsResult.count || 0,
+    pendingQuotes: quotesResult.count!,
+    pendingApplications: applicationsResult.count!,
+    pendingBookings: bookingsResult.count!,
   };
 }
