@@ -1,5 +1,5 @@
-import { getPaystackSecretKey } from "@/lib/paystack-config";
 "use server";
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 
 import { BookingFormData } from "@/lib/types/booking";
 import { getBookingByReference, updatePaymentStatus, updateBookingStatus } from "@/lib/storage/bookings-supabase";
