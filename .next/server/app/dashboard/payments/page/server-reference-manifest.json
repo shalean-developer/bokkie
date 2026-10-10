@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a0d1d8804cabe885ea9a947453da41207a129832": {
+    "40c39e19cee25452c708abbd9237f1a1f2e1e9c24e": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60e95166cdb92b7c5960ae2c096c1454da43eb9d3a": {
+    "60a9fc78cf9417a58c52f5aa6060c7f62d7c25a238": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "409a68ba608e85fe943ce78ac455841636165f3593": {
+    "404f16395af6e2b0e8a9ab3b3dc06fd1b04182fe29": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "00d997621bd337bc1a667fbe8843b249b56ede6837": {
+    "00544358f9bf6692176d3a6d22e7ec94ab84648392": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "409aea59fb00e537019f811066ba32864a2d522452": {
+    "40f3c55b74a375f6ed75fcaa259ab5ec9bff4c0384": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "00e867ba9c57636bcc1b9b2de3c986e4a22b4a2ec4": {
+    "00c36077d200c819423fb25d1ca62fb564b7663314": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "00ee593636bc8c9a4216f897a5d9b63d50313c84e6": {
+    "0097a9e1935ccfc83b44e73c3a34361a339af77802": {
       "workers": {
         "app/dashboard/payments/page": {
           "moduleId": 296735,
