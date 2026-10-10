@@ -1,6 +1,6 @@
 {
   "node": {
-    "008be59247cc77504108aeb71222635fc33fc8d4c9": {
+    "00e19a0d160c49f3f3e48a645b8be80b83536d3b8c": {
       "workers": {
         "app/booking/service/standard/details/page": {
           "moduleId": 105926,
@@ -15,7 +15,7 @@
       "exportedName": "getPricingConfig",
       "filename": "app/actions/pricing.ts"
     },
-    "00131963a48ab788637524fd4f867f22f12673c1f9": {
+    "00f8da876bf4fd40c4f429b80771a44a65922eb629": {
       "workers": {
         "app/booking/service/standard/details/page": {
           "moduleId": 105926,
@@ -30,7 +30,7 @@
       "exportedName": "getAdditionalServices",
       "filename": "app/actions/booking-data.ts"
     },
-    "0019cacc58224ec4f53cad7a817caaf829a08f8240": {
+    "00e5fb8d8563f7fda3e6fa13a63310428bc8759743": {
       "workers": {
         "app/booking/service/standard/details/page": {
           "moduleId": 105926,
@@ -45,7 +45,7 @@
       "exportedName": "getTimeSlots",
       "filename": "app/actions/booking-data.ts"
     },
-    "003ad942879084ef9fe5b2bf7a2b039e32f80733f0": {
+    "004d7f78b78dc6ee9b7ed9be73babff534ac96f491": {
       "workers": {
         "app/booking/service/standard/details/page": {
           "moduleId": 105926,
