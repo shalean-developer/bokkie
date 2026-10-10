@@ -7,6 +7,12 @@ on:
     branches:
       - feature/bok-plesk-01-runtime-prep
 
+# Serialize the entire source build-to-publish pipeline, not just publish.
+# Otherwise the last waiting publish can be cancelled after its build passes.
+concurrency:
+  group: bokkie-staging-source-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -176,9 +182,6 @@ jobs:
     environment: bokkie-staging-build
     permissions:
       contents: write
-    concurrency:
-      group: bokkie-plesk-deploy-staging
-      cancel-in-progress: false
     steps:
       - name: Confirm controlled staging publishing is enabled
         shell: bash
