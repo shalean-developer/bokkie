@@ -36,7 +36,6 @@ export default async function AdminDashboardPage({
       bookingPipeline,
       recentBookings,
       pendingCounts,
-      paymentDateReport,
     } = dashboardData;
 
     // Format currency values
@@ -61,26 +60,37 @@ export default async function AdminDashboardPage({
             </div>
           </div>
 
-          {/* Completed payments are reported by verified payment date only.
-              Undated historical payments remain visible separately. */}
-          {paymentDateReport ? <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-            <MetricCard title="Verified Payment-date Revenue" value={formatCurrency(paymentDateReport.verifiedPeriodRevenue)} icon={DollarSign} />
-            <MetricCard title="Historical Paid — Date Unknown" value={formatCurrency(paymentDateReport.undatedHistoricalRevenue)} icon={DollarSign} />
-            <MetricCard title="Lifetime Recorded Payments" value={formatCurrency(paymentDateReport.lifetimeRecordedPayments)} icon={DollarSign} />
-            <MetricCard title="Non-cancelled Bookings" value={metrics.totalBookings.toString()} change={metrics.bookingsChange} icon={Calendar} />
-            <MetricCard title="Booking Customers" value={metrics.activeCustomers.toString()} change={metrics.customersChange} icon={Users} />
-            <MetricCard title="Avg Verified Paid Booking Value" value={formatCurrency(paymentDateReport.verifiedPeriodCount ? paymentDateReport.verifiedPeriodRevenue / paymentDateReport.verifiedPeriodCount : 0)} icon={TrendingUp} />
+          {/* Metric Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <MetricCard
+              title="Total Revenue"
+              value={formatCurrency(metrics.totalRevenue)}
+              change={metrics.revenueChange}
+              icon={DollarSign}
+            />
+            <MetricCard
+              title="Non-cancelled Bookings"
+              value={metrics.totalBookings.toString()}
+              change={metrics.bookingsChange}
+              icon={Calendar}
+            />
+            <MetricCard
+              title="Booking Customers"
+              value={metrics.activeCustomers.toString()}
+              change={metrics.customersChange}
+              icon={Users}
+            />
+            <MetricCard
+              title="Avg Paid Booking Value"
+              value={formatCurrency(metrics.avgBookingValue)}
+              change={metrics.avgBookingValueChange}
+              icon={TrendingUp}
+            />
           </div>
-          <p className="text-sm text-gray-600 mb-6">
-            Verified revenue follows payment completion dates. {paymentDateReport.undatedHistoricalCount} historical completed payments lack verified dates and are excluded from the dated chart, not from lifetime recorded payments. Refund reconciliation remains pending.
-          </p>
-
-          </> : <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-4 mb-6 text-sm text-amber-900">Verified payment-date reporting is temporarily unavailable. Financial totals are not shown until the source-of-truth query succeeds.</div>}
 
           {/* Charts Row */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-            {paymentDateReport && <RevenueChart data={paymentDateReport.verifiedTrends} />}
+            <RevenueChart data={revenueTrends} />
             <BookingsChart data={bookingsTrends} />
           </div>
 
