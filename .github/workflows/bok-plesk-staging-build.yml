@@ -210,6 +210,11 @@ jobs:
             exit 1
           fi
           printf '%s\n' "${SOURCE_SHA}" > RELEASE_SHA
+          # Passenger/Plesk watches tmp/restart.txt and restarts on the next request.
+          # Publish it with every source release so the running Next.js process reloads.
+          mkdir -p tmp
+          printf '%s\\n' "${SOURCE_SHA}" > tmp/restart.txt
+
           git add --all --force
           git diff --cached --quiet && { echo "No runtime change"; exit 0; }
           git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
