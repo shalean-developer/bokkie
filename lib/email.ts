@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { assertEmailSendingAllowed } from "./staging-guards";
 import { Booking } from "./types/booking";
 import { getServiceName, getFrequencyName, formatPrice, calculatePrice } from "./pricing";
 import { fetchPricingConfig } from "./pricing-server";
@@ -19,9 +20,7 @@ export interface QuoteEmailData {
 }
 
 function createProtectedResendClient(apiKey: string): Resend {
-  if (process.env.BOKKIE_APP_ENV === "staging") {
-    throw new Error("Staging email sending is disabled");
-  }
+  assertEmailSendingAllowed();
   return new Resend(apiKey);
 }
 
