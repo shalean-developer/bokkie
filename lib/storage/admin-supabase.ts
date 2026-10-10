@@ -130,7 +130,8 @@ export async function getAdminDashboardMetrics(
     // Current period bookings count
     supabase
       .from("bookings")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
+      .neq("status", "cancelled")
       .gte("created_at", startStr)
       .lte("created_at", endStr),
     
@@ -138,6 +139,7 @@ export async function getAdminDashboardMetrics(
     supabase
       .from("bookings")
       .select("contact_email")
+      .neq("status", "cancelled")
       .gte("created_at", startStr)
       .lte("created_at", endStr),
     
@@ -152,7 +154,8 @@ export async function getAdminDashboardMetrics(
     // Previous period bookings count
     supabase
       .from("bookings")
-      .select("*", { count: "exact", head: true })
+      .select("id", { count: "exact", head: true })
+      .neq("status", "cancelled")
       .gte("created_at", prevStartStr)
       .lte("created_at", prevEndStr),
     
@@ -160,6 +163,7 @@ export async function getAdminDashboardMetrics(
     supabase
       .from("bookings")
       .select("contact_email")
+      .neq("status", "cancelled")
       .gte("created_at", prevStartStr)
       .lte("created_at", prevEndStr),
   ]);
@@ -167,14 +171,14 @@ export async function getAdminDashboardMetrics(
   // Calculate current period metrics
   const totalRevenue = (revenueResult.data || []).reduce((sum, b) => sum + (parseFloat(b.total_amount) || 0), 0);
   const totalBookings = bookingsResult.count || 0;
-  const uniqueEmails = new Set((customersResult.data || []).map(b => b.contact_email));
+  const uniqueEmails = new Set((customersResult.data || []).map(b => b.contact_email?.trim().toLowerCase()).filter(Boolean));
   const activeCustomers = uniqueEmails.size;
   const avgBookingValue = totalRevenue > 0 && revenueResult.data ? totalRevenue / revenueResult.data.length : 0;
   
   // Calculate previous period metrics
   const prevRevenue = (prevRevenueResult.data || []).reduce((sum, b) => sum + (parseFloat(b.total_amount) || 0), 0);
   const prevBookings = prevBookingsResult.count || 0;
-  const prevUniqueEmails = new Set((prevCustomersResult.data || []).map(b => b.contact_email));
+  const prevUniqueEmails = new Set((prevCustomersResult.data || []).map(b => b.contact_email?.trim().toLowerCase()).filter(Boolean));
   const prevCustomers = prevUniqueEmails.size;
   const prevAvgBookingValue = prevRevenue > 0 && prevRevenueResult.data ? prevRevenue / prevRevenueResult.data.length : 0;
   
@@ -256,6 +260,7 @@ export async function getBookingsTrends(
   const { data, error } = await supabase
     .from("bookings")
     .select("created_at")
+    .neq("status", "cancelled")
     .gte("created_at", startStr)
     .lte("created_at", endStr)
     .order("created_at", { ascending: true });
