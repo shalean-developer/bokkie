@@ -17,7 +17,7 @@ function getSupabaseRef() {
 }
 
 function getPaystackMode() {
-  const key = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+  const key = process.env.PAYSTACK_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
   if (!key) return "unconfigured";
   if (key.startsWith("pk_live_")) return "live";
   if (key.startsWith("pk_test_")) return "test";
@@ -41,6 +41,19 @@ export async function GET() {
     issues.push("Supabase project mismatch");
   }
 
+  const paymentMode = getPaystackMode();
+  const isStaging = process.env.BOKKIE_APP_ENV === "staging";
+
+  if (isStaging && paymentMode !== "test") {
+    issues.push("Staging Paystack must use test public key");
+  }
+  if (isStaging && process.env.PAYSTACK_SECRET_KEY?.startsWith("sk_live_")) {
+    issues.push("Staging Paystack secret key must not be live");
+  }
+  if (isStaging && process.env.RESEND_API_KEY && process.env.BOKKIE_STAGING_OUTBOUND_DISABLED !== "true") {
+    issues.push("Staging outbound email is not explicitly disabled");
+  }
+
   return NextResponse.json(
     {
       status: issues.length === 0 ? "ok" : "degraded",
@@ -57,7 +70,7 @@ export async function GET() {
         ),
       },
       paystack: {
-        publicMode: getPaystackMode(),
+        publicMode: paymentMode,
       },
       messaging: {
         resendConfigured: Boolean(process.env.RESEND_API_KEY),
