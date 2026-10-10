@@ -1,4 +1,5 @@
 import "server-only";
+import { verifiedPaidAt } from "@/lib/payments/paid-at";
 import { getPaystackSecretKey } from "@/lib/paystack-config";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
@@ -41,8 +42,10 @@ export async function updateRebookedBookingPayment(
     if (!result?.status || !matchesBookingPayment(tx, bookingReference, paymentReference, Number(booking.total_amount))) {
       return { success: false, message: "Payment does not match booking" };
     }
+    const paidAt = verifiedPaidAt(tx);
+    if (!paidAt) return { success: false, message: "Paystack did not provide a valid payment completion time" };
     const { data: updated, error: updateError } = await db.from("bookings")
-      .update({ payment_status: "completed", payment_reference: paymentReference, status: "confirmed" })
+      .update({ payment_status: "completed", payment_reference: paymentReference, paid_at: paidAt, status: "confirmed" })
       .eq("booking_reference", bookingReference)
       .neq("payment_status", "completed")
       .select("booking_reference");
