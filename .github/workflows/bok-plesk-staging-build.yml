@@ -70,6 +70,9 @@ jobs:
       - name: Verify Paystack webhook signature enforcement
         run: bash scripts/check-paystack-webhook-signature.sh
 
+      - name: Verify already-paid booking recovery
+        run: bash scripts/check-paid-booking-recovery.sh
+
       - name: Run no-payment Paystack transaction fixture tests
         run: npx tsx --test lib/payments/transaction-match.test.ts
 
