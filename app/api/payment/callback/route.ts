@@ -1,7 +1,7 @@
 import { getPaystackSecretKey } from "@/lib/paystack-config";
 import { NextRequest, NextResponse } from "next/server";
 import { submitBooking } from "@/app/actions/submit-booking";
-import { updateRebookedBookingPayment } from "@/app/actions/rebook-payment";
+import { updateRebookedBookingPayment } from "@/lib/payments/rebook-settlement";
 import { addCreditsAfterPayment } from "@/app/actions/credits";
 import { BookingFormData } from "@/lib/types/booking";
 import { verifyWebhookSignature, verifyPayment } from "@/lib/paystack";
