@@ -1,4 +1,4 @@
-name: BOK-PLESK-04 staging build verification
+name: BOK-PLESK staging build and automatic publish
 
 on:
   pull_request:
