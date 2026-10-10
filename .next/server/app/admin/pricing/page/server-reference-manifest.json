@@ -1,6 +1,6 @@
 {
   "node": {
-    "008d600d669ecc89146a2931d4198e062b033adcde": {
+    "00f12ec0594cc097f5a123abe71e6abf731a6bb40f": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "00c049a1387299ce72486fcd946d754843a460bc13": {
+    "0085b4cd71827e02e780ea720a9eb44eeab7386860": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -30,7 +30,7 @@
       "exportedName": "getAllPricingData",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "60b8addc6f44bd765ffe893deda30ef4bfabdaff00": {
+    "6051f9807c9302c474f963b6f3f50606bb5298d7fb": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -45,7 +45,7 @@
       "exportedName": "updateServiceTypePricing",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "6084f78dab836ae91641e1f33fea1dd56bbbe6abf1": {
+    "608c3b46fb0a4a923d6286b977c0874c7f7ed5f681": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -60,7 +60,7 @@
       "exportedName": "updateRoomPricing",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "6020bc6e2fda3c6546865acfa689bdbe13b4ac3a6f": {
+    "60e93a848ae62eae9b33c8f8396cb900f92dfb4bf9": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -75,7 +75,7 @@
       "exportedName": "updateAdditionalService",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "6030221370f7f5488690bddd36241a983adb31ade5": {
+    "60f00d98f5338b2fd6c1e8731607ed713967e1c879": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -90,7 +90,7 @@
       "exportedName": "updateFrequencyOption",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "604d845cd91a58a46ec41eedabd1b2606a32a036b7": {
+    "6007c83a6a9a2195ded065b41998449566608c44ca": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -105,7 +105,7 @@
       "exportedName": "updateSystemSetting",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "405c9bff45c2d798536cbef3972c491408251845e2": {
+    "4006182fa82011290d61dbfae16cd6ca53e9a75f2f": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -120,7 +120,7 @@
       "exportedName": "createServiceTypePricing",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "40a74ad9c444b5f751d03114b142080a75cab1209e": {
+    "401d569b199497e446a4ab412fc0f3ed4b790d5a87": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -135,7 +135,7 @@
       "exportedName": "deleteServiceTypePricing",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "40f0e8fb2e12eff6e564a6dd946e36f4e7ae972ab1": {
+    "4026d57e933c9cbda9ac1e21e7ce36c08d87313066": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -150,7 +150,7 @@
       "exportedName": "createAdditionalService",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "401e263c263ab6858fcdb396f6310ba45723ddc1a0": {
+    "40d81ae0adc6a7a99d9710f9395bf5a6c84e1085ee": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -165,7 +165,7 @@
       "exportedName": "deleteAdditionalService",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "603b4cce446ecdd179f8994cf9c8b5a8f31d7e13d3": {
+    "60bcd35239ab6fe66df652ba2803c216f32fd50870": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -180,7 +180,7 @@
       "exportedName": "updateServiceCategoryPricing",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "400491162bc4cbc302e16f84ee75980319f8af1cb8": {
+    "40692a93b3b64911baafdcb2b39e0d826bcafd825b": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -195,7 +195,7 @@
       "exportedName": "createTimeSlot",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "40e1ebaa0aebaec5a663e78d49528ee9cdd10ad982": {
+    "40b88d17d7f9dd91ebb4105ed2373107389a108940": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -210,7 +210,7 @@
       "exportedName": "deleteTimeSlot",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "006c4fdb13c1d49882f2208958b4cb7959d395e00c": {
+    "002f34204e36c75592c6c5f5d57b1ed0a6a5efa09d": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -225,7 +225,7 @@
       "exportedName": "getAdminTimeSlots",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "6061f8b9a6968497d5bcb62c58ce30d0d8bba4b891": {
+    "609b8948b8aef990c86b4a67c110d4fd3928ed5fcf": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -240,7 +240,7 @@
       "exportedName": "updateTimeSlot",
       "filename": "app/actions/admin-pricing.ts"
     },
-    "00cb501fdfe21557abd9a0c6d387bea28b2468e3f0": {
+    "0071244bd0eaed5faee18775102943ab06220de961": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -255,7 +255,7 @@
       "exportedName": "getAllPopularServices",
       "filename": "app/actions/popular-services.ts"
     },
-    "7887cae72ca4f40da58cca145ce5d1302685fa3f43": {
+    "7835da63c4a2f260f92bdfbb3a25c2188709288525": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -270,7 +270,7 @@
       "exportedName": "addPopularService",
       "filename": "app/actions/popular-services.ts"
     },
-    "6050cb7fc2ebb82e402aaeb7f43e63c6286de08f28": {
+    "60e7af771bb9e02340c7ffd700267d77d9a14b1195": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
@@ -285,7 +285,7 @@
       "exportedName": "updatePopularService",
       "filename": "app/actions/popular-services.ts"
     },
-    "403bc8cc104b99683bca5b49d23cdb0267bc1e8cdc": {
+    "40b4e83216243714a87c0a49d63fa589e4dd721811": {
       "workers": {
         "app/admin/pricing/page": {
           "moduleId": 528097,
