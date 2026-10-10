@@ -1,6 +1,6 @@
 {
   "node": {
-    "40473931acd76bd683e709c0b2519ce64f7411dc13": {
+    "40be12e02447ceffa0b271b6872c4384d165651a0c": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60c30ab73b8d6364705c568d8ca4fedf22c8418b33": {
+    "60a2b8486b3fef1f5fa086e77c565c5332ccbf3d72": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "408fc3aae9281a70104b0e3f2a806fbe31cb04ec77": {
+    "403f0f3420aeb87a59664a48a1841b39c1f168a7be": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "0082974ccb1f29d8e3b4a3064620b24e25d8bfcae8": {
+    "00f81d76282448afb6af8a8ac6ce3852c4d1c2d70d": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "401ee6b458f3f9b260d94b6c96bbb303cb3ef03360": {
+    "40567f6173d4aad87550dd2c6670f1c1869efa4d37": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "0078ae79f5f150f8140ce4fd4f42a3f99284f5bf42": {
+    "009a270ac9c507efd3861bc977134998a0fdb5065f": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "004c295659694ca579273a48c2b91e4c457f5f6c4f": {
+    "00999904c08e58d3f2486b993046da19ea94f45d65": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -105,7 +105,7 @@
       "exportedName": "getLoginRedirectPath",
       "filename": "app/actions/auth.ts"
     },
-    "60f0527032a77da7f932c3442d7f62dfd94801e8bb": {
+    "60d16f587a7f35b70c9e2d05a537037469bc291315": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -120,7 +120,7 @@
       "exportedName": "updateBookingStatusAction",
       "filename": "app/actions/cleaner-bookings.ts"
     },
-    "4040b94238e3fe9bb0c2022c4e375ec8fff788fa9c": {
+    "40ab32ed41b7e849a0595d4596db4b78f65d53ec52": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -135,7 +135,7 @@
       "exportedName": "acceptBookingAction",
       "filename": "app/actions/cleaner-bookings.ts"
     },
-    "40797467aa1fbef16314f32507edb119cade573a7c": {
+    "40ab8c666b6fb2bc220072cca0cf809d6fd9ad3481": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -150,7 +150,7 @@
       "exportedName": "declineBookingAction",
       "filename": "app/actions/cleaner-bookings.ts"
     },
-    "60a521967c2e8a41dbb69feaf77b92ba29187c371a": {
+    "60aefc821e5564219fd88ceb9fe69cfeb09969cdb7": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
@@ -165,7 +165,7 @@
       "exportedName": "updateJobProgressAction",
       "filename": "app/actions/cleaner-bookings.ts"
     },
-    "404b632a1cb9628314c76caf01df6f92a5451e113f": {
+    "40abf29529ad81f566b8f817532efec012ee1782fc": {
       "workers": {
         "app/cleaner/bookings/[reference]/page": {
           "moduleId": 778379,
