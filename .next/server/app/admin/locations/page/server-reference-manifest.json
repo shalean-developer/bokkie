@@ -1,6 +1,6 @@
 {
   "node": {
-    "00585efdffdbbe027b2022d7f63b748d04293e0ed2": {
+    "00a9abbaed4399632d7f655606aaf46eb5699d36e8": {
       "workers": {
         "app/admin/locations/page": {
           "moduleId": 586266,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "0089ccecb53e42cd9f548183bb631bac33329514c9": {
+    "005622740fd5a855550ba7191bbd15f9513e8dd5dd": {
       "workers": {
         "app/admin/locations/page": {
           "moduleId": 586266,
@@ -30,7 +30,7 @@
       "exportedName": "getAllLocations",
       "filename": "app/actions/locations.ts"
     },
-    "7c59fb459af15e2e36efde1162381528c7a9e80717": {
+    "7cbeee52dbdb7823d0437db7618ae8be5c11ddd64d": {
       "workers": {
         "app/admin/locations/page": {
           "moduleId": 586266,
@@ -45,7 +45,7 @@
       "exportedName": "addLocation",
       "filename": "app/actions/locations.ts"
     },
-    "603126479383439ac56a8ea3062762a7a196c7b72d": {
+    "609bde981bf1a130cba5213fe566e27beec07b6590": {
       "workers": {
         "app/admin/locations/page": {
           "moduleId": 586266,
@@ -60,7 +60,7 @@
       "exportedName": "updateLocation",
       "filename": "app/actions/locations.ts"
     },
-    "40c46463512744a872f007dfc7e1dd202416eec3d3": {
+    "4033e1ab3e159f03355636eb253ef45476318e8d7f": {
       "workers": {
         "app/admin/locations/page": {
           "moduleId": 586266,
