@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,16 @@ function getPaystackMode() {
   if (key.startsWith("pk_live_")) return "live";
   if (key.startsWith("pk_test_")) return "test";
   return "unknown";
+}
+
+async function getReleaseSha() {
+  if (process.env.RELEASE_SHA) return process.env.RELEASE_SHA;
+  try {
+    const sha = (await readFile(path.join(process.cwd(), "RELEASE_SHA"), "utf8")).trim();
+    return /^[0-9a-f]{40}$/.test(sha) ? sha : null;
+  } catch {
+    return null;
+  }
 }
 
 export async function GET() {
@@ -60,7 +72,7 @@ export async function GET() {
       service: "bokkie-environment",
       timestamp: new Date().toISOString(),
       deployment: process.env.BOKKIE_APP_ENV ?? process.env.NODE_ENV ?? "unknown",
-      releaseSha: process.env.RELEASE_SHA ?? null,
+      releaseSha: await getReleaseSha(),
       supabase: {
         configuredRef,
         expectedRef,
