@@ -135,23 +135,6 @@ function bookingToUpdateRow(booking: Booking) {
   };
 }
 
-async function applyV2Extension(
-  state: BookFormState,
-  bookingReference: string,
-  userId: string
-) {
-  const supabase = createServiceRoleClient();
-  const extension = getBookV2ExtensionPayload(state);
-  const { data, error } = await supabase
-    .from("bookings")
-    .update(extension)
-    .eq("booking_reference", bookingReference)
-    .eq("user_id", userId)
-    .select("id");
-  if (error) throw error;
-  if (data?.length !== 1) throw new Error("Booking extension ownership verification failed");
-}
-
 async function buildAuthoritativePricingState(state: BookFormState): Promise<BookFormState> {
   const pricingConfig = await fetchBookPricingConfig();
   const serviceConfig = getServiceConfig(state.service);
@@ -223,6 +206,7 @@ export async function saveBookV2Booking(
 
     stage = "pricing";
     const authoritativeState = await buildAuthoritativePricingState(state);
+    const extensionFields = getBookV2ExtensionPayload(authoritativeState);
     const booking = mapBookFormStateToBooking(
       authoritativeState,
       bookingReference,
@@ -235,7 +219,7 @@ export async function saveBookV2Booking(
       stage = "update_existing";
       const { data: updated, error: updateError } = await supabase
         .from("bookings")
-        .update(bookingToUpdateRow(booking))
+        .update({ ...bookingToUpdateRow(booking), ...extensionFields })
         .eq("booking_reference", bookingReference)
         .eq("user_id", user.id)
         .select("id");
@@ -247,7 +231,7 @@ export async function saveBookV2Booking(
     } else {
       stage = "insert_new";
       try {
-        await saveBooking(booking, user.id);
+        await saveBooking(booking, user.id, extensionFields);
       } catch (insertErr) {
         const message = insertErr instanceof Error ? insertErr.message : "";
         if (!message.includes("bookings_booking_reference_key")) {
@@ -279,9 +263,6 @@ export async function saveBookV2Booking(
         if (retried?.length !== 1) return { success: false, message: "Booking ownership could not be verified." };
       }
     }
-
-    stage = "extension";
-    await applyV2Extension(authoritativeState, bookingReference, user.id);
 
     return { success: true, bookingReference };
   } catch (err) {
