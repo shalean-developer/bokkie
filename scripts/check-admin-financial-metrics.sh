@@ -12,7 +12,8 @@ grep -Fq '.select("created_at")' <<< "$trends"
 grep -Fq 'b.contact_email?.trim().toLowerCase()).filter(Boolean)' <<< "$metrics"
 grep -Fq 'title="Non-cancelled Bookings"' "$page"
 grep -Fq 'title="Booking Customers"' "$page"
-grep -Fq 'title="Avg Paid Booking Value"' "$page"
+grep -Fq 'title="Avg Verified Paid Booking Value"' "$page"
+grep -Fq 'paymentDateReport.verifiedPeriodRevenue / paymentDateReport.verifiedPeriodCount' "$page"
 # Payment accounting stays scoped to completed payments.
 test "$(grep -Fc '.eq("payment_status", "completed")' <<< "$metrics")" -eq 2
 echo "BOK-PLESK-15A dashboard metric contract passed"
