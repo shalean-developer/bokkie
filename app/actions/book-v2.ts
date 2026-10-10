@@ -283,6 +283,31 @@ export async function saveBookV2Booking(
 }
 
 /** Read-only, owner-scoped status for restoring an already-paid booking view. */
+/**
+ * Confirmation details are read from the persisted booking, not cleared client form state.
+ * Service-role access must always be scoped to the authenticated booking owner.
+ */
+export async function getConfirmedBookV2Details(reference: string) {
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user || !reference) return null;
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("bookings")
+    .select("booking_reference, service_type, scheduled_date, scheduled_time, team_id, cleaner_preference, status, payment_status, user_id")
+    .eq("booking_reference", reference)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error || !data || data.payment_status !== "completed" || data.status !== "confirmed") return null;
+  return {
+    bookingReference: data.booking_reference as string,
+    serviceType: data.service_type as string,
+    serviceDate: data.scheduled_date as string | null,
+    serviceTime: data.scheduled_time as string | null,
+    teamId: data.team_id as string | null,
+    cleanerPreference: data.cleaner_preference as string | null,
+  };
+}
+
 export async function getBookV2PaidStatus(reference: string): Promise<{ paid: boolean }> {
   if (!reference || !/^BOK-[A-Z0-9-]+$/.test(reference)) return { paid: false };
   const auth = await createClient();
