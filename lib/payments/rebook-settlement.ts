@@ -2,6 +2,7 @@ import "server-only";
 import { getPaystackSecretKey } from "@/lib/paystack-config";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
+import { matchesBookingPayment, resolveCompletedPayment } from "@/lib/payments/transaction-match";
 
 export interface RebookPaymentResult {
   success: boolean;
@@ -26,7 +27,7 @@ export async function updateRebookedBookingPayment(
       .eq("booking_reference", bookingReference).maybeSingle();
     if (lookupError || !booking) return { success: false, message: "Booking not found" };
     if (booking.payment_status === "completed") {
-      return booking.payment_reference === paymentReference
+      return resolveCompletedPayment(booking.payment_reference, paymentReference) === "same"
         ? { success: true, message: "Payment already confirmed", bookingReference }
         : { success: false, message: "Booking already paid with another reference" };
     }
@@ -37,12 +38,7 @@ export async function updateRebookedBookingPayment(
     if (!response.ok) return { success: false, message: "Payment verification unavailable" };
     const result = await response.json();
     const tx = result?.data;
-    const expectedAmount = Math.round(Number(booking.total_amount) * 100);
-    if (!result?.status || !tx || tx.status !== "success" ||
-        tx.reference !== paymentReference || String(tx.currency).toUpperCase() !== "ZAR" ||
-        !Number.isFinite(expectedAmount) || expectedAmount <= 0 ||
-        Number(tx.amount) !== expectedAmount ||
-        tx.metadata?.booking_reference !== bookingReference) {
+    if (!result?.status || !matchesBookingPayment(tx, bookingReference, paymentReference, Number(booking.total_amount))) {
       return { success: false, message: "Payment does not match booking" };
     }
     const { data: updated, error: updateError } = await db.from("bookings")
