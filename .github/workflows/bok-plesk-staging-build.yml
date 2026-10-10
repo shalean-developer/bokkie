@@ -109,6 +109,9 @@ jobs:
       - name: Test isolated payment-date reporting and undated history
         run: npx tsx --test lib/payments/payment-date-reporting.test.ts
 
+      - name: Reconcile read-only credit movements and voucher awards
+        run: npx tsx --test lib/payments/credit-movement-reporting.test.ts
+
       - name: Verify payment-date dashboard separation
         run: bash scripts/check-dashboard-payment-date-reporting.sh
 
