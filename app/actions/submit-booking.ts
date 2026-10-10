@@ -1,5 +1,5 @@
-import { getPaystackSecretKey } from "@/lib/paystack-config";
 "use server";
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 
 import { BookingFormData, Booking, normalizeCleanerPreference } from "@/lib/types/booking";
 import { calculatePrice, calculateCleanerEarnings } from "@/lib/pricing";
