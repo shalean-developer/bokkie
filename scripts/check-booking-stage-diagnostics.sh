@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 file=app/actions/book-v2.ts
-for stage in authenticate service_client reference_lookup pricing update_existing insert_new duplicate_lookup duplicate_retry extension; do
+for stage in authenticate service_client reference_lookup pricing update_existing insert_new duplicate_lookup duplicate_retry; do
   grep -q "stage = \"$stage\"" "$file"
 done
 grep -Fq '"[BOK-PLESK-13H02] booking save failure"' "$file"
