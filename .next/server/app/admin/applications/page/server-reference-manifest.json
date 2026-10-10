@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f76b3abcbbf647b83136db6d320b57c2ead0ae52": {
+    "00f6265f3e9ebb9962fb424cd8ea5aaa4350aa51b2": {
       "workers": {
         "app/admin/applications/page": {
           "moduleId": 312519,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "0042f308d0c86607211190f1703b021ab4a88f357a": {
+    "006df90d12b343133117df6c8af263173670d17338": {
       "workers": {
         "app/admin/applications/page": {
           "moduleId": 312519,
@@ -30,7 +30,7 @@
       "exportedName": "getAllApplications",
       "filename": "app/actions/admin-applications.ts"
     },
-    "00fd375f3fdfd047fa0728790f17565800407a4e9c": {
+    "001a901fd887902edb3bf2d811ca1b2bd3beaca8a0": {
       "workers": {
         "app/admin/applications/page": {
           "moduleId": 312519,
@@ -45,7 +45,7 @@
       "exportedName": "getApplicationStats",
       "filename": "app/actions/admin-applications.ts"
     },
-    "705d4d71708ad4564a782676a984ed1661f25e605b": {
+    "70d687b37220782f11a1b46d892ff0ee4ae643b817": {
       "workers": {
         "app/admin/applications/page": {
           "moduleId": 312519,
@@ -60,7 +60,7 @@
       "exportedName": "updateApplicationStatus",
       "filename": "app/actions/admin-applications.ts"
     },
-    "40d0efc80a793eaac4f3085176ad3a5eaa17bb2158": {
+    "400a50bc0695b9985767a06ab9af79d6b88f8a166b": {
       "workers": {
         "app/admin/applications/page": {
           "moduleId": 312519,

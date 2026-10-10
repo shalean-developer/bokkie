@@ -1,6 +1,6 @@
 {
   "node": {
-    "40217755fc84c176412b8ece015eb222d818b1d142": {
+    "40563645dd0def6575f336a8524f233619cf96331a": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60659622b099eaf96f40f33e2a9edcb73c71fab113": {
+    "603e4cecc4e16da7166e4450d981f08cca394f56ae": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "4047f76b3c830820ed41c5c9b6c1e9e7fd3e4eed00": {
+    "40cd1ab68bd35f9daba5d0ab64f4f859973f20e194": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "00f76b3abcbbf647b83136db6d320b57c2ead0ae52": {
+    "00f6265f3e9ebb9962fb424cd8ea5aaa4350aa51b2": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "4088326a7c02caeaaa3015daa9176e275729451af3": {
+    "40a9a43ee9a893df802785d43854a945da2624377b": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "0015d8e5873ffb0ede21ac042d6d5ad2c35736b475": {
+    "0017decf3fd25b59747d8fc4d13555e55562e7a97a": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "007d1a8df6e81c0d66945f1688d5d2c8d4d8ca3588": {
+    "00bcc55a8acf0157def60112d6c3cab1cca60631d7": {
       "workers": {
         "app/dashboard/help/page": {
           "moduleId": 808673,

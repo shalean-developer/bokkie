@@ -1,6 +1,6 @@
 {
   "node": {
-    "00f76b3abcbbf647b83136db6d320b57c2ead0ae52": {
+    "00f6265f3e9ebb9962fb424cd8ea5aaa4350aa51b2": {
       "workers": {
         "app/admin/customers/page": {
           "moduleId": 517823,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "009b9f10c05819ce0acad4cb8fdf1806e10b7e2936": {
+    "00f7c0a6b3a0fa4448ffc7b8eed4c20da80d1507d0": {
       "workers": {
         "app/admin/customers/page": {
           "moduleId": 517823,
@@ -30,7 +30,7 @@
       "exportedName": "getAllCustomers",
       "filename": "app/actions/admin-bookings.ts"
     },
-    "600b20ae46681c115f1b8ffcf59e3752be8abeb372": {
+    "6039e31dde20e97731030821e1cfefe33b1d0f0881": {
       "workers": {
         "app/admin/customers/page": {
           "moduleId": 517823,
@@ -45,7 +45,7 @@
       "exportedName": "updateCustomer",
       "filename": "app/actions/admin-bookings.ts"
     },
-    "40777c78bc7ab7a2e4aa6c490ba85704c7b2f3ff04": {
+    "40ac7e1d693dba2bcbb6f1ac474630682ab917614d": {
       "workers": {
         "app/admin/customers/page": {
           "moduleId": 517823,
