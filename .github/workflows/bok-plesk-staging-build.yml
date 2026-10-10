@@ -67,6 +67,9 @@ jobs:
       - name: Verify atomic V2 booking persistence
         run: bash scripts/check-v2-atomic-persistence.sh
 
+      - name: Verify Paystack webhook signature enforcement
+        run: bash scripts/check-paystack-webhook-signature.sh
+
       - name: Verify booking ownership invariants
         run: bash scripts/check-v2-booking-ownership.sh
 
