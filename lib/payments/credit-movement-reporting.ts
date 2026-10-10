@@ -13,7 +13,7 @@ export type CreditMovementSummary = {
 };
 function money(value: number | string): number {
   const n = Number(value);
-  if (!Number.isFinite(n) || n < 0 || Math.round(n * 100) !== n * 100) {
+  if (!Number.isFinite(n) || n < 0 || Math.abs(Math.round(n * 100) - n * 100) > 0.000001) {
     throw new Error("Invalid credit amount");
   }
   return Math.round(n * 100);
