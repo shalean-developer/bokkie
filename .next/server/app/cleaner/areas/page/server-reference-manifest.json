@@ -1,6 +1,6 @@
 {
   "node": {
-    "401a7b5c1a3cc6a6b500140884a66572207879694e": {
+    "4046d3c7343f790f425d84661dad11768387f9b4e7": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -15,7 +15,7 @@
       "exportedName": "login",
       "filename": "app/actions/auth.ts"
     },
-    "60562f7f2780e3afd84cebb4cb3c65a4b9565502d7": {
+    "60222a1d086dce2292b917d6d0b792a1165a5c2d8f": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -30,7 +30,7 @@
       "exportedName": "signup",
       "filename": "app/actions/auth.ts"
     },
-    "40f560da60956425ec790ce9d2926b3e03c7fbd143": {
+    "40b6db1fdc75cfac700f7362aea50ad18f39066166": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -45,7 +45,7 @@
       "exportedName": "forgotPassword",
       "filename": "app/actions/auth.ts"
     },
-    "005ab34dd53429d39ea7e9ccbee083e4b815e3650c": {
+    "0078ffc41bb480575615cb09a052d5a3f0a41408bc": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -60,7 +60,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "4088afadcc483a1cab870ce706a0a5a5e470bc659d": {
+    "40db0bd5e870b41109c9049409ba0b7179fd70ea5c": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -75,7 +75,7 @@
       "exportedName": "resendConfirmationEmail",
       "filename": "app/actions/auth.ts"
     },
-    "00e8d5c1deb784e5a7c5a5e9ab04e581994791da1f": {
+    "001fd0d36fe90f76236f3247f84da8a009b7d589c9": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -90,7 +90,7 @@
       "exportedName": "getCurrentUser",
       "filename": "app/actions/auth.ts"
     },
-    "00d163143644f267b1524247bb462718b22f2e6e99": {
+    "00ca51dc8fc3f9832764ce10bb33b4b19e3319dd50": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -105,7 +105,7 @@
       "exportedName": "getLoginRedirectPath",
       "filename": "app/actions/auth.ts"
     },
-    "005a3e87c7ccffc2282a75e64ac685e4aa3605de47": {
+    "00fd5ddf01a3bd69ae2ab2ac86e44846b807da69fd": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
@@ -120,7 +120,7 @@
       "exportedName": "getAreas",
       "filename": "app/actions/cleaner-areas.ts"
     },
-    "40122c9893526432ee119717e0b9d28580a9f73806": {
+    "409374486841a51c70764076b5c6c2d1f1bc96ff81": {
       "workers": {
         "app/cleaner/areas/page": {
           "moduleId": 209069,
