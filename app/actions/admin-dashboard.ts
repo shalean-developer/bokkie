@@ -46,7 +46,7 @@ export async function getAdminDashboardData(
       getBookingPipeline(),
       getRecentBookings(10),
       getPendingCounts(),
-      (() => { const { start, end } = getDateRange(dateRange, customStart, customEnd); return getPaymentDateReport(start.toISOString(), end.toISOString()); })(),
+      (() => { const { start, end } = getDateRange(dateRange, customStart, customEnd); return getPaymentDateReport(start.toISOString(), end.toISOString()).catch((error) => { console.error("Payment-date report unavailable:", error); return null; }); })(),
     ]);
 
     return {
