@@ -1,6 +1,6 @@
 {
   "node": {
-    "008d25d88a82b5ae9c4be6e689052a56fe012262ed": {
+    "008d600d669ecc89146a2931d4198e062b033adcde": {
       "workers": {
         "app/admin/page": {
           "moduleId": 465017,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "70d7b41416e7c5f13eb11d744a8d3d9eb85f0dfc38": {
+    "703fd071274fd8be965503ca1b903bbb28e486df93": {
       "workers": {
         "app/admin/page": {
           "moduleId": 465017,
