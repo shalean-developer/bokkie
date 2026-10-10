@@ -33,6 +33,7 @@
   "/api/credits/eft/upload/route": "/api/credits/eft/upload",
   "/api/credits/verify/route": "/api/credits/verify",
   "/api/health/environment/route": "/api/health/environment",
+  "/api/health/static-assets/route": "/api/health/static-assets",
   "/api/payment-methods/[id]/default/route": "/api/payment-methods/[id]/default",
   "/api/payment-methods/[id]/route": "/api/payment-methods/[id]",
   "/api/payment-methods/route": "/api/payment-methods",

@@ -458,6 +458,12 @@
       "namedRegex": "^/api/health/environment(?:/)?$"
     },
     {
+      "page": "/api/health/static-assets",
+      "regex": "^/api/health/static\\-assets(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/health/static\\-assets(?:/)?$"
+    },
+    {
       "page": "/api/payment/callback",
       "regex": "^/api/payment/callback(?:/)?$",
       "routeKeys": {},

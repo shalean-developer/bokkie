@@ -33,6 +33,7 @@
   "/api/credits/eft/upload/route": "app/api/credits/eft/upload/route.js",
   "/api/credits/verify/route": "app/api/credits/verify/route.js",
   "/api/health/environment/route": "app/api/health/environment/route.js",
+  "/api/health/static-assets/route": "app/api/health/static-assets/route.js",
   "/api/payment-methods/[id]/default/route": "app/api/payment-methods/[id]/default/route.js",
   "/api/payment-methods/[id]/route": "app/api/payment-methods/[id]/route.js",
   "/api/payment-methods/route": "app/api/payment-methods/route.js",
