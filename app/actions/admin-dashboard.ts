@@ -2,6 +2,7 @@
 
 import {
   getAdminDashboardMetrics,
+  getDateRange,
   getRevenueTrends,
   getBookingsTrends,
   getServiceBreakdown,
@@ -17,6 +18,7 @@ import {
   type PendingCounts,
 } from "@/lib/storage/admin-supabase";
 import { Booking } from "@/lib/types/booking";
+import { getPaymentDateReport } from "@/lib/payments/payment-date-report-server";
 
 /**
  * Get admin dashboard data
@@ -35,6 +37,7 @@ export async function getAdminDashboardData(
       bookingPipeline,
       recentBookings,
       pendingCounts,
+      paymentDateReport,
     ] = await Promise.all([
       getAdminDashboardMetrics(dateRange, customStart, customEnd),
       getRevenueTrends(dateRange, customStart, customEnd),
@@ -43,6 +46,7 @@ export async function getAdminDashboardData(
       getBookingPipeline(),
       getRecentBookings(10),
       getPendingCounts(),
+      (() => { const { start, end } = getDateRange(dateRange, customStart, customEnd); return getPaymentDateReport(start.toISOString(), end.toISOString()); })(),
     ]);
 
     return {
@@ -53,6 +57,7 @@ export async function getAdminDashboardData(
       bookingPipeline,
       recentBookings,
       pendingCounts,
+      paymentDateReport,
     };
   } catch (error) {
     console.error("Error fetching admin dashboard data:", error);
