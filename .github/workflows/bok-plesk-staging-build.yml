@@ -98,7 +98,7 @@ jobs:
           rsync -a --delete --exclude='.git/' "$GITHUB_WORKSPACE/.next/standalone/" ./
           test -d .git
           test ! -e old-source.txt
-          bash "$GITHUB_WORKSPACE/scripts/verify-plesk-runtime.sh" .
+          ALLOW_PUBLISH_WORKTREE_GIT=true bash "$GITHUB_WORKSPACE/scripts/verify-plesk-runtime.sh" .
           git add --all --force
           test -n "$(git diff --cached --name-only)"
       - name: Upload runtime artifact (not deployed)
