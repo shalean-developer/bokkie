@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 import { getPaystackSecretKey } from "@/lib/paystack-config";
 
 import { createServiceRoleClient } from "@/lib/supabase/server";
