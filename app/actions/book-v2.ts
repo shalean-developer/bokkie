@@ -253,7 +253,7 @@ export async function saveBookV2Booking(
         stage = "duplicate_retry";
         const { data: retried, error: retryUpdateError } = await supabase
           .from("bookings")
-          .update(bookingToUpdateRow(booking))
+          .update({ ...bookingToUpdateRow(booking), ...extensionFields })
           .eq("booking_reference", bookingReference)
           .eq("user_id", user.id)
           .select("id");
