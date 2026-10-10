@@ -121,6 +121,9 @@ jobs:
       - name: Verify admin financial metric invariants
         run: bash scripts/check-admin-financial-metrics.sh
 
+      - name: Verify bounded maintenance RPC containment SQL
+        run: bash scripts/check-bok-maintenance-rpc-containment.sh
+
       - name: Verify runtime release identifier fallback
         run: |
           grep -Fq 'path.join(process.cwd(), "RELEASE_SHA")' app/api/health/environment/route.ts
