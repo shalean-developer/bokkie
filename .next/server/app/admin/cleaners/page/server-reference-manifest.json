@@ -1,6 +1,6 @@
 {
   "node": {
-    "00d7ddbe08ecda058f13c8c46f488863c3f80e6c99": {
+    "006cdd353b9281d345a074bc25377815935d6cd710": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "00d2b4dd2a1d13470433fcb8949e550b397f1c69f8": {
+    "00e9171337b40791b97867b3e88b64825170a43b7d": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -30,7 +30,7 @@
       "exportedName": "getAllCleanersFull",
       "filename": "app/actions/admin-bookings.ts"
     },
-    "404586bb6c09fc81b68664376a0ff102eba4ca06a8": {
+    "4082e635a15220d3180739968cacde19916371de3e": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -45,7 +45,7 @@
       "exportedName": "addCleaner",
       "filename": "app/actions/cleaners.ts"
     },
-    "6014cfa331e0504a0b13524cc72bca029c7a0c99a7": {
+    "604f17e9e3f005c57b6b14a8a6fbed032b3f50b019": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -60,7 +60,7 @@
       "exportedName": "updateCleaner",
       "filename": "app/actions/cleaners.ts"
     },
-    "402b2d10e8af40f66276ede8e4a73a3dddc01d4a76": {
+    "4086c711cb80264db25c84b9168bf35d936eac4a73": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -75,7 +75,7 @@
       "exportedName": "deleteCleaner",
       "filename": "app/actions/cleaners.ts"
     },
-    "608e961d7fa338958af0ad2843489126a6ad499f88": {
+    "602c7042f6d351c1cdd7866bdb472e55ea7a32aa12": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -90,7 +90,7 @@
       "exportedName": "updateCleanerAreas",
       "filename": "app/actions/admin-cleaner-areas.ts"
     },
-    "400d11b51c8c79d5c8495e315d6171eff4059bdfb7": {
+    "401bc4c298e0e8eaf199edadc66d2f877c36a292b5": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
@@ -105,7 +105,7 @@
       "exportedName": "getCleanerAreas",
       "filename": "app/actions/admin-cleaner-areas.ts"
     },
-    "00b1ea0d00a6de5403f3476798cb463e8323ff723b": {
+    "003eaf4ada5caa6c9c18e99a8e0517dc548f5224cf": {
       "workers": {
         "app/admin/cleaners/page": {
           "moduleId": 57167,
