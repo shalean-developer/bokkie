@@ -479,7 +479,7 @@ export async function verifyAndCompleteBookPayment(
   const supabase = createServiceRoleClient();
   const { data: booking, error: fetchError } = await supabase
     .from("bookings")
-    .select("total_amount, payment_status, user_id")
+    .select("total_amount, payment_status, payment_reference, user_id")
     .eq("booking_reference", bookingReference)
     .maybeSingle();
 
@@ -491,7 +491,9 @@ export async function verifyAndCompleteBookPayment(
   }
 
   if (booking.payment_status === "completed") {
-    return { success: true, message: "Payment already confirmed" };
+    return booking.payment_reference === paymentReference
+      ? { success: true, message: "Payment already confirmed" }
+      : { success: false, message: "Booking was confirmed with a different payment reference." };
   }
 
   const transaction = await verifyPaystackTransaction(paymentReference, secretKey);
@@ -507,34 +509,40 @@ export async function verifyAndCompleteBookPayment(
     transaction.currency.toUpperCase() === "ZAR" &&
     metadataBookingReference === bookingReference;
 
+  // Unverified transactions must never mutate the booking or overwrite a verified payment.
   if (!verified) {
-    await supabase
-      .from("bookings")
-      .update({
-        payment_status: "failed",
-        payment_reference: paymentReference,
-        status: "pending",
-      })
-      .eq("booking_reference", bookingReference);
-
     return {
       success: false,
-      message:
-        "Payment verification failed because the transaction did not match this booking's amount, currency, or reference.",
+      message: "Payment verification failed because the transaction did not match this booking's amount, currency, or reference.",
     };
   }
 
-  const { error: updateError } = await supabase
+  // Conditional update: concurrent callbacks must not overwrite a completed booking.
+  const { data: updated, error: updateError } = await supabase
     .from("bookings")
     .update({
       payment_status: "completed",
       payment_reference: paymentReference,
       status: "confirmed",
     })
-    .eq("booking_reference", bookingReference);
+    .eq("booking_reference", bookingReference)
+    .eq("user_id", user.id)
+    .neq("payment_status", "completed")
+    .select("booking_reference");
 
   if (updateError) {
-    return { success: false, message: updateError.message };
+    return { success: false, message: "Unable to confirm payment." };
+  }
+  if (!updated?.length) {
+    const { data: latest } = await supabase
+      .from("bookings")
+      .select("payment_status, payment_reference")
+      .eq("booking_reference", bookingReference)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    return latest?.payment_status === "completed" && latest.payment_reference === paymentReference
+      ? { success: true, message: "Payment already confirmed" }
+      : { success: false, message: "Booking payment state changed; please contact support." };
   }
 
   return { success: true, message: "Payment verified and booking confirmed" };
