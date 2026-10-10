@@ -69,19 +69,19 @@ export default async function AdminDashboardPage({
               icon={DollarSign}
             />
             <MetricCard
-              title="Total Bookings"
+              title="Non-cancelled Bookings"
               value={metrics.totalBookings.toString()}
               change={metrics.bookingsChange}
               icon={Calendar}
             />
             <MetricCard
-              title="Active Customers"
+              title="Booking Customers"
               value={metrics.activeCustomers.toString()}
               change={metrics.customersChange}
               icon={Users}
             />
             <MetricCard
-              title="Avg Booking Value"
+              title="Avg Paid Booking Value"
               value={formatCurrency(metrics.avgBookingValue)}
               change={metrics.avgBookingValueChange}
               icon={TrendingUp}
