@@ -5,9 +5,9 @@ import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
  * Save a booking to Supabase
  * Uses service role client to bypass RLS and ensure booking is always created
  */
-export async function saveBooking(booking: Booking): Promise<void> {
+export async function saveBooking(booking: Booking, authenticatedUserId?: string, extensionFields?: Record<string, unknown>): Promise<void> {
   // Use service role client for inserts to ensure they always succeed
-  // Falls back to regular client if service role key is not configured
+  // The privileged client fails closed when service-role credentials are missing.
   const supabase = createServiceRoleClient();
   
   // Set assigned_cleaner_id and team_id based on cleaner_preference
@@ -25,6 +25,7 @@ export async function saveBooking(booking: Booking): Promise<void> {
     .insert({
       id: booking.id,
       booking_reference: booking.bookingReference,
+      ...(authenticatedUserId ? { user_id: authenticatedUserId } : {}),
       service_type: booking.service,
       frequency: booking.frequency,
       scheduled_date: booking.scheduledDate,
@@ -68,6 +69,7 @@ export async function saveBooking(booking: Booking): Promise<void> {
       payment_status: booking.paymentStatus,
       payment_reference: booking.paymentReference || null,
       created_at: booking.createdAt,
+      ...(extensionFields ?? {}),
     })
     .select();
 

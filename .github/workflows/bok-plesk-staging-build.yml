@@ -1,0 +1,270 @@
+name: BOK-PLESK staging build and automatic publish
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches:
+      - feature/bok-plesk-01-runtime-prep
+
+# Serialize the entire source build-to-publish pipeline, not just publish.
+# Otherwise the last waiting publish can be cancelled after its build passes.
+concurrency:
+  group: bokkie-staging-source-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: bokkie-staging-build
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+      NEXT_PUBLIC_SITE_URL: https://staging.bokkiecleaning.co.za
+      NEXT_PUBLIC_BASE_URL: https://staging.bokkiecleaning.co.za
+      PAYSTACK_PUBLIC_KEY: ${{ vars.PAYSTACK_PUBLIC_KEY }}
+      NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: ${{ vars.PAYSTACK_PUBLIC_KEY }}
+      BOKKIE_APP_ENV: staging
+      EXPECTED_SUPABASE_REF: scsrxogumimsrtbnqeas
+      BOKKIE_STAGING_OUTBOUND_DISABLED: "true"
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Validate staging build inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          for name in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY PAYSTACK_PUBLIC_KEY; do
+            if [ -z "${!name}" ]; then
+              echo "::error title=Missing staging setting::Configure $name in the bokkie-staging-build GitHub environment"
+              exit 1
+            fi
+          done
+          case "$PAYSTACK_PUBLIC_KEY" in
+            pk_test_*) ;;
+            *) echo "Staging requires a Paystack test public key"; exit 1 ;;
+          esac
+          test "$NEXT_PUBLIC_SUPABASE_URL" = "https://scsrxogumimsrtbnqeas.supabase.co"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24.21.0"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run existing regression test
+        run: npm run test:blog-sanitize
+
+      - name: Test privileged Supabase client fail-closed contract
+        run: bash scripts/check-service-role-fail-closed.sh
+
+      - name: Verify redacted booking diagnostics
+        run: bash scripts/check-booking-stage-diagnostics.sh
+
+      - name: Verify atomic V2 booking persistence
+        run: bash scripts/check-v2-atomic-persistence.sh
+
+      - name: Verify Paystack webhook signature enforcement
+        run: bash scripts/check-paystack-webhook-signature.sh
+
+      - name: Verify already-paid booking recovery
+        run: bash scripts/check-paid-booking-recovery.sh
+
+      - name: Run no-payment Paystack transaction fixture tests
+        run: npx tsx --test lib/payments/transaction-match.test.ts
+
+      - name: Verify webhook booking payment settlement
+        run: bash scripts/check-rebook-payment-verification.sh
+
+      - name: Verify booking ownership invariants
+        run: bash scripts/check-v2-booking-ownership.sh
+
+      - name: Test staging outbound guard
+        run: npx tsx --test lib/staging-guards.test.ts
+
+      - name: Verify independent admin pending queues
+        run: bash scripts/check-admin-pending-counts.sh
+
+      - name: Test verified payment timestamps
+        run: npx tsx --test lib/payments/paid-at.test.ts
+
+      - name: Verify immutable settlement payment timestamp contract
+        run: bash scripts/check-paid-at-settlement.sh
+
+      - name: Verify existing-payment recovery does not reopen checkout
+        run: bash scripts/check-existing-payment-recovery.sh
+
+      - name: Verify confirmed booking source of truth
+        run: bash scripts/check-confirmation-booking-source.sh
+
+      - name: Test isolated payment-date reporting and undated history
+        run: npx tsx --test lib/payments/payment-date-reporting.test.ts
+
+      - name: Reconcile read-only credit movements and voucher awards
+        run: npx tsx --test lib/payments/credit-movement-reporting.test.ts
+
+      - name: Verify payment-date dashboard separation
+        run: bash scripts/check-dashboard-payment-date-reporting.sh
+
+      - name: Verify optional financial metric comparison SSR guard
+        run: bash scripts/check-metric-card-optional-change.sh
+
+      - name: Verify admin financial metric invariants
+        run: bash scripts/check-admin-financial-metrics.sh
+
+      - name: Syntax-check isolated concurrency harness without executing it
+        run: python -c 'import ast, pathlib; ast.parse(pathlib.Path("scripts/test-bok-staging-atomic-concurrency.py").read_text())'
+
+      - name: Verify private atomic credit settlement migration
+        run: bash scripts/check-bok-atomic-credit-settlement.sh
+
+      - name: Verify bounded maintenance RPC containment SQL
+        run: bash scripts/check-bok-maintenance-rpc-containment.sh
+
+      - name: Verify runtime release identifier fallback
+        run: |
+          grep -Fq 'path.join(process.cwd(), "RELEASE_SHA")' app/api/health/environment/route.ts
+          grep -Fq 'releaseSha: await getReleaseSha()' app/api/health/environment/route.ts
+
+      - name: Check staging-only static asset diagnostics
+        run: bash scripts/check-static-asset-probe.sh
+
+      - name: Build standalone Next.js
+        run: npm run build
+
+      - name: Verify standalone runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .next/standalone/server.js
+          test -d .next/static
+          test -d public
+
+      - name: Package runtime for verification
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .next/standalone/.next
+          cp -R .next/static .next/standalone/.next/static
+          cp -R public .next/standalone/public
+          bash scripts/verify-plesk-runtime.sh .next/standalone
+          tar -czf /tmp/bokkie-staging-standalone.tar.gz -C .next/standalone .
+
+      - name: Dry-run standalone runtime replacement
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/bokkie-dry-run
+          cd /tmp/bokkie-dry-run
+          git init -q
+          git config user.name bokkie-ci
+          git config user.email bokkie-ci@example.invalid
+          echo old > old-source.txt
+          git add old-source.txt
+          git commit -qm fixture
+          git ls-files -z | xargs -0 -r git rm -q -f --
+          rsync -a --delete --exclude='.git/' "$GITHUB_WORKSPACE/.next/standalone/" ./
+          test -d .git
+          test ! -e old-source.txt
+          ALLOW_PUBLISH_WORKTREE_GIT=true bash "$GITHUB_WORKSPACE/scripts/verify-plesk-runtime.sh" .
+          git add --all --force
+          test -n "$(git diff --cached --name-only)"
+      - name: Upload runtime artifact (not deployed)
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: bokkie-staging-standalone
+          path: /tmp/bokkie-staging-standalone.tar.gz
+          retention-days: 3
+          if-no-files-found: error
+
+  publish:
+    name: Publish standalone to Plesk staging branch
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/feature/bok-plesk-01-runtime-prep'
+    runs-on: ubuntu-latest
+    environment: bokkie-staging-build
+    permissions:
+      contents: write
+    steps:
+      - name: Confirm controlled staging publishing is enabled
+        shell: bash
+        env:
+          ENABLED: ${{ vars.BOKKIE_ENABLE_PLESK_PUBLISH }}
+        run: |
+          if [ "$ENABLED" != "true" ]; then
+            echo "::error::BOKKIE_ENABLE_PLESK_PUBLISH must be true in bokkie-staging-build"
+            exit 1
+          fi
+
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: bokkie-staging-standalone
+          path: /tmp/bokkie-bundle
+
+      - name: Verify artifact and publish without force push
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_SHA: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          test -s /tmp/bokkie-bundle/bokkie-staging-standalone.tar.gz
+          mkdir -p /tmp/bokkie-deploy
+          tar -xzf /tmp/bokkie-bundle/bokkie-staging-standalone.tar.gz -C /tmp/bokkie-deploy
+          test -f /tmp/bokkie-deploy/server.js
+          test -d /tmp/bokkie-deploy/.next/static
+          test -d /tmp/bokkie-deploy/public
+          test -f /tmp/bokkie-deploy/.next/BUILD_ID
+          if find /tmp/bokkie-deploy -type f \( -name '.env' -o -name '.env.local' -o -name '.env.production' -o -name '*.pem' \) | grep -q .; then exit 1; fi
+          mkdir -p /tmp/bokkie-publish
+          cd /tmp/bokkie-publish
+          git init
+          git config user.name "bokkie-deploy-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://github.com/${GITHUB_REPOSITORY}.git"
+          # Never publish an outdated bundle after a newer feature commit exists.
+          latest_source="$(git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" ls-remote origin refs/heads/feature/bok-plesk-01-runtime-prep | cut -f1)"
+          if [ "$SOURCE_SHA" != "$latest_source" ]; then
+            echo "Skipping stale staging bundle: source $SOURCE_SHA; latest $latest_source"
+            exit 0
+          fi
+          git fetch --depth=1 origin deploy/staging
+          git checkout -B deploy/staging FETCH_HEAD
+          # Replace the existing tracked tree only after checking out the deploy branch.
+          git ls-files -z | xargs -0 -r git rm -q -f --
+          rsync -a --delete --exclude=.git/ /tmp/bokkie-deploy/ ./
+          test -f server.js
+          test -d .next/static
+          test -d public
+          # GitHub rejects individual files larger than 100 MiB.
+          oversized="$(find . -path './.git' -prune -o -type f -size +95M -print -quit)"
+          if [ -n "$oversized" ]; then
+            echo "::error title=Oversized deployment file::A runtime file exceeds the safe GitHub size limit"
+            exit 1
+          fi
+          printf '%s\n' "${SOURCE_SHA}" > RELEASE_SHA
+          # Passenger/Plesk watches tmp/restart.txt and restarts on the next request.
+          # Publish it with every source release so the running Next.js process reloads.
+          mkdir -p tmp
+          printf '%s\n' "${SOURCE_SHA}" > tmp/restart.txt
+          test -s tmp/restart.txt
+          test "$(cat tmp/restart.txt)" = "$SOURCE_SHA"
+
+          git add --all --force
+          git diff --cached --quiet && { echo "No runtime change"; exit 0; }
+          git commit -m "BOK-PLESK staging bundle from ${SOURCE_SHA}"
+          latest_source="$(git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" ls-remote origin refs/heads/feature/bok-plesk-01-runtime-prep | cut -f1)"
+          if [ "$SOURCE_SHA" != "$latest_source" ]; then
+            echo "Skipping stale staging push: newer source is $latest_source"
+            exit 0
+          fi
+          git -c http.extraheader="AUTHORIZATION: basic $(printf "x-access-token:%s" "$GH_TOKEN" | base64 -w0)" push origin HEAD:deploy/staging

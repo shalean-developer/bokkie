@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { assertEmailSendingAllowed } from "./staging-guards";
 import { Booking } from "./types/booking";
 import { getServiceName, getFrequencyName, formatPrice, calculatePrice } from "./pricing";
 import { fetchPricingConfig } from "./pricing-server";
@@ -16,6 +17,11 @@ export interface QuoteEmailData {
   bathrooms: number;
   additionalServices: string[];
   note?: string;
+}
+
+function createProtectedResendClient(apiKey: string): Resend {
+  assertEmailSendingAllowed();
+  return new Resend(apiKey);
 }
 
 const serviceNames: Record<string, string> = {
@@ -509,7 +515,7 @@ export async function sendQuoteEmail(data: QuoteEmailData): Promise<void> {
   validateApiKey(process.env.RESEND_API_KEY);
 
   // Initialize Resend client with API key
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
 
   // Get and validate from email
   const fromEmail = getFromEmail();
@@ -557,7 +563,7 @@ export async function sendCustomerConfirmationEmail(data: QuoteEmailData): Promi
   }
 
   // Initialize Resend client with API key
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
 
   // Use verified domain email - bookings@bokkiecleaning.co.za is the verified sender
   const fromEmail = getFromEmail();
@@ -987,7 +993,7 @@ export async function sendBookingConfirmationEmail(booking: Booking): Promise<vo
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
   // Use verified domain email - bookings@bokkiecleaning.co.za is the verified sender
   const fromEmail = getFromEmail();
   // Always send to customer's actual email address (domain is verified)
@@ -1060,7 +1066,7 @@ export async function sendBookingNotificationEmail(booking: Booking): Promise<vo
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
   // Get and validate from email
   const fromEmail = getFromEmail();
   // Always send business notifications to the configured business email
@@ -1224,7 +1230,7 @@ export async function sendContactEmail(data: ContactEmailData): Promise<void> {
   }
 
   // Initialize Resend client with API key
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
   
   // Always send business notifications to the configured business email
   const toEmail = process.env.RESEND_TO_EMAIL || "info@bokkiecleaning.co.za";
@@ -1269,7 +1275,7 @@ export async function sendContactConfirmationEmail(data: ContactEmailData): Prom
   }
 
   // Initialize Resend client with API key
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
 
   // Use verified domain email - bookings@bokkiecleaning.co.za is the verified sender
   const fromEmail = getFromEmail();
@@ -1448,7 +1454,7 @@ export async function sendPaymentLinkEmail(booking: Booking): Promise<void> {
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
   // Use verified domain email - bookings@bokkiecleaning.co.za is the verified sender
   const fromEmail = getFromEmail();
   // Always send to customer's actual email address (domain is verified)
@@ -1614,7 +1620,7 @@ export async function sendSignupConfirmationEmail(data: SignupConfirmationEmailD
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
   const fromEmail = getFromEmail();
   const toEmail = data.email;
 
@@ -1660,7 +1666,7 @@ export async function sendSignupNotificationEmail(data: SignupConfirmationEmailD
     throw new Error("RESEND_API_KEY is not configured");
   }
 
-  const resend = new Resend(process.env.RESEND_API_KEY);
+  const resend = createProtectedResendClient(process.env.RESEND_API_KEY);
   const fromEmail = getFromEmail();
   const toEmail = process.env.RESEND_TO_EMAIL || "info@bokkiecleaning.co.za";
 

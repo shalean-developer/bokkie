@@ -1,6 +1,7 @@
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 import { NextRequest, NextResponse } from "next/server";
 import { submitBooking } from "@/app/actions/submit-booking";
-import { updateRebookedBookingPayment } from "@/app/actions/rebook-payment";
+import { updateRebookedBookingPayment } from "@/lib/payments/rebook-settlement";
 import { addCreditsAfterPayment } from "@/app/actions/credits";
 import { BookingFormData } from "@/lib/types/booking";
 import { verifyWebhookSignature, verifyPayment } from "@/lib/paystack";
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     
     // Verify webhook signature for security
     const signature = request.headers.get("x-paystack-signature");
-    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const secretKey = getPaystackSecretKey();
 
     if (!secretKey) {
       console.error("PAYSTACK_SECRET_KEY is not configured");
@@ -30,16 +31,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify signature if provided (Paystack always sends it for webhooks)
-    if (signature) {
-      const isValid = verifyWebhookSignature(rawBody, signature, secretKey);
-      if (!isValid) {
-        console.error("Invalid webhook signature");
-        return NextResponse.json(
-          { success: false, message: "Invalid signature" },
-          { status: 401 }
-        );
-      }
+    // Paystack signs every webhook. Reject missing or invalid signatures.
+    if (!signature || !verifyWebhookSignature(rawBody, signature, secretKey)) {
+      console.error("Paystack webhook signature missing or invalid");
+      return NextResponse.json(
+        { success: false, message: "Invalid signature" },
+        { status: 401 }
+      );
     }
 
     // Parse the webhook event

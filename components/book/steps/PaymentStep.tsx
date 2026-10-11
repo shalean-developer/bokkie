@@ -14,6 +14,8 @@ import {
   bookLogin,
   bookSignupAndProfile,
   saveBookV2Booking,
+  getBookV2PaidStatus,
+  getConfirmedBookV2Details,
   verifyAndCompleteBookPayment,
   initializeBookPayment,
 } from "@/app/actions/book-v2";
@@ -57,7 +59,14 @@ export function PaymentStep() {
   const [authLoading2, setAuthLoading2] = useState(false);
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [alreadyPaid, setAlreadyPaid] = useState(false);
+  const [paidReference, setPaidReference] = useState("");
   const [bookingRef, setBookingRef] = useState("");
+  const [confirmedDetails, setConfirmedDetails] = useState<Awaited<ReturnType<typeof getConfirmedBookV2Details>>>(null);
+  const [confirmationLoading, setConfirmationLoading] = useState(false);
+  const [recoveryBookingReference, setRecoveryBookingReference] = useState("");
+  const [recoveryPaymentReference, setRecoveryPaymentReference] = useState("");
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
 
   const isAuthenticated = !!user;
   const isTeam = usesTeamSelection(state.service);
@@ -79,6 +88,21 @@ export function PaymentStep() {
       });
     }
   }, [user, state.customer.email, setCustomer, updateState]);
+
+  useEffect(() => {
+    const reference = state.bookingReference;
+    if (!isHydrated || !isAuthenticated || !reference) {
+      setAlreadyPaid(false);
+      return;
+    }
+    let active = true;
+    getBookV2PaidStatus(reference).then(({ paid }) => {
+      if (active) { setAlreadyPaid(paid); if (paid) setPaidReference(reference); }
+    }).catch(() => {
+      if (active) setAlreadyPaid(false);
+    });
+    return () => { active = false; };
+  }, [isHydrated, isAuthenticated, state.bookingReference]);
 
   const handleLogin = async () => {
     setAuthError("");
@@ -137,7 +161,7 @@ export function PaymentStep() {
       setAuthError("Please log in or create an account before payment");
       return;
     }
-    if (!pricing) return;
+    if (!pricing || alreadyPaid) return;
 
     setAuthError("");
     setPaymentLoading(true);
@@ -148,6 +172,13 @@ export function PaymentStep() {
     );
 
     if (!saveResult.success || !saveResult.bookingReference) {
+      if (saveResult.message === "This booking has already been paid." && state.bookingReference) {
+        setPaidReference(state.bookingReference);
+        setAlreadyPaid(true);
+        setAuthError("");
+        setPaymentLoading(false);
+        return;
+      }
       setAuthError(saveResult.message ?? "Failed to save booking");
       setPaymentLoading(false);
       return;
@@ -158,6 +189,13 @@ export function PaymentStep() {
 
     const payInit = await initializeBookPayment(saveResult.bookingReference);
     if (!payInit.success || !payInit.publicKey || !payInit.amount || !payInit.reference || !payInit.email) {
+      if (payInit.message === "This booking has already been paid.") {
+        setPaidReference(saveResult.bookingReference);
+        setAlreadyPaid(true);
+        setAuthError("");
+        setPaymentLoading(false);
+        return;
+      }
       setAuthError(payInit.message ?? "Payment initialization failed");
       setPaymentLoading(false);
       return;
@@ -173,6 +211,8 @@ export function PaymentStep() {
         form_version: "v2",
       },
       onSuccess: async (reference) => {
+        setRecoveryBookingReference(saveResult.bookingReference!);
+        setRecoveryPaymentReference(reference);
         const verifyResult = await verifyAndCompleteBookPayment(
           saveResult.bookingReference!,
           reference
@@ -183,6 +223,7 @@ export function PaymentStep() {
           return;
         }
         setConfirmed(true);
+        void loadConfirmedDetails(saveResult.bookingReference!);
         clearBookState();
         setPaymentLoading(false);
       },
@@ -195,6 +236,47 @@ export function PaymentStep() {
     });
 
     setTimeout(() => setPaymentLoading(false), 500);
+  };
+
+  const loadConfirmedDetails = async (reference: string) => {
+    setConfirmationLoading(true);
+    try {
+      setConfirmedDetails(await getConfirmedBookV2Details(reference));
+    } catch {
+      setConfirmedDetails(null);
+    } finally {
+      setConfirmationLoading(false);
+    }
+  };
+
+  const handleRecoverPayment = async () => {
+    if (!isAuthenticated || recoveryLoading) return;
+    const bookingReference = recoveryBookingReference.trim();
+    const paymentReference = recoveryPaymentReference.trim();
+    if (!bookingReference || !paymentReference) {
+      setAuthError("Enter your existing booking and Paystack references.");
+      return;
+    }
+    setRecoveryLoading(true);
+    setAuthError("");
+    try {
+      // This action verifies an EXISTING Paystack transaction; it never starts checkout.
+      const result = await verifyAndCompleteBookPayment(bookingReference, paymentReference);
+      if (!result.success) {
+        setAuthError(result.message ?? "Unable to verify existing payment.");
+        return;
+      }
+      setBookingRef(bookingReference);
+      setPaidReference(bookingReference);
+      setAlreadyPaid(true);
+      setConfirmed(true);
+      void loadConfirmedDetails(bookingReference);
+      clearBookState();
+    } catch {
+      setAuthError("Payment verification unavailable. Do not pay again; please contact support.");
+    } finally {
+      setRecoveryLoading(false);
+    }
   };
 
   if (confirmed && bookingRef) {
@@ -212,8 +294,16 @@ export function PaymentStep() {
             Reference: {bookingRef}
           </Badge>
           <div className="text-sm text-gray-600 space-y-1">
-            <p>{config.title} · {state.schedule.serviceDate} at {state.schedule.serviceTime}</p>
-            <p>{isTeam ? `Team: ${teamName}` : `${state.schedule.cleanerCount} cleaner(s)`}</p>
+            {confirmationLoading && <p>Loading confirmed booking details...</p>}
+            {confirmedDetails && (
+              <>
+                <p>{confirmedDetails.serviceType} · {confirmedDetails.serviceDate || "Date to be confirmed"} at {confirmedDetails.serviceTime || "Time to be confirmed"}</p>
+                {confirmedDetails.teamId && (
+                  <p>Team: {DEFAULT_TEAMS.find((t) => t.id === confirmedDetails.teamId)?.teamName || "Assigned team"}</p>
+                )}
+              </>
+            )}
+            {!confirmationLoading && !confirmedDetails && <p>View your booking for confirmed schedule details.</p>}
           </div>
           <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
             <Button asChild><Link href="/"><Home className="w-4 h-4" /> Back to Home</Link></Button>
@@ -311,17 +401,48 @@ export function PaymentStep() {
               <Shield className="w-3.5 h-3.5" />
               Secured by Paystack · Status: pending until paid
             </div>
+            {alreadyPaid && (paidReference || state.bookingReference) && (
+              <Alert>
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <AlertTitle>Payment already completed</AlertTitle>
+                <AlertDescription>
+                  Booking {paidReference || state.bookingReference} is confirmed and paid.
+                  <div className="mt-3">
+                    <Button variant="outline" asChild>
+                      <Link href="/dashboard/bookings"><ExternalLink className="w-4 h-4" /> View Booking</Link>
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
             {authError && isAuthenticated && (
               <Alert variant="destructive"><AlertDescription>{authError}</AlertDescription></Alert>
             )}
-            <Button
+            {!alreadyPaid && isAuthenticated && (
+              <div className="rounded-xl border border-gray-200 p-4 space-y-3">
+                <p className="text-sm font-medium text-brand-primary">Already completed payment?</p>
+                <p className="text-xs text-gray-600">Verify your existing Paystack transaction without paying again.</p>
+                <div>
+                  <Label htmlFor="recovery-booking">Booking reference</Label>
+                  <Input id="recovery-booking" className="mt-1" value={recoveryBookingReference} onChange={(e) => setRecoveryBookingReference(e.target.value)} placeholder="BOK-..." />
+                </div>
+                <div>
+                  <Label htmlFor="recovery-payment">Paystack transaction reference</Label>
+                  <Input id="recovery-payment" className="mt-1" value={recoveryPaymentReference} onChange={(e) => setRecoveryPaymentReference(e.target.value)} placeholder="bokkie-v2-..." />
+                </div>
+                <Button type="button" variant="outline" className="w-full" disabled={recoveryLoading || paymentLoading || !recoveryBookingReference.trim() || !recoveryPaymentReference.trim()} onClick={handleRecoverPayment}>
+                  {recoveryLoading ? "Verifying..." : "Verify Existing Payment"}
+                </Button>
+              </div>
+            )}
+            {!alreadyPaid && <Button
               size="lg"
               className="w-full"
               disabled={!isAuthenticated || paymentLoading}
               onClick={() => handlePay()}
             >
               {paymentLoading ? "Processing..." : "Pay Now"}
-            </Button>
+            </Button>}
             {!isAuthenticated && (
               <Alert>
                 <AlertTitle>Authentication required</AlertTitle>

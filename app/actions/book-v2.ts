@@ -1,4 +1,5 @@
 "use server";
+import { verifiedPaidAt } from "@/lib/payments/paid-at";
 
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import {
@@ -135,19 +136,6 @@ function bookingToUpdateRow(booking: Booking) {
   };
 }
 
-async function applyV2Extension(
-  state: BookFormState,
-  bookingReference: string,
-  userId?: string
-) {
-  const supabase = createServiceRoleClient();
-  const extension = getBookV2ExtensionPayload(state);
-  await supabase
-    .from("bookings")
-    .update({ ...extension, user_id: userId ?? null })
-    .eq("booking_reference", bookingReference);
-}
-
 async function buildAuthoritativePricingState(state: BookFormState): Promise<BookFormState> {
   const pricingConfig = await fetchBookPricingConfig();
   const serviceConfig = getServiceConfig(state.service);
@@ -182,6 +170,8 @@ export async function saveBookV2Booking(
   state: BookFormState,
   _userId?: string
 ): Promise<{ success: boolean; bookingReference?: string; message?: string }> {
+  let stage = "authenticate";
+  const traceId = crypto.randomUUID();
   try {
     const authClient = await createClient();
     const {
@@ -192,16 +182,19 @@ export async function saveBookV2Booking(
       return { success: false, message: "Please log in before saving this booking." };
     }
 
+    stage = "service_client";
     const supabase = createServiceRoleClient();
     const bookingReference = state.bookingReference ?? generateBookingReference();
 
-    const { data: existing } = await supabase
+    stage = "reference_lookup";
+    const { data: existing, error: existingError } = await supabase
       .from("bookings")
       .select("id, payment_status, created_at, user_id")
       .eq("booking_reference", bookingReference)
       .maybeSingle();
 
-    if (existing?.user_id && existing.user_id !== user.id) {
+    if (existingError) throw existingError;
+    if (existing && existing.user_id !== user.id) {
       return { success: false, message: "This booking belongs to another account." };
     }
 
@@ -212,7 +205,9 @@ export async function saveBookV2Booking(
       };
     }
 
+    stage = "pricing";
     const authoritativeState = await buildAuthoritativePricingState(state);
+    const extensionFields = getBookV2ExtensionPayload(authoritativeState);
     const booking = mapBookFormStateToBooking(
       authoritativeState,
       bookingReference,
@@ -222,56 +217,109 @@ export async function saveBookV2Booking(
     );
 
     if (existing) {
-      const { error: updateError } = await supabase
+      stage = "update_existing";
+      const { data: updated, error: updateError } = await supabase
         .from("bookings")
-        .update(bookingToUpdateRow(booking))
-        .eq("booking_reference", bookingReference);
+        .update({ ...bookingToUpdateRow(booking), ...extensionFields })
+        .eq("booking_reference", bookingReference)
+        .eq("user_id", user.id)
+        .select("id");
 
       if (updateError) {
         return { success: false, message: updateError.message };
       }
+      if (updated?.length !== 1) return { success: false, message: "Booking ownership could not be verified." };
     } else {
+      stage = "insert_new";
       try {
-        await saveBooking(booking);
+        await saveBooking(booking, user.id, extensionFields);
       } catch (insertErr) {
         const message = insertErr instanceof Error ? insertErr.message : "";
         if (!message.includes("bookings_booking_reference_key")) {
           throw insertErr;
         }
-        const { data: dup } = await supabase
+        stage = "duplicate_lookup";
+        const { data: dup, error: duplicateError } = await supabase
           .from("bookings")
           .select("payment_status, user_id")
           .eq("booking_reference", bookingReference)
           .maybeSingle();
-        if (dup?.user_id && dup.user_id !== user.id) {
+        if (duplicateError) throw duplicateError;
+        if (!dup || dup.user_id !== user.id) {
           return { success: false, message: "This booking belongs to another account." };
         }
         if (dup?.payment_status === "completed") {
           return { success: false, message: "This booking has already been paid." };
         }
-        const { error: retryUpdateError } = await supabase
+        stage = "duplicate_retry";
+        const { data: retried, error: retryUpdateError } = await supabase
           .from("bookings")
-          .update(bookingToUpdateRow(booking))
-          .eq("booking_reference", bookingReference);
+          .update({ ...bookingToUpdateRow(booking), ...extensionFields })
+          .eq("booking_reference", bookingReference)
+          .eq("user_id", user.id)
+          .select("id");
         if (retryUpdateError) {
           return { success: false, message: retryUpdateError.message };
         }
+        if (retried?.length !== 1) return { success: false, message: "Booking ownership could not be verified." };
       }
-    }
-
-    try {
-      await applyV2Extension(authoritativeState, bookingReference, user.id);
-    } catch (extensionError) {
-      console.warn("V2 booking extension update skipped:", extensionError);
     }
 
     return { success: true, bookingReference };
   } catch (err) {
+    const code = typeof err === "object" && err !== null && "code" in err && typeof err.code === "string"
+      ? err.code
+      : "UNCLASSIFIED";
+    console.error("[BOK-PLESK-13H02] booking save failure", {
+      stage,
+      traceId,
+      code,
+    });
     return {
       success: false,
       message: err instanceof Error ? err.message : "Failed to save booking",
     };
   }
+}
+
+/** Read-only, owner-scoped status for restoring an already-paid booking view. */
+/**
+ * Confirmation details are read from the persisted booking, not cleared client form state.
+ * Service-role access must always be scoped to the authenticated booking owner.
+ */
+export async function getConfirmedBookV2Details(reference: string) {
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user || !reference) return null;
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("bookings")
+    .select("booking_reference, service_type, scheduled_date, scheduled_time, team_id, cleaner_preference, status, payment_status, user_id")
+    .eq("booking_reference", reference)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error || !data || data.payment_status !== "completed" || data.status !== "confirmed") return null;
+  return {
+    bookingReference: data.booking_reference as string,
+    serviceType: data.service_type as string,
+    serviceDate: data.scheduled_date as string | null,
+    serviceTime: data.scheduled_time as string | null,
+    teamId: data.team_id as string | null,
+    cleanerPreference: data.cleaner_preference as string | null,
+  };
+}
+
+export async function getBookV2PaidStatus(reference: string): Promise<{ paid: boolean }> {
+  if (!reference || !/^BOK-[A-Z0-9-]+$/.test(reference)) return { paid: false };
+  const auth = await createClient();
+  const { data: { user } } = await auth.auth.getUser();
+  if (!user) return { paid: false };
+  const db = createServiceRoleClient();
+  const { data, error } = await db.from("bookings")
+    .select("payment_status")
+    .eq("booking_reference", reference)
+    .eq("user_id", user.id)
+    .maybeSingle();
+  return { paid: !error && data?.payment_status === "completed" };
 }
 
 export async function initializeBookPayment(
@@ -412,6 +460,7 @@ export async function bookLogin(email: string, password: string) {
 }
 
 type VerifiedPaystackTransaction = {
+  paid_at?: unknown;
   status: string;
   amount: number;
   currency: string;
@@ -437,6 +486,7 @@ async function verifyPaystackTransaction(
     if (!payload?.status || !payload?.data) return null;
 
     return {
+      paid_at: payload.data.paid_at,
       status: String(payload.data.status ?? ""),
       amount: Number(payload.data.amount),
       currency: String(payload.data.currency ?? ""),
@@ -472,7 +522,7 @@ export async function verifyAndCompleteBookPayment(
   const supabase = createServiceRoleClient();
   const { data: booking, error: fetchError } = await supabase
     .from("bookings")
-    .select("total_amount, payment_status, user_id")
+    .select("total_amount, payment_status, payment_reference, user_id")
     .eq("booking_reference", bookingReference)
     .maybeSingle();
 
@@ -484,7 +534,9 @@ export async function verifyAndCompleteBookPayment(
   }
 
   if (booking.payment_status === "completed") {
-    return { success: true, message: "Payment already confirmed" };
+    return booking.payment_reference === paymentReference
+      ? { success: true, message: "Payment already confirmed" }
+      : { success: false, message: "Booking was confirmed with a different payment reference." };
   }
 
   const transaction = await verifyPaystackTransaction(paymentReference, secretKey);
@@ -500,34 +552,44 @@ export async function verifyAndCompleteBookPayment(
     transaction.currency.toUpperCase() === "ZAR" &&
     metadataBookingReference === bookingReference;
 
+  // Unverified transactions must never mutate the booking or overwrite a verified payment.
   if (!verified) {
-    await supabase
-      .from("bookings")
-      .update({
-        payment_status: "failed",
-        payment_reference: paymentReference,
-        status: "pending",
-      })
-      .eq("booking_reference", bookingReference);
-
     return {
       success: false,
-      message:
-        "Payment verification failed because the transaction did not match this booking's amount, currency, or reference.",
+      message: "Payment verification failed because the transaction did not match this booking's amount, currency, or reference.",
     };
   }
 
-  const { error: updateError } = await supabase
+  const paidAt = verifiedPaidAt(transaction);
+  if (!paidAt) return { success: false, message: "Paystack did not provide a valid payment completion time." };
+
+  // Conditional update: concurrent callbacks must not overwrite a completed booking.
+  const { data: updated, error: updateError } = await supabase
     .from("bookings")
     .update({
       payment_status: "completed",
       payment_reference: paymentReference,
+      paid_at: paidAt,
       status: "confirmed",
     })
-    .eq("booking_reference", bookingReference);
+    .eq("booking_reference", bookingReference)
+    .eq("user_id", user.id)
+    .neq("payment_status", "completed")
+    .select("booking_reference");
 
   if (updateError) {
-    return { success: false, message: updateError.message };
+    return { success: false, message: "Unable to confirm payment." };
+  }
+  if (!updated?.length) {
+    const { data: latest } = await supabase
+      .from("bookings")
+      .select("payment_status, payment_reference")
+      .eq("booking_reference", bookingReference)
+      .eq("user_id", user.id)
+      .maybeSingle();
+    return latest?.payment_status === "completed" && latest.payment_reference === paymentReference
+      ? { success: true, message: "Payment already confirmed" }
+      : { success: false, message: "Booking payment state changed; please contact support." };
   }
 
   return { success: true, message: "Payment verified and booking confirmed" };

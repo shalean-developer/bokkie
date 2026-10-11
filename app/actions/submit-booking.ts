@@ -1,4 +1,5 @@
 "use server";
+import { getPaystackSecretKey } from "@/lib/paystack-config";
 
 import { BookingFormData, Booking, normalizeCleanerPreference } from "@/lib/types/booking";
 import { calculatePrice, calculateCleanerEarnings } from "@/lib/pricing";
@@ -207,9 +208,9 @@ export async function submitBooking(
       paymentStatus = "completed";
       // Use booking reference as payment reference prefix
       paymentReference = `credits-${bookingRef}`;
-    } else if (paymentReference && process.env.PAYSTACK_SECRET_KEY) {
+    } else if (paymentReference && getPaystackSecretKey()) {
       // Verify card payment
-      const verified = await verifyPayment(paymentReference, process.env.PAYSTACK_SECRET_KEY);
+      const verified = await verifyPayment(paymentReference, getPaystackSecretKey());
       paymentStatus = verified ? "completed" : "failed";
     }
 

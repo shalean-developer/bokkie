@@ -1,0 +1,94 @@
+import { NextResponse } from "next/server";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+
+export const dynamic = "force-dynamic";
+
+function getSupabaseRef() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return null;
+
+  try {
+    const host = new URL(url).hostname;
+    return host.endsWith(".supabase.co")
+      ? host.slice(0, -".supabase.co".length)
+      : host;
+  } catch {
+    return null;
+  }
+}
+
+function getPaystackMode() {
+  const key = process.env.PAYSTACK_PUBLIC_KEY ?? process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY;
+  if (!key) return "unconfigured";
+  if (key.startsWith("pk_live_")) return "live";
+  if (key.startsWith("pk_test_")) return "test";
+  return "unknown";
+}
+
+async function getReleaseSha() {
+  if (process.env.RELEASE_SHA) return process.env.RELEASE_SHA;
+  try {
+    const sha = (await readFile(path.join(process.cwd(), "RELEASE_SHA"), "utf8")).trim();
+    return /^[0-9a-f]{40}$/.test(sha) ? sha : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function GET() {
+  const configuredRef = getSupabaseRef();
+  const expectedRef = process.env.EXPECTED_SUPABASE_REF ?? null;
+  const issues: string[] = [];
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
+    issues.push("NEXT_PUBLIC_SUPABASE_URL missing");
+  }
+
+  if (!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    issues.push("NEXT_PUBLIC_SUPABASE_ANON_KEY missing");
+  }
+
+  if (expectedRef && configuredRef && expectedRef !== configuredRef) {
+    issues.push("Supabase project mismatch");
+  }
+
+  const paymentMode = getPaystackMode();
+  const isStaging = process.env.BOKKIE_APP_ENV === "staging";
+
+  if (isStaging && paymentMode !== "test") {
+    issues.push("Staging Paystack must use test public key");
+  }
+  if (isStaging && process.env.PAYSTACK_SECRET_KEY?.startsWith("sk_live_")) {
+    issues.push("Staging Paystack secret key must not be live");
+  }
+  if (isStaging && process.env.RESEND_API_KEY && process.env.BOKKIE_STAGING_OUTBOUND_DISABLED !== "true") {
+    issues.push("Staging outbound email is not explicitly disabled");
+  }
+
+  return NextResponse.json(
+    {
+      status: issues.length === 0 ? "ok" : "degraded",
+      service: "bokkie-environment",
+      timestamp: new Date().toISOString(),
+      deployment: process.env.BOKKIE_APP_ENV ?? process.env.NODE_ENV ?? "unknown",
+      releaseSha: await getReleaseSha(),
+      supabase: {
+        configuredRef,
+        expectedRef,
+        configured: Boolean(
+          process.env.NEXT_PUBLIC_SUPABASE_URL &&
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+        ),
+      },
+      paystack: {
+        publicMode: paymentMode,
+      },
+      messaging: {
+        resendConfigured: Boolean(process.env.RESEND_API_KEY),
+      },
+      issues,
+    },
+    { status: issues.length === 0 ? 200 : 503 }
+  );
+}
