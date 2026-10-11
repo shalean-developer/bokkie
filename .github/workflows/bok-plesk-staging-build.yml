@@ -121,6 +121,9 @@ jobs:
       - name: Verify admin financial metric invariants
         run: bash scripts/check-admin-financial-metrics.sh
 
+      - name: Verify private atomic credit settlement migration
+        run: bash scripts/check-bok-atomic-credit-settlement.sh
+
       - name: Verify bounded maintenance RPC containment SQL
         run: bash scripts/check-bok-maintenance-rpc-containment.sh
 
