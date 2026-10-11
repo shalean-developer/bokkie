@@ -1,6 +1,6 @@
 {
   "node": {
-    "60fd5d1770741b5552c319729b711b599c67e055d6": {
+    "605f8cbb020ff1468b307908d5aa210be051d2ac55": {
       "workers": {
         "app/auth/signup/page": {
           "moduleId": 794935,
