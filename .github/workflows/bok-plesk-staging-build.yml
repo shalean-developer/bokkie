@@ -121,6 +121,9 @@ jobs:
       - name: Verify admin financial metric invariants
         run: bash scripts/check-admin-financial-metrics.sh
 
+      - name: Syntax-check isolated concurrency harness without executing it
+        run: python -c 'import ast, pathlib; ast.parse(pathlib.Path("scripts/test-bok-staging-atomic-concurrency.py").read_text())'
+
       - name: Verify private atomic credit settlement migration
         run: bash scripts/check-bok-atomic-credit-settlement.sh
 
