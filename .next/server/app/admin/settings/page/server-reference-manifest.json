@@ -1,6 +1,6 @@
 {
   "node": {
-    "004a677f808566191c09d0f4242dac5a4e9e7089b9": {
+    "00bb47f721255cac56b8cce80755f43e29d0480c61": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 376382,
@@ -15,7 +15,7 @@
       "exportedName": "logout",
       "filename": "app/actions/auth.ts"
     },
-    "0094c523556bab98d04a2e570a5c574b7174aaefd1": {
+    "00683f9672b1cdd29623f495b76121b2be8b79bdff": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 376382,
@@ -30,7 +30,7 @@
       "exportedName": "getAllSystemSettingsAdmin",
       "filename": "app/actions/admin-settings.ts"
     },
-    "601063deb5b1d86ca62aa5f6c283489b210d639830": {
+    "60daa70021ff390e9d726ed90a2c0653439c46f53e": {
       "workers": {
         "app/admin/settings/page": {
           "moduleId": 376382,
