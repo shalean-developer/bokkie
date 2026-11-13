@@ -1,28 +1,18 @@
 import { Booking, normalizeCleanerPreference } from "@/lib/types/booking";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
-/**
- * Save a booking to Supabase
- * Uses service role client to bypass RLS and ensure booking is always created
- */
-export async function saveBooking(booking: Booking, authenticatedUserId?: string, extensionFields?: Record<string, unknown>): Promise<void> {
-  // Use service role client for inserts to ensure they always succeed
-  // The privileged client fails closed when service-role credentials are missing.
-  const supabase = createServiceRoleClient();
-  
+export function bookingInsertRow(booking: Booking, authenticatedUserId?: string, extensionFields?: Record<string, unknown>) {
   // Set assigned_cleaner_id and team_id based on cleaner_preference
   // If cleaner_preference is a team (team-a, team-b, team-c), set team_id
   // Otherwise, if it's a cleaner preference, set assigned_cleaner_id
   const normalizedPreference = normalizeCleanerPreference(booking.cleanerPreference);
   const isTeamPreference = normalizedPreference.startsWith('team-');
   const teamId = isTeamPreference ? normalizedPreference : null;
-  const assignedCleanerId = !isTeamPreference && normalizedPreference !== "no-preference" 
-    ? normalizedPreference 
+  const assignedCleanerId = !isTeamPreference && normalizedPreference !== "no-preference"
+    ? normalizedPreference
     : null;
-  
-  const { data, error } = await supabase
-    .from("bookings")
-    .insert({
+
+  return {
       id: booking.id,
       booking_reference: booking.bookingReference,
       ...(authenticatedUserId ? { user_id: authenticatedUserId } : {}),
@@ -70,7 +60,21 @@ export async function saveBooking(booking: Booking, authenticatedUserId?: string
       payment_reference: booking.paymentReference || null,
       created_at: booking.createdAt,
       ...(extensionFields ?? {}),
-    })
+    };
+}
+
+/**
+ * Save a booking to Supabase
+ * Uses service role client to bypass RLS and ensure booking is always created
+ */
+export async function saveBooking(booking: Booking, authenticatedUserId?: string, extensionFields?: Record<string, unknown>): Promise<void> {
+  // Use service role client for inserts to ensure they always succeed
+  // The privileged client fails closed when service-role credentials are missing.
+  const supabase = createServiceRoleClient();
+
+  const { data, error } = await supabase
+    .from("bookings")
+    .insert(bookingInsertRow(booking, authenticatedUserId, extensionFields))
     .select();
 
   if (error) {
@@ -101,7 +105,7 @@ export async function saveBooking(booking: Booking, authenticatedUserId?: string
  */
 export async function getBookings(): Promise<Booking[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -119,7 +123,7 @@ export async function getBookings(): Promise<Booking[]> {
  */
 export async function getBookingByReference(reference: string): Promise<Booking | null> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -143,9 +147,9 @@ export async function getBookingByReference(reference: string): Promise<Booking 
  */
 export async function getUserBookingByReferenceOrId(referenceOrId: string): Promise<Booking | null> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return null;
   }
@@ -166,7 +170,7 @@ export async function getUserBookingByReferenceOrId(referenceOrId: string): Prom
       .eq("id", referenceOrId)
       .eq("contact_email", user.email)
       .single();
-    
+
     if (result.data) {
       data = result.data;
       error = null;
@@ -193,7 +197,7 @@ export async function getUserBookingByReferenceOrId(referenceOrId: string): Prom
 export async function getBookingByPaymentReference(paymentReference: string): Promise<Booking | null> {
   try {
     const supabase = await createClient();
-    
+
     const { data, error } = await supabase
       .from("bookings")
       .select("*")
@@ -213,13 +217,13 @@ export async function getBookingByPaymentReference(paymentReference: string): Pr
     // Handle network errors and other unexpected errors
     if (error instanceof Error) {
       // Check if it's a network/fetch error
-      const isNetworkError = 
+      const isNetworkError =
         error.name === "TypeError" ||
         error.message.includes("fetch failed") ||
         error.message.includes("network") ||
         error.message.includes("ECONNREFUSED") ||
         error.message.includes("ETIMEDOUT");
-      
+
       if (isNetworkError) {
         console.error("Network error while fetching booking by payment reference:", error);
         // Return null instead of throwing to allow booking creation to proceed
@@ -239,7 +243,7 @@ export async function getBookingByPaymentReference(paymentReference: string): Pr
  */
 export async function getRecurringBookings(groupId: string): Promise<Booking[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -258,9 +262,9 @@ export async function getRecurringBookings(groupId: string): Promise<Booking[]> 
  */
 export async function getUserBookings(): Promise<Booking[]> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return [];
   }
@@ -283,7 +287,7 @@ export async function getUserBookings(): Promise<Booking[]> {
  */
 export async function getBookingsByEmail(email: string): Promise<Booking[]> {
   const supabase = await createClient();
-  
+
   const { data, error } = await supabase
     .from("bookings")
     .select("*")
@@ -305,7 +309,7 @@ export async function updateBookingStatus(
   status: Booking["status"]
 ): Promise<void> {
   const supabase = await createClient();
-  
+
   const { error } = await supabase
     .from("bookings")
     .update({
@@ -328,7 +332,7 @@ export async function updatePaymentStatus(
   paymentReference?: string
 ): Promise<void> {
   const supabase = await createClient();
-  
+
   const updates: any = {
     payment_status: paymentStatus,
     updated_at: new Date().toISOString(),
@@ -369,9 +373,9 @@ export function generateBookingId(): string {
  */
 export async function getUpcomingBookings(): Promise<Booking[]> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return [];
   }
@@ -404,9 +408,9 @@ export async function getBookingCounts(): Promise<{
   past: number;
 }> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return { upcoming: 0, today: 0, new: 0, past: 0 };
   }
@@ -429,8 +433,8 @@ export async function getBookingCounts(): Promise<{
 
   const counts = {
     upcoming: bookings.filter(
-      (b) => 
-        (b.status === "pending" || b.status === "confirmed") && 
+      (b) =>
+        (b.status === "pending" || b.status === "confirmed") &&
         b.scheduled_date >= today
     ).length,
     today: bookings.filter(
@@ -464,9 +468,9 @@ export async function getSpendingAnalytics(): Promise<{
   favoriteFrequency: string | null;
 }> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return {
       totalSpent: 0,
@@ -489,27 +493,27 @@ export async function getSpendingAnalytics(): Promise<{
   }
 
   const bookings = data || [];
-  
+
   // Calculate totals
   const totalSpent = bookings
     .filter((b) => b.payment_status === "completed")
     .reduce((sum, b) => sum + (b.total_amount || 0), 0);
-  
+
   const totalPaid = bookings
     .filter((b) => b.payment_status === "completed")
     .reduce((sum, b) => sum + (b.total_amount || 0), 0);
-  
+
   const pendingPayments = bookings
     .filter((b) => b.payment_status === "pending" && (b.status === "pending" || b.status === "confirmed"))
     .reduce((sum, b) => sum + (b.total_amount || 0), 0);
-  
+
   const completedBookings = bookings.filter((b) => b.status === "completed").length;
-  
+
   const paidBookings = bookings.filter((b) => b.payment_status === "completed");
   const averageBookingValue = paidBookings.length > 0
     ? totalPaid / paidBookings.length
     : 0;
-  
+
   // Find most booked service
   const serviceCounts: Record<string, number> = {};
   bookings.forEach((b) => {
@@ -520,7 +524,7 @@ export async function getSpendingAnalytics(): Promise<{
   const mostBookedService = Object.keys(serviceCounts).length > 0
     ? Object.entries(serviceCounts).sort((a, b) => b[1] - a[1])[0][0]
     : null;
-  
+
   // Find favorite frequency
   const frequencyCounts: Record<string, number> = {};
   bookings.forEach((b) => {
@@ -564,9 +568,9 @@ export async function getWeeklySpending(): Promise<{
   estimatedEarnings: number;
 }> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     const now = new Date();
     const dayOfWeek = now.getDay();
@@ -577,7 +581,7 @@ export async function getWeeklySpending(): Promise<{
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     weekEnd.setHours(23, 59, 59, 999);
-    
+
     return {
       weekStart,
       weekEnd,
@@ -606,7 +610,7 @@ export async function getWeeklySpending(): Promise<{
   const weekEnd = new Date(weekStart);
   weekEnd.setDate(weekStart.getDate() + 6);
   weekEnd.setHours(23, 59, 59, 999);
-  
+
   const weekStartStr = weekStart.toISOString().split('T')[0];
   const weekEndStr = weekEnd.toISOString().split('T')[0];
 
@@ -622,7 +626,7 @@ export async function getWeeklySpending(): Promise<{
   }
 
   const bookings = (data || []).map(mapDatabaseToBooking);
-  
+
   // Filter completed jobs for this week
   const completedJobs = bookings.filter((b) => {
     if (b.status !== "completed") return false;
@@ -695,9 +699,9 @@ export async function getHistoricalEarnings(): Promise<{
   }>;
 }> {
   const supabase = await createClient();
-  
+
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     return {
       totalJobs: 0,
@@ -722,16 +726,16 @@ export async function getHistoricalEarnings(): Promise<{
   }
 
   const bookings = (data || []).map(mapDatabaseToBooking);
-  
+
   // Group by month
   const monthlyMap = new Map<string, Booking[]>();
-  
+
   bookings.forEach((booking) => {
     if (!booking.scheduledDate) return;
     const date = new Date(booking.scheduledDate);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
     const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    
+
     if (!monthlyMap.has(monthKey)) {
       monthlyMap.set(monthKey, []);
     }
@@ -743,14 +747,14 @@ export async function getHistoricalEarnings(): Promise<{
     const firstJob = jobs[0];
     const date = new Date(firstJob.scheduledDate!);
     const monthName = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    
+
     const hours = jobs.reduce((sum, b) => sum + estimateJobHours(b.service, b.bedrooms, b.bathrooms), 0);
     const tips = jobs.reduce((sum, b) => sum + (b.tip || 0), 0);
     const earnings = jobs
       .filter((b) => b.paymentStatus === "completed")
       .reduce((sum, b) => sum + (b.totalAmount - (b.tip || 0)), 0);
     const total = earnings + tips;
-    
+
     return {
       month: monthName,
       monthKey,
@@ -806,12 +810,12 @@ function estimateJobHours(service: string, bedrooms: number, bathrooms: number):
 function formatWeekDate(date: Date): string {
   const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-  
+
   const day = days[date.getDay()];
   const dayNum = date.getDate();
   const month = months[date.getMonth()];
   const year = date.getFullYear();
-  
+
   return `${day} ${dayNum} ${month} ${year}`;
 }
 

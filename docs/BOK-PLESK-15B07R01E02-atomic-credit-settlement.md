@@ -1,6 +1,6 @@
 # BOK-PLESK-15B07R01E-02 — Atomic credit settlement contract
 
-Status: P0 OPEN. This document is a migration prerequisite, not an applied permission change.
+Status: P0 OPEN on hosted environments. Source remediation and local verification are prepared in [the 13 November fix record](BOK-credit-settlement-fix-2026-11-13.md); no hosted migration or cutover has occurred.
 
 ## Proved from current code and staging schema
 - `app/actions/credits.ts` is a `"use server"` module exporting `addCreditsAfterPayment(userId,amount,paymentMethod,paymentReference,...)`. That exported action has no independent caller authorization or provider verification.

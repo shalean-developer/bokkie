@@ -1,9 +1,12 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { CreditTransaction, mapDatabaseToCreditTransaction } from "@/lib/storage/credits-supabase";
+import { randomUUID } from "node:crypto";
+import { creditAmountInCents } from "@/lib/payments/credit-payment-match";
+import { getPaystackSecretKey, getPaystackPublicKey } from "@/lib/paystack-config";
 import { EFTPaymentSubmission } from "@/lib/storage/eft-supabase";
-import { submitEFTPayment, verifyEFTPayment, getUserEFTSubmissions } from "@/lib/storage/eft-supabase";
+import { submitEFTPayment, getUserEFTSubmissions } from "@/lib/storage/eft-supabase";
 
 export interface CreditActionResult {
   success: boolean;
@@ -99,222 +102,13 @@ export async function getCreditTransactionsAction(
 }
 
 /**
- * Use credits for a booking
- */
-export async function useCreditsForBooking(
-  amount: number,
-  bookingReference: string
-): Promise<CreditActionResult> {
-  try {
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return {
-        success: false,
-        error: "User must be logged in to use credits",
-      };
-    }
-
-    // Get balance BEFORE updating to ensure accurate transaction record
-    const { data: balanceBeforeData, error: balanceBeforeError } = await supabase
-      .from("user_credits")
-      .select("balance")
-      .eq("user_id", user.id)
-      .single();
-
-    const balanceBefore = balanceBeforeError || !balanceBeforeData 
-      ? 0 
-      : parseFloat(balanceBeforeData.balance || "0");
-
-    // Call the database function to update balance atomically
-    const { data: balanceData, error: balanceError } = await supabase.rpc(
-      "update_credit_balance",
-      {
-        p_user_id: user.id,
-        p_amount: amount,
-        p_transaction_type: "usage",
-      }
-    );
-
-    if (balanceError) {
-      console.error("Failed to update credit balance:", balanceError);
-      return {
-        success: false,
-        error: balanceError.message || "Failed to use credits",
-      };
-    }
-
-    const newBalance = balanceData as number;
-    
-    // Verify the balance was actually updated correctly
-    if (Math.abs(newBalance - (balanceBefore - amount)) > 0.01) {
-      console.error(
-        `Balance mismatch: expected ${balanceBefore - amount}, got ${newBalance}. ` +
-        `This may indicate a race condition or concurrent transaction.`
-      );
-    }
-
-    // Create transaction record
-    const { data: transactionData, error: transactionError } = await supabase
-      .from("credit_transactions")
-      .insert({
-        user_id: user.id,
-        transaction_type: "usage",
-        amount: amount,
-        balance_before: balanceBefore, // Use the actual balance before deduction
-        balance_after: newBalance,
-        payment_reference: bookingReference,
-        status: "completed",
-        metadata: {
-          booking_reference: bookingReference,
-          type: "booking_payment",
-        },
-      })
-      .select()
-      .single();
-
-    if (transactionError) {
-      console.error("Failed to create transaction record:", transactionError);
-      // Balance was already updated, so we still return success
-      return {
-        success: true,
-        balance: newBalance,
-      };
-    }
-
-    return {
-      success: true,
-      balance: newBalance,
-      transactionId: transactionData.id,
-    };
-  } catch (error) {
-    console.error("Error using credits for booking:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to use credits",
-    };
-  }
-}
-
-/**
- * Add credits after payment
- * For Paystack (card) payments: status is "completed" and balance is updated immediately
- * For EFT payments: status is "pending" initially, balance is updated when admin approves
- */
-export async function addCreditsAfterPayment(
-  userId: string,
-  amount: number,
-  paymentMethod: "card" | "eft",
-  paymentReference: string,
-  metadata?: Record<string, any>,
-  status: "pending" | "completed" = "completed"
-): Promise<CreditActionResult> {
-  try {
-    const supabase = await createClient();
-
-    // Get balance BEFORE updating to ensure accurate transaction record
-    const { data: balanceBeforeData, error: balanceBeforeError } = await supabase
-      .from("user_credits")
-      .select("balance")
-      .eq("user_id", userId)
-      .single();
-
-    const balanceBefore = balanceBeforeError || !balanceBeforeData 
-      ? 0 
-      : parseFloat(balanceBeforeData.balance || "0");
-
-    let newBalance = balanceBefore;
-    
-    // Only update balance if status is "completed"
-    // For EFT payments with "pending" status, balance will be updated when admin approves
-    if (status === "completed") {
-      // Call the database function to update balance atomically
-      const { data: balanceData, error: balanceError } = await supabase.rpc(
-        "update_credit_balance",
-        {
-          p_user_id: userId,
-          p_amount: amount,
-          p_transaction_type: "purchase",
-        }
-      );
-
-      if (balanceError) {
-        console.error("Failed to update credit balance:", balanceError);
-        return {
-          success: false,
-          error: balanceError.message || "Failed to add credits",
-        };
-      }
-
-      newBalance = balanceData as number;
-      
-      // Verify the balance was actually updated correctly
-      if (Math.abs(newBalance - (balanceBefore + amount)) > 0.01) {
-        console.error(
-          `Balance mismatch: expected ${balanceBefore + amount}, got ${newBalance}. ` +
-          `This may indicate a race condition or concurrent transaction.`
-        );
-      }
-    } else {
-      // For pending transactions, balance_after should equal balance_before
-      newBalance = balanceBefore;
-    }
-
-    // Create transaction record
-    const { data: transactionData, error: transactionError } = await supabase
-      .from("credit_transactions")
-      .insert({
-        user_id: userId,
-        transaction_type: "purchase",
-        amount: amount,
-        balance_before: balanceBefore,
-        balance_after: newBalance,
-        payment_method: paymentMethod,
-        payment_reference: paymentReference,
-        status: status,
-        metadata: metadata || {},
-      })
-      .select()
-      .single();
-
-    if (transactionError) {
-      console.error("Failed to create transaction record:", transactionError);
-      // If status was completed, balance was already updated, so we still return success
-      if (status === "completed") {
-        return {
-          success: true,
-          balance: newBalance,
-        };
-      }
-      return {
-        success: false,
-        error: transactionError.message || "Failed to create transaction",
-      };
-    }
-
-    return {
-      success: true,
-      balance: newBalance,
-      transactionId: transactionData.id,
-    };
-  } catch (error) {
-    console.error("Error adding credits after payment:", error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to add credits",
-    };
-  }
-}
-
-/**
  * Initialize credit purchase payment
  */
 export async function initializeCreditPurchase(
   amount: number
 ): Promise<CreditPurchaseInitResult> {
   try {
-    if (!process.env.PAYSTACK_PUBLIC_KEY) {
+    if (!getPaystackPublicKey() || !getPaystackSecretKey()) {
       return {
         success: false,
         message: "Payment gateway is not configured",
@@ -332,7 +126,7 @@ export async function initializeCreditPurchase(
     }
 
     // Validate amount
-    if (amount < 20 || amount > 5000) {
+    if (!Number.isFinite(amount) || amount < 20 || amount > 5000 || Math.abs(amount * 100 - Math.round(amount * 100)) > 0.000001) {
       return {
         success: false,
         message: "Amount must be between R20 and R5000",
@@ -340,15 +134,21 @@ export async function initializeCreditPurchase(
     }
 
     // Generate payment reference
-    const reference = `credit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const reference = `credit-${randomUUID()}`;
 
     // Convert amount to cents (Paystack uses smallest currency unit)
     // Round to ensure we have a valid integer (Paystack requirement)
-    const amountInCents = Math.round(amount * 100);
+    const amountInCents = creditAmountInCents(amount);
+    const secret = getPaystackSecretKey()!;
+    const { error: intentError } = await createServiceRoleClient().from("credit_payment_intents").insert({
+      reference, user_id: user.id, email: user.email.toLowerCase(), amount_cents: amountInCents,
+      environment: secret.startsWith("sk_test_") ? "test" : "live",
+    });
+    if (intentError) throw new Error("Unable to save credit purchase intent");
 
     return {
       success: true,
-      publicKey: process.env.PAYSTACK_PUBLIC_KEY,
+      publicKey: getPaystackPublicKey()!,
       amount: amountInCents,
       email: user.email,
       reference,
@@ -432,7 +232,7 @@ export async function submitEFTPaymentAction(
     }
 
     // Validate amount
-    if (amount < 20 || amount > 5000) {
+    if (!Number.isFinite(amount) || amount < 20 || amount > 5000 || Math.abs(amount * 100 - Math.round(amount * 100)) > 0.000001) {
       return {
         success: false,
         error: "Amount must be between R20 and R5000",
@@ -452,26 +252,6 @@ export async function submitEFTPaymentAction(
         success: false,
         error: result.error || "Failed to submit EFT payment",
       };
-    }
-
-    // Create pending credit transaction (balance will be updated when admin approves)
-    const creditsResult = await addCreditsAfterPayment(
-      user.id,
-      amount,
-      "eft",
-      referenceNumber,
-      {
-        type: "eft_credit_purchase",
-        eft_submission_id: result.submissionId,
-      },
-      "pending" // Create as pending - admin needs to approve
-    );
-
-    if (!creditsResult.success) {
-      console.error("Failed to create pending credit transaction:", creditsResult.error);
-      // EFT submission was created, but transaction creation failed
-      // This is not ideal, but we'll still return success for the submission
-      // Admin can manually create the transaction if needed
     }
 
     return {
@@ -536,126 +316,13 @@ export async function verifyEFTPaymentAction(
       };
     }
 
-    // Fetch submission details BEFORE verification to ensure we have the data
-    // This prevents issues where verification succeeds but we can't fetch the data afterward
-    const { data: submissionData, error: submissionError } = await supabase
-      .from("eft_payment_submissions")
-      .select("user_id, amount, reference_number, status")
-      .eq("id", submissionId)
-      .single();
-
-    if (submissionError || !submissionData) {
-      return {
-        success: false,
-        error: submissionError?.message || "Failed to fetch EFT submission details",
-      };
-    }
-
-    // Check if already processed
-    if (submissionData.status !== "pending") {
-      return {
-        success: false,
-        error: `Submission already ${submissionData.status}`,
-      };
-    }
-
-    // Verify the EFT payment
-    const verifyResult = await verifyEFTPayment(
-      submissionId,
-      user.id,
-      approved,
-      rejectionReason
-    );
-
-    if (!verifyResult.success) {
-      return {
-        success: false,
-        error: verifyResult.error || "Failed to verify EFT payment",
-      };
-    }
-
-    // If approved, update pending transaction to completed and allocate credits
-    if (approved) {
-      // Find the pending transaction for this EFT submission
-      const { data: pendingTransaction, error: transactionError } = await supabase
-        .from("credit_transactions")
-        .select("id, balance_before, amount")
-        .eq("user_id", submissionData.user_id)
-        .eq("payment_reference", submissionData.reference_number)
-        .eq("payment_method", "eft")
-        .eq("status", "pending")
-        .eq("transaction_type", "purchase")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single();
-
-      if (transactionError || !pendingTransaction) {
-        console.error("Pending transaction not found for EFT approval:", transactionError);
-        // Fallback: create a new completed transaction
-        const creditsResult = await addCreditsAfterPayment(
-          submissionData.user_id,
-          parseFloat(submissionData.amount),
-          "eft",
-          submissionData.reference_number,
-          {
-            type: "eft_credit_purchase",
-            eft_submission_id: submissionId,
-          },
-          "completed"
-        );
-
-        if (!creditsResult.success) {
-          console.error("Failed to add credits after EFT verification:", creditsResult.error);
-          return {
-            success: false,
-            error: creditsResult.error || "Failed to add credits",
-          };
-        }
-      } else {
-        // Update the pending transaction to completed and update balance
-        const balanceBefore = parseFloat(pendingTransaction.balance_before || "0");
-        const amount = parseFloat(pendingTransaction.amount || submissionData.amount);
-        
-        // Update balance atomically
-        const { data: balanceData, error: balanceError } = await supabase.rpc(
-          "update_credit_balance",
-          {
-            p_user_id: submissionData.user_id,
-            p_amount: amount,
-            p_transaction_type: "purchase",
-          }
-        );
-
-        if (balanceError) {
-          console.error("Failed to update credit balance:", balanceError);
-          return {
-            success: false,
-            error: balanceError.message || "Failed to update balance",
-          };
-        }
-
-        const newBalance = balanceData as number;
-
-        // Update transaction status to completed
-        const { error: updateError } = await supabase
-          .from("credit_transactions")
-          .update({
-            status: "completed",
-            balance_after: newBalance,
-            metadata: {
-              type: "eft_credit_purchase",
-              eft_submission_id: submissionId,
-              approved_at: new Date().toISOString(),
-            },
-          })
-          .eq("id", pendingTransaction.id);
-
-        if (updateError) {
-          console.error("Failed to update transaction status:", updateError);
-          // Balance was already updated, so we still return success
-        }
-      }
-    }
+    // SQL checks the administrator against trusted Auth app metadata and locks the
+    // submission. Approval, balance and ledger commit together; retries replay.
+    const { error } = await createServiceRoleClient().rpc("settle_eft_credit_private", {
+      p_submission_id: submissionId, p_admin_id: user.id, p_approved: approved,
+      p_rejection_reason: rejectionReason ?? null,
+    });
+    if (error) return { success: false, error: "EFT decision could not be settled" };
 
     return {
       success: true,

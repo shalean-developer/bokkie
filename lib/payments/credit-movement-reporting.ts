@@ -2,10 +2,11 @@
 export type CreditLedgerRow = {
   id:string; transaction_type:string; status:string; amount:number|string;
   balance_before:number|string; balance_after:number|string; created_at:string;
+  metadata?: {operation_key?:string};
 };
 export type VoucherRedemptionRow = {
   id:string; user_voucher_id:string; voucher_type:string; value:number|string;
-  redeemed_at:string;
+  redeemed_at:string; ledger_transaction_id?:string|null;
 };
 export type CreditMovementSummary = {
   cashPurchases:number; creditUsage:number;
@@ -31,7 +32,7 @@ export function summarizeCreditMovements(
   openingBalance:number|string,actualBalance:number|string
 ):CreditMovementSummary {
   const ids=new Set<string>();
-  let purchases=0,usage=0;
+  let purchases=0,usage=0,voucherCredits=0;
   const completed=transactions.filter(t=>{
     if (!t.id||ids.has(t.id)) throw new Error("Duplicate credit transaction");
     ids.add(t.id);
@@ -39,7 +40,10 @@ export function summarizeCreditMovements(
   }).sort((a,b)=>time(a.created_at)-time(b.created_at)||a.id.localeCompare(b.id));
   for(const t of completed){
     const amount=cents(t.amount);
-    if(t.transaction_type==="purchase") purchases+=amount;
+    if(t.transaction_type==="purchase") {
+      if(t.metadata?.operation_key?.startsWith("voucher:credit:")) voucherCredits+=amount;
+      else purchases+=amount;
+    }
     else if(t.transaction_type==="usage") usage+=amount;
     else throw new Error("Unsupported completed credit transaction type");
     const delta=t.transaction_type==="usage"?-amount:amount;
@@ -54,11 +58,12 @@ export function summarizeCreditMovements(
     if(v.voucher_type!=="credit") continue;
     if(!v.user_voucher_id) throw new Error("Voucher assignment ID required");
     rawVouchers+=cents(v.value);
-    const previous=assignmentMap.get(v.user_voucher_id);
+    const assignmentKey=v.ledger_transaction_id ?? v.user_voucher_id;
+    const previous=assignmentMap.get(assignmentKey);
     if(previous&&cents(previous.value)!==cents(v.value))
       throw new Error("Conflicting voucher assignment values");
     if(!previous||time(v.redeemed_at)>time(previous.redeemed_at))
-      assignmentMap.set(v.user_voucher_id,v);
+      assignmentMap.set(assignmentKey,v);
   }
   const canonical=[...assignmentMap.values()];
   const unique=canonical.reduce((sum,v)=>sum+cents(v.value),0);
@@ -66,11 +71,19 @@ export function summarizeCreditMovements(
   // a positive gap between consecutive completed ledger balances.
   let supported=0,previousBalance=cents(openingBalance),previousTime=-Infinity;
   const applied=new Set<string>();
+  for(const v of canonical.filter(v=>v.ledger_transaction_id)) {
+    const ledger=completed.find(t=>t.id===v.ledger_transaction_id);
+    if(!ledger || !ledger.metadata?.operation_key?.startsWith("voucher:credit:") || cents(ledger.amount)!==cents(v.value))
+      throw new Error("Voucher ledger link mismatch");
+    supported+=cents(v.value);
+    applied.add(v.ledger_transaction_id!);
+  }
+  if(supported!==voucherCredits) throw new Error("Voucher ledger history incomplete");
   function reconcileGap(nextBalance:number,nextTime:number){
     const gap=nextBalance-previousBalance;
     const candidates=canonical.filter(v=>{
       const t=time(v.redeemed_at);
-      return t>previousTime&&t<=nextTime&&!applied.has(v.user_voucher_id);
+      return !v.ledger_transaction_id&&t>previousTime&&t<=nextTime&&!applied.has(v.user_voucher_id);
     });
     const value=candidates.reduce((sum,v)=>sum+cents(v.value),0);
     if(gap>0&&gap===value){
