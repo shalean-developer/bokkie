@@ -59,3 +59,21 @@ test("ignores pending purchases and non-credit vouchers",()=>{
  assert.equal(r.cashPurchases,0);
  assert.equal(r.recordedVoucherHistory,0);
 });
+
+test("atomic voucher ledger awards are counted once and are not cash purchases",()=>{
+ const ledger={...p("voucher-ledger","purchase",50,0,50,d("15:00:00")),metadata:{operation_key:"voucher:credit:fixture"}};
+ const award={...v("award","assignment",50,d("15:00:00")),ledger_transaction_id:"voucher-ledger"};
+ const r=summarizeCreditMovements([ledger],[award],0,50);
+ assert.equal(r.cashPurchases,0);assert.equal(r.balanceSupportedVoucherAwards,50);
+ assert.equal(r.expectedBalance,50);assert.equal(r.reconciliationStatus,"matched");
+});
+test("repurchasing and redeeming the same voucher assignment preserves both ledger awards",()=>{
+ const rows=[
+  {...p("v1","purchase",50,0,50,d("15:00:00")),metadata:{operation_key:"voucher:credit:fixture:one"}},
+  {...p("v2","purchase",50,50,100,d("16:00:00")),metadata:{operation_key:"voucher:credit:fixture:two"}},
+ ];
+ const history=[{...v("h1","assignment",50,d("15:00:00")),ledger_transaction_id:"v1"},{...v("h2","assignment",50,d("16:00:00")),ledger_transaction_id:"v2"}];
+ const r=summarizeCreditMovements(rows,history,0,100);
+ assert.equal(r.cashPurchases,0);assert.equal(r.balanceSupportedVoucherAwards,100);
+ assert.equal(r.duplicateHistoryValue,0);assert.equal(r.reconciliationStatus,"matched");
+});

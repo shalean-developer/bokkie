@@ -1,6 +1,7 @@
 "use server";
+import { settleVoucherPayment } from "@/lib/payments/voucher-settlement";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 export interface Voucher {
   id: string;
@@ -518,7 +519,7 @@ export async function purchaseVoucher(
     const amountInCents = Math.round(Number(voucherData.purchase_price) * 100);
 
     // Create pending purchase record
-    const { error: pendingError } = await supabase
+    const { error: pendingError } = await createServiceRoleClient()
       .from("pending_voucher_purchases")
       .insert({
         user_id: user.id,
@@ -584,32 +585,8 @@ export async function completeVoucherPurchase(
       };
     }
 
-    const { data, error } = await supabase.rpc("purchase_voucher", {
-      p_user_id: user.id,
-      p_voucher_id: voucherId,
-      p_payment_reference: paymentReference,
-    });
-
-    if (error) {
-      console.error("Error completing voucher purchase:", error);
-      return {
-        success: false,
-        message: error.message || "Error completing voucher purchase",
-      };
-    }
-
-    if (!data || data.length === 0) {
-      return {
-        success: false,
-        message: "Failed to complete voucher purchase",
-      };
-    }
-
-    const result = data[0];
-    return {
-      success: result.success,
-      message: result.message,
-    };
+    await settleVoucherPayment(paymentReference, user.id, voucherId);
+    return { success: true, message: "Voucher purchase confirmed" };
   } catch (error) {
     console.error("Error completing voucher purchase:", error);
     return {

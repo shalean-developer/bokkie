@@ -13,14 +13,14 @@ export async function getUserCreditMovementReport(userId: string) {
         .order("created_at", { ascending: true }).range(offset, offset + 499);
       const { data, error } = await q;
       if (error) throw new Error("Credit movement history unavailable");
-      rows.push(...(data ?? []));
+      rows.push(...((data ?? []) as unknown as Record<string, unknown>[]));
       if (!data || data.length < 500) break;
     }
     return rows;
   };
   const [transactions, vouchers, balance] = await Promise.all([
-    fetchAll("credit_transactions", "id,transaction_type,status,amount,balance_before,balance_after,created_at"),
-    fetchAll("voucher_usage_history", "id,user_voucher_id,voucher_type,value,redeemed_at,created_at"),
+    fetchAll("credit_transactions", "id,transaction_type,status,amount,balance_before,balance_after,created_at,metadata"),
+    fetchAll("voucher_usage_history", "id,user_voucher_id,voucher_type,value,redeemed_at,created_at,ledger_transaction_id"),
     db.from("user_credits").select("balance").eq("user_id", userId).maybeSingle(),
   ]);
   if (balance.error || !balance.data) throw new Error("Credit balance unavailable");

@@ -8,8 +8,8 @@ import { saveBooking, generateBookingId, generateBookingReference, getBookingByP
 import { sendBookingConfirmationEmail, sendBookingNotificationEmail } from "@/lib/email";
 import { verifyPayment } from "@/lib/paystack";
 import { validateDiscountCode, recordDiscountCodeUsage } from "@/app/actions/discount";
-import { useCreditsForBooking } from "@/app/actions/credits";
-import { createClient } from "@/lib/supabase/server";
+import { saveCreditBookings, findSettledCreditBooking } from "@/lib/payments/credit-bookings";
+import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 import { getSystemSettings, checkTeamAvailability } from "@/lib/supabase/booking-data";
 import { generateRecurringGroupId, calculateRecurringDates } from "@/lib/utils/recurring-bookings";
 
@@ -125,6 +125,10 @@ export async function submitBooking(
   }
 
   try {
+    if (paymentMethod === "credits") {
+      const replay = await findSettledCreditBooking(data);
+      if (replay) return replay;
+    }
     // Fetch pricing configuration from database
     const pricingConfig = await fetchPricingConfig();
     
@@ -173,44 +177,19 @@ export async function submitBooking(
       }
     }
 
+    // Credits use a separate transaction that saves every visit and the ledger
+    // together. The caller never supplies the charged amount or operation key.
+    if (paymentMethod === "credits") {
+      return await saveCreditBookings(data, priceBreakdown, normalizedPreference);
+    }
+
     // Handle payment based on payment method
     let paymentStatus: "pending" | "completed" | "failed" = "pending";
     
-    if (paymentMethod === "credits") {
-      // Deduct credits for booking payment
-      const supabase = await createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        return {
-          success: false,
-          message: "User must be logged in to use credits",
-          errors: { payment: "Please log in to use ShalCred credits" },
-        };
-      }
-
-      // Generate booking reference first for credit transaction
-      const bookingRef = generateBookingReference();
-      
-      const creditsResult = await useCreditsForBooking(
-        priceBreakdown.total,
-        bookingRef
-      );
-
-      if (!creditsResult.success) {
-        return {
-          success: false,
-          message: creditsResult.error || "Failed to use credits",
-          errors: { payment: creditsResult.error || "Insufficient credits" },
-        };
-      }
-
-      paymentStatus = "completed";
-      // Use booking reference as payment reference prefix
-      paymentReference = `credits-${bookingRef}`;
-    } else if (paymentReference && getPaystackSecretKey()) {
+    const verificationKey = getPaystackSecretKey();
+    if (paymentReference && verificationKey) {
       // Verify card payment
-      const verified = await verifyPayment(paymentReference, getPaystackSecretKey());
+      const verified = await verifyPayment(paymentReference, verificationKey);
       paymentStatus = verified ? "completed" : "failed";
     }
 
@@ -229,13 +208,7 @@ export async function submitBooking(
       }
     }
 
-    // Generate booking reference (reuse if already generated for credits)
-    let bookingReference: string;
-    if (paymentMethod === "credits" && paymentReference?.startsWith("credits-")) {
-      bookingReference = paymentReference.replace("credits-", "");
-    } else {
-      bookingReference = generateBookingReference();
-    }
+    const bookingReference = generateBookingReference();
 
     // Determine assigned cleaner ID (reuse normalizedPreference from above)
     // normalizedPreference is already defined above for team availability check
@@ -309,7 +282,7 @@ export async function submitBooking(
       createdAt: new Date().toISOString(),
       totalAmount: priceBreakdown.total,
       paymentStatus: finalPaymentStatus,
-      paymentReference: paymentMethod === "credits" ? `credits-${bookingReference}` : paymentReference,
+      paymentReference: paymentReference,
       status: finalStatus,
       // Price breakdown fields
       subtotal: priceBreakdown.subtotal,
@@ -348,7 +321,7 @@ export async function submitBooking(
             createdAt: new Date().toISOString(),
             totalAmount: priceBreakdown.total,
             paymentStatus: finalPaymentStatus, // Mark as paid if payment completed
-            paymentReference: paymentMethod === "credits" ? `credits-${bookingReference}` : paymentReference, // Same payment reference
+            paymentReference: paymentReference, // Same payment reference
             status: finalStatus, // Mark as confirmed if payment completed
             // Price breakdown fields (same as first booking)
             subtotal: priceBreakdown.subtotal,
@@ -436,7 +409,7 @@ export async function submitBooking(
           // process referral rewards
           // Note: The booking was just saved, so count will be 1, meaning this is the first
           if (bookingCount === 1) {
-            const { error: referralError } = await supabase.rpc(
+            const { error: referralError } = await createServiceRoleClient().rpc(
               "process_referral_rewards",
               {
                 p_referee_id: userId,

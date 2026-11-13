@@ -2,10 +2,10 @@ import { getPaystackSecretKey } from "@/lib/paystack-config";
 import { NextRequest, NextResponse } from "next/server";
 import { submitBooking } from "@/app/actions/submit-booking";
 import { updateRebookedBookingPayment } from "@/lib/payments/rebook-settlement";
-import { addCreditsAfterPayment } from "@/app/actions/credits";
+import { settleVoucherPayment } from "@/lib/payments/voucher-settlement";
+import { settleCreditPayment } from "@/lib/payments/credit-settlement";
 import { BookingFormData } from "@/lib/types/booking";
 import { verifyWebhookSignature, verifyPayment } from "@/lib/paystack";
-import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 /**
  * Paystack webhook handler for payment verification
@@ -67,123 +67,22 @@ export async function POST(request: NextRequest) {
         const isVoucherPurchase = reference.startsWith("voucher-");
 
         if (isVoucherPurchase) {
-          // Get pending purchase record using service role client (webhooks don't have user context)
-          const supabase = createServiceRoleClient();
-          const { data: pendingPurchase, error: pendingError } = await supabase
-            .from("pending_voucher_purchases")
-            .select("user_id, voucher_id, amount")
-            .eq("payment_reference", reference)
-            .eq("status", "pending")
-            .single();
-
-          if (pendingError || !pendingPurchase) {
-            console.error("Pending voucher purchase not found:", reference, pendingError);
-            return NextResponse.json(
-              { success: false, message: "Pending purchase not found" },
-              { status: 400 }
-            );
+          try {
+            await settleVoucherPayment(reference);
+            return NextResponse.json({success:true,message:"Voucher purchase confirmed"});
+          } catch {
+            return NextResponse.json({success:false,message:"Voucher settlement unavailable"},{status:503});
           }
-
-          // Complete voucher purchase using database function directly
-          // Use service role client since webhooks don't have user authentication
-          const { data: voucherResult, error: voucherError } = await supabase.rpc("purchase_voucher", {
-            p_user_id: pendingPurchase.user_id,
-            p_voucher_id: pendingPurchase.voucher_id,
-            p_payment_reference: reference,
-          });
-
-          if (voucherError) {
-            console.error("Error completing voucher purchase:", voucherError);
-            return NextResponse.json(
-              { success: false, message: voucherError.message || "Failed to complete voucher purchase" },
-              { status: 400 }
-            );
-          }
-
-          if (!voucherResult || voucherResult.length === 0 || !voucherResult[0].success) {
-            console.error("Failed to complete voucher purchase:", voucherResult?.[0]?.message || "Unknown error");
-            return NextResponse.json(
-              { success: false, message: voucherResult?.[0]?.message || "Failed to complete voucher purchase" },
-              { status: 400 }
-            );
-          }
-
-          console.log("Voucher purchased successfully via webhook:", reference, voucherResult[0]);
-          return NextResponse.json({
-            success: true,
-            message: "Voucher purchase confirmed",
-            reference: reference,
-          });
         }
 
         // Check if this is a credit purchase
-        const isCreditPurchase = metadata.type === "credit_purchase";
-        
+        const isCreditPurchase = reference.startsWith("credit-");
         if (isCreditPurchase) {
-          // Get user ID from customer email
-          const customerEmail = transaction.customer?.email || transaction.email;
-          if (!customerEmail) {
-            console.error("Customer email not found in transaction for credit purchase:", reference);
-            return NextResponse.json(
-              { success: false, message: "Customer email not found" },
-              { status: 400 }
-            );
-          }
-
-          const supabase = await createClient();
-          
-          // Try to find user by email in auth.users
-          // Note: This requires admin access, so we'll use a different approach
-          // Get user from profiles table first
-          const { data: profileData } = await supabase
-            .from("profiles")
-            .select("id, email")
-            .eq("email", customerEmail)
-            .single();
-
-          let userId: string | null = profileData?.id || null;
-
-          // If not found in profiles, try to get from auth.users via admin API
-          // For now, we'll log and handle gracefully
-          if (!userId) {
-            console.warn("User not found in profiles for email:", customerEmail);
-            // In production, you might want to use Supabase Admin API here
-            // For now, we'll return an error and handle it manually
-            return NextResponse.json(
-              { success: false, message: "User account not found. Please contact support." },
-              { status: 400 }
-            );
-          }
-
-          // Get amount from transaction (convert from cents to Rands)
-          const amount = transaction.amount ? transaction.amount / 100 : 0;
-
-          // Add credits
-          const creditsResult = await addCreditsAfterPayment(
-            userId,
-            amount,
-            "card",
-            reference,
-            {
-              type: "credit_purchase",
-              amount: amount,
-              paystack_reference: reference,
-            }
-          );
-
-          if (creditsResult.success) {
-            console.log("Credits added successfully via webhook:", reference);
-            return NextResponse.json({
-              success: true,
-              message: "Credit purchase confirmed",
-              reference: reference,
-            });
-          } else {
-            console.error("Failed to add credits:", creditsResult.error);
-            return NextResponse.json(
-              { success: false, message: creditsResult.error || "Failed to add credits" },
-              { status: 400 }
-            );
+          try {
+            await settleCreditPayment(reference);
+            return NextResponse.json({ success: true, message: "Credit purchase confirmed" });
+          } catch {
+            return NextResponse.json({ success: false, message: "Credit settlement unavailable" }, { status: 503 });
           }
         }
 
