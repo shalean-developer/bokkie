@@ -1,5 +1,7 @@
 "use server";
 
+import { getPaystackPublicKey } from "@/lib/paystack-config";
+
 import { BookingFormData } from "@/lib/types/booking";
 import { calculatePrice } from "@/lib/pricing";
 import { fetchPricingConfig } from "@/lib/pricing-server";
@@ -23,7 +25,8 @@ export async function initializePaymentWithAmount(
   amount: number,
   email: string
 ): Promise<PaymentInitResult> {
-  if (!process.env.PAYSTACK_PUBLIC_KEY) {
+  const publicKey = getPaystackPublicKey();
+  if (!publicKey) {
     return {
       success: false,
       message: "Payment gateway is not configured",
@@ -41,7 +44,7 @@ export async function initializePaymentWithAmount(
 
     return {
       success: true,
-      publicKey: process.env.PAYSTACK_PUBLIC_KEY,
+      publicKey,
       amount: amountInCents,
       email,
       reference,
@@ -62,7 +65,8 @@ export async function initializePayment(
   bookingData: BookingFormData,
   email: string
 ): Promise<PaymentInitResult> {
-  if (!process.env.PAYSTACK_PUBLIC_KEY) {
+  const publicKey = getPaystackPublicKey();
+  if (!publicKey) {
     return {
       success: false,
       message: "Payment gateway is not configured",
@@ -121,7 +125,7 @@ export async function initializePayment(
 
     return {
       success: true,
-      publicKey: process.env.PAYSTACK_PUBLIC_KEY,
+      publicKey,
       amount: amountInCents,
       email,
       reference,
