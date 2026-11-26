@@ -4,6 +4,7 @@ import { updateRebookedBookingPayment } from "@/app/actions/rebook-payment";
 import { addCreditsAfterPayment } from "@/app/actions/credits";
 import { BookingFormData } from "@/lib/types/booking";
 import { verifyWebhookSignature, verifyPayment } from "@/lib/paystack";
+import { getPaystackSecretKey, getPaystackMode } from "@/lib/paystack-config";
 import { createClient, createServiceRoleClient } from "@/lib/supabase/server";
 
 /**
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     
     // Verify webhook signature for security
     const signature = request.headers.get("x-paystack-signature");
-    const secretKey = process.env.PAYSTACK_SECRET_KEY;
+    const secretKey = getPaystackSecretKey();
 
     if (!secretKey) {
       console.error("PAYSTACK_SECRET_KEY is not configured");
@@ -30,8 +31,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify signature if provided (Paystack always sends it for webhooks)
-    if (signature) {
+    // Reject unsigned requests before processing any event.
+    if (!signature) {
+      return NextResponse.json({ success: false, message: "Missing signature" }, { status: 401 });
+    }
+    {
       const isValid = verifyWebhookSignature(rawBody, signature, secretKey);
       if (!isValid) {
         console.error("Invalid webhook signature");
@@ -49,6 +53,9 @@ export async function POST(request: NextRequest) {
     // We're interested in charge.success events
     if (event.event === "charge.success" && event.data) {
       const transaction = event.data;
+      if (transaction.domain !== getPaystackMode()) {
+        return NextResponse.json({ success: false, message: "Invalid payment environment" }, { status: 400 });
+      }
       const reference = transaction.reference;
       const metadata = transaction.metadata || {};
 

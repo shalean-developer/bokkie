@@ -9,6 +9,7 @@ import {
   getPaystackPublicKey,
   getPaystackConfigError,
   getPaystackSecretKey,
+  getPaystackMode,
 } from "@/lib/paystack-config";
 import { mapBookFormStateToBooking, getBookV2ExtensionPayload } from "@/lib/book/map-booking";
 import type { BookFormState, TeamAvailabilityResult } from "@/lib/book/types";
@@ -412,6 +413,7 @@ export async function bookLogin(email: string, password: string) {
 }
 
 type VerifiedPaystackTransaction = {
+  domain: string;
   status: string;
   amount: number;
   currency: string;
@@ -437,6 +439,7 @@ async function verifyPaystackTransaction(
     if (!payload?.status || !payload?.data) return null;
 
     return {
+      domain: String(payload.data.domain ?? ""),
       status: String(payload.data.status ?? ""),
       amount: Number(payload.data.amount),
       currency: String(payload.data.currency ?? ""),
@@ -494,7 +497,8 @@ export async function verifyAndCompleteBookPayment(
   );
 
   const verified =
-    transaction?.status === "success" &&
+    transaction?.domain === getPaystackMode() &&
+    transaction.status === "success" &&
     transaction.reference === paymentReference &&
     transaction.amount === expectedAmount &&
     transaction.currency.toUpperCase() === "ZAR" &&

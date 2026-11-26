@@ -151,14 +151,18 @@ export function initializePaystack(config: PaystackConfig): void {
  */
 export async function verifyPayment(reference: string, secretKey: string): Promise<boolean> {
   try {
-    const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+    const mode = process.env.NODE_ENV === "production" ? "live" : "test";
+    if (!new RegExp("^sk_" + mode + "_[a-zA-Z0-9]+$").test(secretKey)) return false;
+    const response = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
       headers: {
         Authorization: `Bearer ${secretKey}`,
       },
     });
 
+    if (!response.ok) return false;
     const data = await response.json();
-    return data.status && data.data.status === "success";
+    return data?.status === true && data.data?.status === "success" &&
+      data.data.domain === mode && data.data.reference === reference;
   } catch (error) {
     console.error("Error verifying payment:", error);
     return false;
